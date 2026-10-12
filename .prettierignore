@@ -1,0 +1,14 @@
+node_modules
+package-lock.json
+web/next-env.d.ts
+web/.next
+web/out
+worker/dist
+worker/.wrangler
+coverage
+.cache
+.tools
+supabase/.temp
+
+# Giữ nguyên hướng dẫn gốc của người dùng.
+/AGENTS.md

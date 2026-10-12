@@ -1,0 +1,91 @@
+import { afterEach, expect, it, vi } from 'vitest';
+import { ingest } from '../../worker/src/index';
+import fixture from '../../fixtures/vps-getliststockdata-sample.json';
+const timestamp = Date.parse('2026-10-12T08:30:00Z');
+const env = {
+  SUPABASE_URL: 'https://database.example.test',
+  SUPABASE_SERVICE_ROLE_KEY: 'local-test-only',
+};
+afterEach(() => vi.unstubAllGlobals());
+
+function mockServices(
+  options: { closed?: boolean; empty?: boolean; writeFails?: boolean } = {},
+) {
+  const calls: { url: string; body: unknown }[] = [];
+  vi.stubGlobal(
+    'fetch',
+    vi.fn<typeof fetch>().mockImplementation(async (input, init) => {
+      const url =
+        typeof input === 'string'
+          ? input
+          : input instanceof URL
+            ? input.href
+            : input.url;
+      calls.push({
+        url,
+        body:
+          typeof init?.body === 'string'
+            ? (JSON.parse(init.body) as unknown)
+            : null,
+      });
+      if (url.startsWith('https://bgapidatafeed.vps.com.vn/'))
+        return Response.json([fixture[0]]);
+      if (url.includes('/trading_sessions'))
+        return Response.json({
+          session_date: '2026-10-12',
+          is_open: options.closed !== false,
+          closes_at: '2026-10-12T08:00:00Z',
+        });
+      if (url.includes('/stocks'))
+        return Response.json(options.empty ? [] : [{ symbol: 'ACB' }]);
+      if (url.includes('/rpc/ingest_current_quotes'))
+        return options.writeFails
+          ? Response.json(
+              { message: 'fixture database write error' },
+              { status: 400 },
+            )
+          : Response.json(null);
+      if (url.includes('/system_status'))
+        return new Response(null, { status: 201 });
+      throw new Error('Unexpected destination in mock');
+    }),
+  );
+  return calls;
+}
+it('Cron dùng quote hiện tại, VND và volume raw, ghi trạng thái sau RPC thành công', async () => {
+  const calls = mockServices();
+  await ingest(env, timestamp);
+  const rpc = calls.find((c) => c.url.includes('/rpc/'))!;
+  expect(rpc.body).toMatchObject({
+    rows: [
+      {
+        symbol: 'ACB',
+        reference_vnd: 20150,
+        ceiling_vnd: 21550,
+        floor_vnd: 18750,
+        bid3_price_vnd: 20350,
+        last_volume_raw: 1440,
+        lot_raw: 796910,
+      },
+    ],
+  });
+  expect(calls.at(-1)!.url).toContain('/system_status');
+  expect(calls.some((c) => c.url.includes('prices_daily'))).toBe(false);
+});
+it('Ngày không giao dịch không gọi VPS, không ghi success', async () => {
+  const calls = mockServices({ closed: false });
+  await ingest(env, timestamp);
+  expect(calls).toHaveLength(1);
+});
+it('Danh mục rỗng không được ghi success', async () => {
+  const calls = mockServices({ empty: true });
+  await expect(ingest(env, timestamp)).rejects.toThrow('Danh mục chưa có mã');
+  expect(calls.some((c) => c.url.includes('system_status'))).toBe(false);
+});
+it('RPC lỗi không ghi success, không suy ra lịch sử', async () => {
+  const calls = mockServices({ writeFails: true });
+  await expect(ingest(env, timestamp)).rejects.toThrow(
+    'Không ghi được snapshot',
+  );
+  expect(calls.some((c) => c.url.includes('system_status'))).toBe(false);
+});

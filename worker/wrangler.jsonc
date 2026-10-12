@@ -1,0 +1,9 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "vn-stock-analyzer-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-12",
+  "compatibility_flags": ["nodejs_compat"],
+  "triggers": { "crons": ["30 8 * * 1-5"] },
+  "observability": { "enabled": true },
+}

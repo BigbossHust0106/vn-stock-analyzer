@@ -1,0 +1,5 @@
+npx --no-install lint-staged --concurrent false --hide-all
+# Nếu commit chỉ xóa file hoặc là empty commit, lint-staged không có task ACMR.
+if test -z "$(git diff --cached --name-only --diff-filter=ACMR)"; then
+  npm run verify
+fi

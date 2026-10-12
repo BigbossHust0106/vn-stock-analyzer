@@ -1,0 +1,59 @@
+{
+  "name": "vn-stock-analyzer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "web",
+    "worker"
+  ],
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev:web": "npm run dev --workspace web",
+    "dev:worker": "npm run dev --workspace worker",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "format:check": "prettier --check .",
+    "format": "prettier --write .",
+    "test": "vitest run --coverage --exclude tests/providers/**",
+    "test:provider": "vitest run tests/providers",
+    "build": "npm run build --workspace web && npm run build --workspace worker",
+    "verify": "node scripts/verify.mjs",
+    "verify:live": "tsx scripts/verify-live.ts",
+    "verify:migrations": "node scripts/database.mjs migrations",
+    "verify:rls": "node scripts/database.mjs rls",
+    "verify:secrets": "node scripts/secrets.mjs",
+    "tools:install": "bash scripts/install-tools.sh",
+    "prepare": "husky",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.117.3",
+    "next": "16.4.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "technicalindicators": "3.1.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261012.1",
+    "@eslint/js": "9.39.5",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitest/coverage-v8": "5.0.3",
+    "eslint": "9.39.5",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "husky": "9.1.7",
+    "lint-staged": "17.6.0",
+    "prettier": "3.9.10",
+    "tailwindcss": "4.3.3",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.1",
+    "vitest": "5.0.3",
+    "wrangler": "4.149.0"
+  }
+}

@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+dist/
+coverage/
+.cache/
+.tools/
+.wrangler/
+.env*
+!.env.example
+*.tsbuildinfo
+*.log
+worker/.dev.vars
+supabase/.temp/
