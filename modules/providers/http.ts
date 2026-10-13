@@ -56,9 +56,10 @@ export class ProviderHttp {
       this.lastRequest = Date.now();
       let response: Response;
       try {
-        response = await this.transport(url, {
+        // Workers fetch requires globalThis as receiver and does not support redirect:error.
+        response = await this.transport.call(globalThis, url, {
           signal: AbortSignal.timeout(this.options.timeoutMs),
-          redirect: 'error',
+          redirect: 'manual',
           headers: { 'User-Agent': 'vn-stock-analyzer/0.2 data-provider' },
         });
       } catch {
