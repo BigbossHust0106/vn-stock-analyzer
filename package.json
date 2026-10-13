@@ -24,6 +24,9 @@
     "verify": "node scripts/verify.mjs",
     "verify:live": "node --use-env-proxy --import tsx scripts/verify-live.ts",
     "verify:connections": "node --use-env-proxy --env-file-if-exists=.cache/connection.env --import tsx scripts/verify-connections.ts",
+    "sync:market": "node --use-env-proxy --import tsx scripts/sync-market.ts",
+    "dev:market": "node --use-env-proxy --env-file-if-exists=.cache/connection.env --import tsx scripts/dev-market.ts",
+    "verify:browser:live": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-market.ts",
     "verify:migrations": "node scripts/database.mjs migrations",
     "verify:rls": "node scripts/database.mjs rls",
     "verify:secrets": "node scripts/secrets.mjs",
@@ -34,6 +37,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.3",
+    "lightweight-charts": "5.2.1",
     "next": "16.4.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
@@ -42,6 +46,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "5.20261012.1",
     "@eslint/js": "9.39.5",
+    "@playwright/test": "1.64.0",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "26.6.5",
     "@types/react": "19.3.0",

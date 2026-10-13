@@ -1,0 +1,196 @@
+
+[1/9] Typecheck strict
+
+> vn-stock-analyzer@0.1.0 typecheck
+> tsc --noEmit
+
+
+[2/9] ESLint (0 warning)
+
+> vn-stock-analyzer@0.1.0 lint
+> eslint . --max-warnings 0
+
+
+[3/9] Prettier check
+
+> vn-stock-analyzer@0.1.0 format:check
+> prettier --check .
+
+Checking formatting...
+All matched files use Prettier code style!
+
+[4/9] Vitest + coverage >=80%
+
+> vn-stock-analyzer@0.1.0 test
+> vitest run --coverage --exclude 'tests/providers/**'
+
+
+ RUN  v5.0.3 /workspace/vn-stock-analyzer
+      Coverage enabled with v8
+
+
+ Test Files  7 passed (7)
+      Tests  58 passed (58)
+   Start at  04:23:26
+   Duration  998ms (transform 40%, import 29%, tests 20%, worker 11%)
+
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |     100 |    97.75 |     100 |     100 |                   
+ strategies        |     100 |    97.64 |     100 |     100 |                   
+  technical.ts     |     100 |    95.91 |     100 |     100 | 118,136           
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 79/79 )
+Branches     : 97.75% ( 87/89 )
+Functions    : 100% ( 22/22 )
+Lines        : 100% ( 69/69 )
+================================================================================
+
+[5/9] Build web + worker
+
+> vn-stock-analyzer@0.1.0 build
+> npm run build --workspace web && npm run build --workspace worker
+
+
+> web@0.1.0 build
+> next build --webpack
+
+▲ Next.js 16.4.0 (webpack)
+✓ Running next.config.mjs took 22ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 2.6s
+  Running TypeScript ...
+  Finished TypeScript in 1924ms ...
+  Collecting page data using 4 workers ...
+  Generating static pages using 4 workers (0/4) ...
+  Generating static pages using 4 workers (1/4) 
+  Generating static pages using 4 workers (2/4) 
+  Generating static pages using 4 workers (3/4) 
+✓ Generating static pages using 4 workers (4/4) in 705ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+└ ○ /stocks
+
+
+○  (Static)  prerendered as static content
+
+
+> worker@0.1.0 build
+> node ../scripts/wrangler.mjs deploy --dry-run --outdir worker/dist
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mProxy environment variables detected. We'll use your proxy for fetch requests.[0m
+
+
+
+ ⛅️ wrangler 4.149.0
+────────────────────
+✨ Read 55 files from the assets directory /workspace/vn-stock-analyzer/web/out
+Total Upload: 783.01 KiB / gzip: 155.68 KiB
+Your Worker has access to the following bindings:
+Binding            Resource      
+env.ASSETS         Assets        
+
+--dry-run: exiting now.
+
+[6/9] Gitleaks
+
+> vn-stock-analyzer@0.1.0 verify:secrets
+> node scripts/secrets.mjs
+
+4:23AM INF scanned ~412480 bytes (412.48 KB) in 78.4ms
+4:23AM INF no leaks found
+4:23AM INF 9 commits scanned.
+4:23AM INF scanned ~468203 bytes (468.20 KB) in 242ms
+4:23AM INF no leaks found
+
+[7/9] Migrations PostgreSQL
+
+> vn-stock-analyzer@0.1.0 verify:migrations
+> node scripts/database.mjs migrations
+
+MIGRATION PASS: 202610120001_initial.sql
+MIGRATION PASS: 202610120002_current_quotes.sql
+MIGRATION PASS: 202610130001_market_history.sql
+ingest_current_quotes 
+-----------------------
+ 
+(1 row)
+
+ ingest_current_quotes 
+-----------------------
+ 
+(1 row)
+
+ ingest_price_history 
+----------------------
+ 
+(1 row)
+
+ ingest_price_history 
+----------------------
+ 
+(1 row)
+
+SCHEMA PASS: constraints, service-role RPC, idempotency, stale/unknown/empty quote rejection
+MIGRATIONS PASS: 3 file SQL trên PostgreSQL 17 (auth shim; không thay thế Supabase Auth integration)
+
+[8/9] RLS 2 users
+
+> vn-stock-analyzer@0.1.0 verify:rls
+> node scripts/database.mjs rls
+
+set_config              
+--------------------------------------
+ 10000000-0000-4000-8000-000000000002
+(1 row)
+
+              set_config              
+--------------------------------------
+ 10000000-0000-4000-8000-000000000001
+(1 row)
+
+              set_config              
+--------------------------------------
+ 10000000-0000-4000-8000-000000000002
+(1 row)
+
+RLS PASS: A/B isolation, own read/write, owner forgery, parent ownership, anonymous market read, market write denied
+
+[9/9] VPS fixture parser
+
+> vn-stock-analyzer@0.1.0 test:provider
+> vitest run tests/providers
+
+
+ RUN  v5.0.3 /workspace/vn-stock-analyzer
+
+
+ Test Files  3 passed (3)
+      Tests  20 passed | 1 todo (21)
+   Start at  04:23:53
+   Duration  835ms (tests 58%, transform 34%, import 7%, worker 1%)
+
+
+BẢNG TỔNG KẾT VERIFY
+| Bước | Kết quả |
+| --- | --- |
+| Typecheck strict | PASS |
+| ESLint (0 warning) | PASS |
+| Prettier check | PASS |
+| Vitest + coverage >=80% | PASS |
+| Build web + worker | PASS |
+| Gitleaks | PASS |
+| Migrations PostgreSQL | PASS |
+| RLS 2 users | PASS |
+| VPS fixture parser | PASS |
+
+VERIFY PASS

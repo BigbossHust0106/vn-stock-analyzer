@@ -1,6 +1,6 @@
 # vn-stock-analyzer
 
-Bộ khung Phần 1: Next.js + TypeScript strict + Tailwind, Workers API/Cron,
+Phần 1–2: tra cứu cổ phiếu và biểu đồ giá thật với Next.js + TypeScript strict + Tailwind, Workers API/Cron,
 Supabase PostgreSQL/Auth/RLS và GitHub Actions. Chỉ hỗ trợ thị trường Việt Nam
 (HOSE/HNX/UPCOM). Chỉ mang tính tham khảo, không phải lời khuyên đầu tư.
 
@@ -32,6 +32,7 @@ Docker image PostgreSQL 17 được pin digest trong `scripts/database.mjs`.
 Mở hai terminal từ thư mục gốc để phát triển:
 
 ```bash
+npm run build --workspace web
 npm run dev:web
 npm run dev:worker
 ```
@@ -55,10 +56,11 @@ URL mặc định. Publishable key vẫn lấy từ biến `SUPABASE_PUBLISHABLE
 trong Cloudflare; không ghi key thật vào source hay `.env.example`.
 Không khai báo thêm Wrangler plaintext var trùng tên secret đã có trong dashboard.
 
-Trang chủ có nút **Kiểm tra kết nối**. Nó kiểm tra health Worker, khả năng đọc ba
-bảng thị trường công khai ở Supabase và đọc snapshot ACB qua Worker. Health xanh
-không biến lỗi database thành PASS; bảng rỗng không được mô tả là đã có giá.
-Không truy vấn watchlist/cảnh báo/cài đặt cá nhân và không ghi dữ liệu.
+Trang chủ có tìm kiếm mã/tên công ty và lọc HOSE/HNX/UPCOM. Trang chi tiết
+`/stocks?symbol=VNM` hiển thị quote thật, phần trăm thay đổi có dấu, biểu đồ nến
+ngày/tuần/tháng, MA20/50/200 và volume. MA chỉ xuất hiện khi đủ nến; tính trước khi
+zoom khoảng ngày. Có chế độ sáng/tối, thời điểm nhận dữ liệu và cảnh báo nguồn lỗi.
+Không truy vấn watchlist/cảnh báo/cài đặt cá nhân trong phần này.
 
 `GET /v1/public-config` trả URL Supabase và publishable key từ Worker, có CORS và
 `Cache-Control: no-store`. Chỉ chấp nhận key `sb_publishable_*`; service_role,
@@ -79,12 +81,60 @@ các biến public vào file local ignored `.cache/connection.env` (hoặc expor
 tương ứng); lệnh không in key hay raw payload. Exit 1 khi kết nối/schema lỗi,
 không coi lỗi live là PASS chỉ vì unit tests xanh.
 
-Kết quả live ngày 13/10/2026 trước thay đổi này: Supabase nhận publishable key nhưng
-Data API trả `PGRST205` cho `stocks`, `prices_current`, `trading_sessions`;
-Worker health HTTP 200, quotes HTTP 502. Cần áp dụng migration bằng CLI ở phần
-Supabase bên dưới hoặc kiểm tra bảng đã được expose/schema cache. Không seed fixture
-vào database production. Môi trường Codex chưa có quyền quản trị hai dịch vụ;
-việc kết nối chúng trong dashboard của bạn không tự cấp credential cho Codex.
+## Dữ liệu Phần 2 và đồng bộ
+
+Endpoint đã gọi thật, đơn vị và các giới hạn: [docs/data-sources.md](docs/data-sources.md).
+VPS catalog lỗi 503 trong khảo sát; dùng danh mục KBS đã xác minh thay vì đoán schema.
+Cấu hình mặc định: `CATALOG_PROVIDER=kbs`, `QUOTE_PROVIDER=vps`, `HISTORY_PROVIDER=vps`.
+Có thể đổi history sang `kbs`; nguồn được lưu cùng từng bar, không trộn chuỗi.
+Các tổ hợp không hỗ trợ báo lỗi rõ, không tự chuyển nguồn ngầm.
+
+`GET /v1/stocks?q=viet%20nam&exchange=HOSE` tìm mã/tên, bỏ dấu tiếng Việt,
+giới hạn 20 gợi ý. `GET /v1/stocks/VNM` trả công ty, quote, history, provenance và
+notices. Mã phải tồn tại trong danh mục Việt Nam trước khi gọi provider.
+Cache quotes 15 giây, history 15 phút, profile/catalog 24 giờ trong isolate;
+rate limit 1 request/giây, batch tối đa 50, timeout 25 giây, retry tối đa 2 lần
+cho network/429/5xx. Cache không phải giới hạn toàn cục giữa mọi isolate.
+
+Để áp dụng migration và đồng bộ **project của bạn**, cấp `SUPABASE_ACCESS_TOKEN`
+qua Environment Secrets và `SUPABASE_PROJECT_REF` đúng project. Script chỉ ghi
+bảng thị trường, không seed fixture; lần chạy sau kiểm tra migration đã áp dụng.
+
+```bash
+npm run sync:market -- --migrate
+# Sau khi migration đã áp dụng:
+SYNC_SYMBOLS=VNM,FPT,HPG npm run sync:market
+```
+
+Mặc định đồng bộ toàn bộ catalog và 3 năm history/quote cho VNM/FPT/HPG.
+`SYNC_SYMBOLS` chọn tối đa 50 mã mỗi lượt. Các mã khác tải history khi mở trang;
+Worker ghi cache Supabase khi có service_role, bằng RPC kiểm tra quyền và chống
+snapshot cũ ghi đè. Cron `0 9 * * 1-5` (16:00 Việt Nam) cập nhật catalog và nhóm
+mã cấu hình; không có history hoặc lỗi ghi dữ liệu thì không báo success.
+Cron này chỉ lưu dữ liệu nguồn, không tạo ngày giao dịch hay đánh dấu phiên đóng.
+`prices_history` giữ `price_basis=unverified`; chưa đưa vào scoring hoặc
+`prices_daily` vốn yêu cầu cơ sở giá/lịch phiên đã xác minh. Phiên hôm nay chưa final.
+
+Ngày 13/10/2026 đã chạy migration thật trên project Supabase được cung cấp:
+1.522 mã (HOSE 406, HNX 299, UPCOM 817); 746 bar/mã VNM, FPT, HPG;
+2.238 bar và 3 snapshot ban đầu. Đây là số liệu lúc đồng bộ, có thể thay đổi.
+
+Kiểm tra giao diện local với **nguồn thật**, không mock API:
+
+```bash
+npm run build
+# Điền public URL/key vào .cache/connection.env (ignored); không dùng service_role.
+npm run dev:market
+# Terminal khác, dùng cache browser ghi được:
+PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright npx playwright install chromium
+npm run verify:browser:live
+```
+
+Adapter Node phục vụ web đã build và cùng Worker handler tại port 8878, hỗ trợ
+proxy mạng của cloud. Browser test kiểm tra VNM/FPT/HPG, Enter, chart canvas,
+ngày/tuần/tháng, mobile 390px, theme giữ sau reload và lỗi JavaScript.
+Có thể đặt `MARKET_APP_URL` để kiểm tra site đã triển khai. Kiểm tra live tách khỏi
+CI để sự cố nguồn ngoài không làm test fixture thiếu tính tái lập.
 
 ## Lệnh verify bắt buộc
 
@@ -147,8 +197,9 @@ npx supabase@2.120.0 db push
 Migrations trong `supabase/migrations/`. Không chạy `tests/database/bootstrap.sql`
 hay fixture RLS trên project thật. Các table thị trường cho anon đọc công khai;
 private tables dùng Auth UUID/owner_id, USING + WITH CHECK và FK ghép. Không dùng
-service_role trong browser. Các bước hosted này cần tài khoản project và chưa được
-thực thi khi chỉ chạy verify PostgreSQL container.
+service_role trong browser. Các bước hosted cần quyền project; verify PostgreSQL container không thay thế
+kiểm tra hosted. Lệnh Management API ở trên đã áp dụng cả ba migration vào project
+được cung cấp ngày 13/10/2026.
 
 Có thể dùng Supabase local đầy đủ với Docker để kiểm tra Auth/PostgREST ở bước sau:
 
@@ -159,18 +210,18 @@ npx supabase@2.120.0 db reset --local
 
 `db reset --local` xóa dữ liệu **local**; không dùng `--linked` cho kiểm thử. Thiết lập
 Auth Site URL và redirect allowlist đúng domain Pages; local là localhost:3000.
-Chưa có đăng nhập/redirect UI trong Phần 1. Nhập danh mục mã/sàn và lịch phiên từ
-nguồn đã xác nhận; không dùng fixture VPS để seed production. Thiếu lịch Cron bỏ tải.
+Chưa có đăng nhập/redirect UI trong Phần 1. Danh mục được đồng bộ từ KBS đã xác minh. Lịch phiên vẫn cần nguồn được xác nhận;
+không dùng fixture để seed production. Cron snapshot Phần 1 bỏ tải khi thiếu lịch.
 
 ## Cloudflare Pages / Workers và secrets
 
-1. Tạo API token scope tối thiểu cho account: Workers Scripts Edit và Cloudflare
-   Pages Edit. Chọn Account ID. Không đưa token vào repo hay log.
-2. Tạo Pages project dạng **Direct Upload**, production branch `main`. CI build
-   artifact `web/out`; không bật thêm Git integration deploy trùng workflow.
+1. Tạo API token Workers Scripts Edit cho **account chứa `manhhuong.workers.dev`**.
+   Chọn đúng Account ID; không đưa token vào repo hay log.
+2. Giao diện được phục vụ bằng Workers Static Assets ngay trên URL Worker cũ.
+   Pages là tùy chọn; chỉ cần thêm Pages Edit nếu triển khai Pages riêng.
 
 ```bash
-node scripts/wrangler.mjs pages project create "$CF_PAGES_PROJECT" --production-branch main
+npm run build
 node scripts/wrangler.mjs deploy
 ```
 
@@ -194,23 +245,23 @@ Trong Workers & Pages → Worker `vn-stock-analyzer` → Settings → Build, c�
 | Node.js version   | `24` (biến build `NODE_VERSION=24`) |
 
 Lệnh deploy mặc định tìm `wrangler.jsonc` tại root, thay vì tự phát hiện ứng dụng
-ở gốc monorepo. Build vẫn biên dịch cả web và worker; deploy này chỉ phát hành
-API Worker. Kiểm tra trước từ root: `node scripts/wrangler.mjs deploy --dry-run`.
+ở gốc monorepo. Build biên dịch cả web và worker; deploy phát hành
+API/Cron và static assets `web/out` trên cùng URL Worker. Kiểm tra trước từ root: `node scripts/wrangler.mjs deploy --dry-run`.
 Sau deploy, URL Worker `/health` trả hello world; `/v1/quotes` cần các secret Supabase
 bên dưới. Thông báo dry-run `No bindings found` không phải lỗi, vì repo không ghi
 giá trị secret vào config.
 
-Giao diện Next.js xuất ra `web/out`, cần dự án **Pages** riêng. Nếu tạo Pages bằng
-Git integration, chọn root repo, framework preset `None`,
-build `npm run build --workspace web`, output `web/out`, `NODE_VERSION=24` và nhánh `main`.
-Chọn một cơ chế CD cho mỗi ứng dụng: Workers Builds/Pages Git integration **hoặc**
-job deploy GitHub Actions bên dưới. Nếu dùng hoàn toàn Git integration, đặt
-repository variable `CF_DEPLOYMENT_MODE=git-integration` trong GitHub Actions
-để bỏ qua job `deploy`, giữ job `verify`; tránh hai pipeline cùng deploy một
-Worker/Pages. Để dùng CD Actions, bỏ trống biến mode và cấu hình `CF_PAGES_PROJECT`
-cùng token/Account ID bên dưới. Chưa đặt Pages project thì job `deploy` SKIPPED;
-job `verify` vẫn chạy đầy đủ, không bỏ qua kiểm thử để CI xanh.
-Workers Builds chạy build riêng; không chứng minh check `verify` đã xanh trên GitHub.
+Giao diện Next.js xuất ra `web/out`, được gắn bằng `assets` trong Wrangler.
+Không cần Pages riêng để xem trang chủ ở URL Worker. `/v1/*` và `/health` chạy
+Worker trước; các trang/JS/CSS dùng static assets. Nếu cần Pages riêng, có thể
+Direct Upload `web/out` hoặc Git integration build `npm run build --workspace web`,
+output `web/out`, `NODE_VERSION=24`.
+
+Chọn một pipeline CD: Workers Builds **hoặc** GitHub Actions. Khi dùng Workers
+Builds, đặt repository variable `CF_DEPLOYMENT_MODE=git-integration` để tránh
+job Actions deploy trùng; job verify vẫn chạy. Khi dùng Actions, đặt
+`CF_DEPLOYMENT_MODE=actions`; `CF_PAGES_PROJECT` chỉ cần nếu muốn deploy Pages thêm.
+Chưa bật mode Actions hoặc Pages project thì deploy job SKIPPED, không phải đã publish.
 
 Nếu đã lưu biến local vào `worker/.dev.vars`, chuyển file sang `.dev.vars` ở gốc
 repo: Wrangler đọc biến cạnh config. Cả hai vị trí và các biến thể `.dev.vars.*`
@@ -226,7 +277,8 @@ node scripts/wrangler.mjs secret put SUPABASE_PUBLISHABLE_KEY
 node scripts/wrangler.mjs secret put SUPABASE_SERVICE_ROLE_KEY
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY` chỉ dùng trong scheduled handler ghi market data.
+`SUPABASE_SERVICE_ROLE_KEY` chỉ dùng trong Worker ghi market data qua Cron hoặc
+background cache; không trả về browser hay nhận service key từ request client.
 Phần đọc public dùng publishable key. Secret runtime đã đặt được giữ khi deploy;
 workflow không in hay tự suy ra giá trị. Local đặt các tên Worker vào
 `.dev.vars` ở gốc repo (ignored). `.env.example` liệt kê tên, không chứa giá trị secret;
@@ -238,24 +290,24 @@ secret Worker sang biến `NEXT_PUBLIC_*`.
 Workflow `.github/workflows/ci-cd.yml` chạy mọi pull request và push main:
 `npm ci` → cài Gitleaks → `npm run verify` → smoke. Artifact giữ log/coverage và
 static web đã build. Job deploy **needs verify**, chỉ push `main` khi đã cấu hình
-`CF_PAGES_PROJECT` và không chọn mode `git-integration`, triển khai Worker rồi Pages
-từ artifact đó. PR không nhận deployment secrets và không deploy.
+mode `actions` (hoặc Pages project) và không chọn mode `git-integration`,
+triển khai Worker cùng giao diện từ artifact đó; Pages chỉ deploy khi có project. PR không nhận deployment secrets và không deploy.
 API VPS live không chạy trong CI. CD chưa tự áp dụng migration cloud; dùng db push
 được review trước khi deploy phiên bản cần schema mới.
 
 Trong Settings → Secrets and variables → Actions, đặt:
 
-| Loại     | Tên                   | Dùng cho                                                      |
-| -------- | --------------------- | ------------------------------------------------------------- |
-| Secret   | CLOUDFLARE_API_TOKEN  | Deploy Worker/Pages                                           |
-| Secret   | CLOUDFLARE_ACCOUNT_ID | Chọn account                                                  |
-| Variable | CF_PAGES_PROJECT      | Pages project Direct Upload đã tạo                            |
-| Variable | CF_DEPLOYMENT_MODE    | `git-integration` bỏ qua CD Actions; để trống dùng CD Actions |
+| Loại     | Tên                   | Dùng cho                                                |
+| -------- | --------------------- | ------------------------------------------------------- |
+| Secret   | CLOUDFLARE_API_TOKEN  | Deploy Worker/Pages                                     |
+| Secret   | CLOUDFLARE_ACCOUNT_ID | Chọn account                                            |
+| Variable | CF_PAGES_PROJECT      | Pages project Direct Upload đã tạo                      |
+| Variable | CF_DEPLOYMENT_MODE    | `actions` bật CD; `git-integration` dùng Workers Builds |
 
 Bật Actions, thiết lập environment `production` chỉ cho nhánh `main`. Không cần
 Supabase service key trong GitHub Actions vì migration CI dùng container và key
-runtime nằm ở Cloudflare. Job deploy SKIPPED khi chưa đặt Pages project hoặc đã chọn
-Git integration; khi đã bật CD Actions bằng Pages project, job sẽ lỗi rõ nếu thiếu
+runtime nằm ở Cloudflare. Job deploy SKIPPED khi chưa bật mode Actions/Pages hoặc đã chọn
+Git integration; khi đã bật CD Actions, job sẽ lỗi rõ nếu thiếu
 token/account. Không coi job deploy SKIPPED là bằng chứng đã phát hành lên Cloudflare.
 
 **Workflow không tự chặn merge.** Trong Settings → Rules → Rulesets tạo branch
@@ -289,8 +341,8 @@ scripts/              Verify tuần tự, smoke, database, Gitleaks, Wrangler wr
 docs/                 Kiến trúc, nguồn dữ liệu và kết quả review
 ```
 
-Giới hạn hiện tại: KBS/Vietcap có bar/BCTC mẫu thật, nhưng contract production,
-price basis và mapping tài chính chưa xác minh; tin tức chưa có nguồn; lot × 10 mới đối chiếu ACB một ngày; đơn vị lastVolume
-và timestamp sàn chưa rõ; app chỉ hello world, chưa có màn hình phân tích. Xem
-`docs/data-sources.md`. Không mô tả CI trên GitHub, hosted migration hay deploy
-thành công nếu chỉ chạy các kiểm thử local.
+Giới hạn hiện tại: chưa xác minh cơ sở điều chỉnh lịch sử giá, tài liệu quota và
+quyền phân phối; chưa có mapping BCTC cho production hay lịch nghỉ lễ có nguồn.
+`lot × 10` mới đối chiếu ACB một ngày; `lastVolume` và timestamp sàn chưa rõ.
+Chưa có ranking/scoring/tin tức/đăng nhập/watchlist UI trong Phần 2.
+Không mô tả deploy, CI hosted hay kiểm thử Auth JWT thành công nếu chưa chạy thật.

@@ -1,0 +1,91 @@
+import { createClient } from '@supabase/supabase-js';
+import type { Env } from './index';
+import deployment from '../../config/public-deployment.json';
+import { marketProviders } from './api/market';
+import { normalizeSearch } from '../../modules/market/search';
+import { vietnamDate, yearsBefore } from '../../modules/market/calendar';
+import { validatedSymbols } from '../../modules/providers/vps-provider';
+
+export async function syncMarket(env: Env): Promise<void> {
+  if (!env.SUPABASE_SERVICE_ROLE_KEY)
+    throw new Error('Thiếu quyền đồng bộ thị trường');
+  const db = createClient(
+    env.SUPABASE_URL || deployment.supabaseUrl,
+    env.SUPABASE_SERVICE_ROLE_KEY,
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  );
+  const provider = marketProviders(env);
+  const stocks = await provider.catalog.fetchStocks();
+  if (stocks.length < 100) throw new Error('Catalog không đầy đủ');
+  for (let offset = 0; offset < stocks.length; offset += 300) {
+    const { error } = await db.from('stocks').upsert(
+      stocks.slice(offset, offset + 300).map((s) => ({
+        symbol: s.symbol,
+        name: s.name,
+        exchange: s.exchange,
+        source: s.source,
+        source_verified_at: s.fetchedAt,
+        search_text: normalizeSearch(s.symbol + ' ' + s.name),
+      })),
+      { onConflict: 'symbol' },
+    );
+    if (error) throw new Error('Không ghi được catalog');
+  }
+  const symbols = validatedSymbols(
+    (env.SYNC_SYMBOLS || 'VNM,FPT,HPG').split(','),
+  );
+  const today = vietnamDate(Date.now());
+  for (const symbol of symbols) {
+    const { data: stock, error } = await db
+      .from('stocks')
+      .select('id')
+      .eq('symbol', symbol)
+      .eq('active', true)
+      .maybeSingle();
+    if (error || !stock) throw new Error('Mã đồng bộ không hợp lệ');
+    const bars = await provider.history.fetchHistory(
+      symbol,
+      yearsBefore(today, 3),
+      today,
+    );
+    if (!bars.length)
+      throw new Error('Nguồn lịch sử không có dữ liệu cho mã đồng bộ');
+    const { error: writeError } = await db.rpc('ingest_price_history', {
+      rows: bars.map((b) => ({
+        stock_id: stock.id,
+        session_date: b.sessionDate,
+        source: b.source,
+        open_vnd: b.openVnd,
+        high_vnd: b.highVnd,
+        low_vnd: b.lowVnd,
+        close_vnd: b.closeVnd,
+        volume_reported: b.volumeReported,
+        is_final: b.isFinal,
+        fetched_at: b.fetchedAt,
+      })),
+    });
+    if (writeError) throw new Error('Không ghi được history');
+  }
+  const quotes = await provider.quotes.fetchQuotes(symbols);
+  const { error } = await db.rpc('ingest_current_quotes', {
+    rows: quotes.map((q) => ({
+      symbol: q.symbol,
+      reference_vnd: q.referenceVnd,
+      ceiling_vnd: q.ceilingVnd,
+      floor_vnd: q.floorVnd,
+      last_price_vnd: q.lastPriceVnd,
+      bid3_price_vnd: q.bid3PriceVnd,
+      last_volume_raw: q.volumeRaw.lastVolume,
+      lot_raw: q.volumeRaw.lot,
+      fetched_at: q.fetchedAt,
+    })),
+  });
+  if (error) throw new Error('Không ghi được quotes');
+  const { error: statusError } = await db.from('system_status').upsert({
+    component: 'prices',
+    state: 'ok',
+    last_success_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  });
+  if (statusError) throw new Error('Không cập nhật trạng thái');
+}

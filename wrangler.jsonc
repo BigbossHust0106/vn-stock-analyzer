@@ -4,6 +4,11 @@
   "main": "worker/src/index.ts",
   "compatibility_date": "2026-10-12",
   "compatibility_flags": ["nodejs_compat"],
-  "triggers": { "crons": ["30 8 * * 1-5"] },
+  "assets": {
+    "directory": "./web/out",
+    "binding": "ASSETS",
+    "run_worker_first": ["/v1/*", "/health"],
+  },
+  "triggers": { "crons": ["30 8 * * 1-5", "0 9 * * 1-5"] },
   "observability": { "enabled": true },
 }

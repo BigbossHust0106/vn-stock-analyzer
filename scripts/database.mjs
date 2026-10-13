@@ -106,7 +106,7 @@ export async function migrations() {
     for (let i = 0; i < 60; i++) {
       const probe = spawnSync(
         'docker',
-        ['exec', name, 'pg_isready', '-U', 'postgres'],
+        ['exec', name, 'pg_isready', '-h', '127.0.0.1', '-U', 'postgres'],
         { stdio: 'ignore' },
       );
       if (probe.status === 0) {

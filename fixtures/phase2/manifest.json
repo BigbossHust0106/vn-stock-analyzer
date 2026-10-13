@@ -1,0 +1,44 @@
+{
+  "captured_date": "2026-10-13",
+  "purpose": "Tests only; never production fallback",
+  "catalog_total_records": 3496,
+  "catalog_subset_symbols": ["VNM", "FPT", "HPG", "SHS", "QNS", "ACB"],
+  "files": [
+    {
+      "file": "VNM-history.json",
+      "raw_sha256": "f9b61bc868ac58f67620ee08827ec3a18ee8c300592cc43872564f688751d2a3"
+    },
+    {
+      "file": "FPT-history.json",
+      "raw_sha256": "1e66c39d110e516ee90b26a0db5d2d3ac014f94dd8ee79bb8ae45b432dce0ca4"
+    },
+    {
+      "file": "HPG-history.json",
+      "raw_sha256": "f6dc17af3504a65e78117a43e7b0502c2862cc33d2d884b2f12178c8188befff"
+    },
+    {
+      "file": "VNM-symbol.json",
+      "raw_sha256": "d3897621c553dcbbf71c34fd319e881660f8aa2edf9ac4c109326ec73eb7f64e"
+    },
+    {
+      "file": "FPT-symbol.json",
+      "raw_sha256": "1b906098ea8da926c01c8cdfccb158a4d73cdf4646f83eceb742205024429d13"
+    },
+    {
+      "file": "HPG-symbol.json",
+      "raw_sha256": "e85c8209f7b11e5f731a7ef6765f4eb8bb61fe5005be41c871566f8683d918d6"
+    },
+    {
+      "file": "VNM-kbs.json",
+      "raw_sha256": "8ebfab0cb542014f7af81114d0f63079694052bb9f841c3acb690f2824db62a3"
+    },
+    {
+      "file": "FPT-kbs.json",
+      "raw_sha256": "33ea22a0f35bf9b74f7cc10111ecbfb580d4e4cec78da78b9a0aa9f6b6d59824"
+    },
+    {
+      "file": "HPG-kbs.json",
+      "raw_sha256": "88ac3342648d9097e415226ae2042185161258789d2545ea6f6edf3029d7a42f"
+    }
+  ]
+}

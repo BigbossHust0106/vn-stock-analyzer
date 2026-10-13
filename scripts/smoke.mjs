@@ -14,7 +14,7 @@ const services = [
       '3100',
     ],
     url: 'http://127.0.0.1:3100',
-    expected: 'Xin chào, thị trường chứng khoán Việt Nam!',
+    expected: 'Tra cứu cổ phiếu Việt Nam',
   },
   {
     name: 'worker',

@@ -18,6 +18,23 @@ do $$ begin
   exception when raise_exception then if sqlerrm <> 'No quotes' then raise; end if; end;
 end $$;
 reset role;
+update public.stocks set search_text='tst synthetic db' where symbol='TST';
+set local role service_role;
+select public.ingest_price_history('[{"stock_id":"20000000-0000-4000-8000-000000000009","session_date":"2020-01-02","source":"VPS","open_vnd":10,"high_vnd":12,"low_vnd":9,"close_vnd":11,"volume_reported":100,"is_final":true,"fetched_at":"2020-01-02T08:00:00Z"}]');
+select public.ingest_price_history('[{"stock_id":"20000000-0000-4000-8000-000000000009","session_date":"2020-01-02","source":"VPS","open_vnd":10,"high_vnd":12,"low_vnd":9,"close_vnd":10,"volume_reported":100,"is_final":true,"fetched_at":"2020-01-02T07:00:00Z"}]');
+do $$ begin
+  if (select close_vnd from public.prices_history) <> 11 then raise exception 'Stale history overwrote new'; end if;
+  begin perform public.ingest_price_history('[]');raise exception 'Empty history accepted';exception when raise_exception then if sqlerrm <> 'No history' then raise;end if;end;
+end $$;
+set local role anon;
+do $$ begin
+  if (select count(*) from public.prices_history) <> 1 then raise exception 'Anon cannot read history';end if;
+  if (select count(*) from public.search_stocks('synthetic')) <> 1 then raise exception 'Name search failed';end if;
+  if (select count(*) from public.search_stocks('%')) <> 0 then raise exception 'Wildcard search not escaped';end if;
+  begin perform public.ingest_price_history('[]');raise exception 'Anon can ingest history';exception when insufficient_privilege then null;end;
+  begin delete from public.prices_history;raise exception 'Anon can delete history';exception when insufficient_privilege then null;end;
+end $$;
+reset role;
 do $$ begin
   begin
     insert into public.prices_daily(stock_id,session_date,price_basis,open_vnd,high_vnd,low_vnd,close_vnd,volume_shares,source) values('20000000-0000-4000-8000-000000000009','2020-01-02','adjusted',10,9,8,11,1,'synthetic');

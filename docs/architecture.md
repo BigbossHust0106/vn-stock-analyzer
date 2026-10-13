@@ -1,61 +1,56 @@
-# Kiến trúc Phần 1
+# Kiến trúc Phần 1–2
 
 ```mermaid
 flowchart TD
-  U[Người dùng] --> P[Cloudflare Pages: Next.js static + Tailwind]
-  P --> A[Workers API: health / quotes / public-config]
-  P --> AU[Supabase Auth: session JWT]
-  P --> R[Supabase PostgREST: publishable key + JWT]
-  R --> DB[(Postgres: RLS owner_id)]
-  A -->|publishable key, chỉ đọc công khai| DB
-  C[Cloudflare Cron: 08:30 UTC ngày thường] --> W[Worker scheduled]
-  W -->|kiểm tra lịch phiên đã xác minh| DB
-  W --> V[VpsProvider: batch / cache / retry / rate limit]
-  V -->|endpoint hiện tại do user xác nhận| VPS[API VPS không chính thức]
-  VPS -->|quote hiện tại, validate toàn bộ wire| V
-  V --> W
-  W -->|service_role: RPC transaction| Q[(prices_current: snapshot VND / volume raw)]
-  Q --> DB
-  GH[GitHub Actions: verify / smoke] -->|main và verify xanh| DEP[Deploy worker + Pages]
-  DEP --> P
-  DEP --> W
+  U[Người dùng] --> WEB[Next.js static: tra cứu và chi tiết mã]
+  WEB --> ASSETS[Workers Static Assets: URL manhhuong.workers.dev]
+  WEB --> API[Workers API: stocks, quotes, public-config, health]
+  API -->|publishable key, public RLS| DB[(Supabase PostgreSQL)]
+  API --> P[DataProvider registry: cache, retry, rate limit]
+  P --> VPS[VPS: quote, metadata, daily history]
+  P --> KBS[KBS: catalog, history tùy cấu hình]
+  API -->|background, service_role RPC| DB
+  CRON[Cron 16:00 Việt Nam ngày thường] --> SYNC[Catalog + history/quote nhóm SYNC_SYMBOLS]
+  SYNC --> P
+  SYNC -->|service_role RPC, chống ghi đè dữ liệu mới| DB
+  CLI[sync:market với quyền project] -->|migration + đồng bộ dữ liệu thật| DB
+  CI[GitHub Actions verify + smoke] --> DEP[Deploy Worker + assets khi main xanh]
+  DEP --> ASSETS
+  DEP --> API
+  WEB -. Phần sau .-> AUTH[Supabase Auth + RLS dữ liệu cá nhân]
 ```
 
-Web xuất trang tĩnh bằng Next.js `output: export`; không có Next server ở
-Cloudflare Pages. SSR/server actions nếu cần ở phần sau sẽ cần kiến trúc và adapter
-khác. Trang hiện tại hiển thị hello world tiếng Việt, cảnh báo tham khảo và nút
-kiểm tra kết nối: health Worker, ba bảng thị trường công khai ở Supabase, snapshot
-ACB qua Worker. Nút này không ghi dữ liệu, không phải dashboard phân tích.
+Next.js `output: export` phục vụ trang chủ và `/stocks?symbol=VNM`; trang chi tiết
+client fetch dữ liệu thật, không fetch provider lúc build, không load fixture production.
+Workers Static Assets gắn `web/out` vào URL Worker hiện có, không cần Pages riêng.
+Pages vẫn là lựa chọn deployment bổ sung. SSR/server actions nếu cần ở phần sau
+sẽ cần adapter khác.
 
-Workers API có `GET /health` và `GET /v1/quotes?symbols=ACB,BID`. Route quotes chỉ đọc
-snapshot dùng Supabase publishable key; không nhận service key/JWT từ client để
-tự nâng quyền. Dữ liệu riêng được truy cập qua Supabase Auth + RLS khi UI được xây
-ở phần sau. Chưa có luồng đăng nhập hay quản lý watchlist trên giao diện Phần 1.
+API tra cứu kiểm tra input/mã đã đăng ký HOSE/HNX/UPCOM, public SELECT bằng
+publishable key. Chỉ background cache/Cron dùng secret service_role gọi RPC ingest;
+không có endpoint HTTP cho thao tác private hoặc quyền admin. Các RPC ghi chỉ
+EXECUTE cho service_role, SECURITY INVOKER, empty search_path. Payload lỗi/credential
+không đưa vào trạng thái public. `/v1/public-config` chỉ xuất key sb_publishable,
+không xuất service_role/sb_secret. Các key thật không có trong GitHub.
 
-`GET /v1/public-config` xuất URL Supabase và key `sb_publishable_*` đã đặt trong
-Worker để browser lấy cấu hình lúc chạy, có CORS và không cache. Không trả service
-role hay `sb_secret_*`; biến publishable đặt nhầm loại key bị chặn. URL mặc định
-do người dùng cung cấp nằm ở `config/public-deployment.json`, env có thể ghi đè;
-key thật không hard-code vào GitHub. Publishable key công khai không thay thế RLS.
-Health xanh không chứng minh migration hosted, snapshot hay Cron đã hoạt động.
+Catalog mặc định KBS vì endpoint danh mục VPS đang lỗi trong khảo sát; quote/profile
+và OHLCV ngày VPS đã gọi thật. History có thể cấu hình KBS; provenance lưu mỗi bar,
+không fallback ngầm hay trộn nguồn. Cache bounded 100 entry/isolate: quote 15s,
+history 15 phút, catalog/profile 24h. Request cách nhau 1s, batch tối đa 50,
+timeout 25s, retry có backoff/Retry-After, không retry 401/403/schema lỗi.
 
-Cron `30 8 * * 1-5` chạy 15:30 giờ Việt Nam. Đây là lựa chọn vận hành, không phải
-khẳng định giờ giao dịch đã xác minh cho mọi sàn. Worker kiểm tra `trading_sessions`
-và `closes_at` trước khi chạy, kể cả ngày nghỉ lễ hoặc phiên đóng sớm; thiếu lịch
-thì bỏ tải. Lịch và danh sách mã/sàn phải được nhập từ nguồn được xác nhận. Không
-seed từ fixture, không suy luận sàn từ `mc`. Không có lịch → không ghi nhận success.
+History giá VND, volume cổ phiếu đã đối soát VNM/FPT/HPG một phiên; giữ
+price_basis=unverified, tách bảng prices_history khỏi prices_daily và scoring.
+Không tạo bar cuối tuần/ngày nghỉ, không điền ngày thiếu, không biến snapshot thành
+OHLCV. Ngày phiên dùng Asia/Ho_Chi_Minh; bar hôm nay không final vì chưa có lịch
+đóng phiên có nguồn. MA20/50/200 tính trên close cùng nguồn, chỉ xuất khi đủ nến.
 
-VpsProvider chỉ lấy **quote hiện tại**, có cache 15s, batch <=50, retry và giới hạn
-gọi trong isolate. Snapshot không được chuyển thành OHLCV hay dùng cho ATR/RSI/MACD
-khi chưa rõ price basis/ngày phiên. Cron sau phiên vẫn chỉ lưu snapshot nhận được,
-không khẳng định đó là giá đóng cửa. Thiếu timestamp sàn được thể hiện rõ trong API.
-
-RPC `ingest_current_quotes` dùng SECURITY INVOKER, chỉ service_role có EXECUTE.
-Mỗi batch là một transaction; mã chưa đăng ký hoặc sai constraint làm rollback.
-Snapshot cũ hơn không ghi đè snapshot mới. Trạng thái success chỉ cập nhật sau khi
-toàn bộ các batch hoàn tất. Nhiều batch chưa phải một transaction toàn bộ thị trường;
-client phải kiểm tra `system_status` và `fetched_at` để phát hiện dữ liệu chưa đồng bộ.
-Không lưu payload lỗi/credential trong bảng trạng thái công khai.
+Cron mới `0 9 * * 1-5` chạy 16:00 VN để cập nhật catalog và SYNC_SYMBOLS (mặc định
+VNM/FPT/HPG). Đây là lịch lấy dữ liệu, không khẳng định giờ đóng cửa; ngày nghỉ có
+thể đọc lại history mà không tạo phiên. Ghi success chỉ sau toàn bộ dữ liệu hợp lệ
+và ghi DB thành công. Ingest nhiều mã chưa phải transaction toàn thị trường.
+Cron cũ `30 8 * * 1-5` chỉ lưu snapshot sau khi trading_sessions/closes_at đã
+xác minh cho ngày đó; thiếu lịch thì bỏ tải. Không tự tạo lịch nghỉ lễ hoặc phiên.
 
 ## Database
 
@@ -64,6 +59,7 @@ Không lưu payload lỗi/credential trong bảng trạng thái công khai.
 | stocks           | Danh mục mã + sàn HOSE/HNX/UPCOM; unique symbol         | Công khai đọc  |
 | trading_sessions | Lịch có nguồn, verified_at, đóng phiên theo VN          | Công khai đọc  |
 | prices_current   | Snapshot giá VND; lot × 10 (ACB 1 ngày), lastVolume raw | Công khai đọc  |
+| prices_history   | OHLCV nguồn/basis unverified, fetched_at, is_final      | Công khai đọc  |
 | prices_daily     | OHLCV theo mã/ngày/price_basis; chưa có nguồn ingest    | Công khai đọc  |
 | fundamentals     | Mã/kỳ/annual-ttm-quarter, EPS/BVPS VND, FCFE VND        | Công khai đọc  |
 | scores           | Mã/ngày/horizon/model, null nếu thiếu dữ liệu           | Công khai đọc  |

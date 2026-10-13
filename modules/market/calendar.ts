@@ -13,6 +13,13 @@ export interface TradingSession {
   is_open: boolean;
   closes_at: string | null;
 }
+export function yearsBefore(date: string, years: number): string {
+  const value = new Date(date + 'T00:00:00Z');
+  const month = value.getUTCMonth();
+  value.setUTCFullYear(value.getUTCFullYear() - years);
+  if (value.getUTCMonth() !== month) value.setUTCDate(0);
+  return value.toISOString().slice(0, 10);
+}
 export function canIngest(
   session: TradingSession | null,
   timestamp: number,

@@ -1,0 +1,22 @@
+{
+  "description": "Công ty Cổ phần FPT",
+  "exchange-listed": "HOSE",
+  "exchange-traded": "HOSE",
+  "name": "FPT",
+  "symbol": "FPT",
+  "ticker": "FPT",
+  "type": "stock",
+  "timezone": "Asia/Ho_Chi_Minh",
+  "supported_resolutions": ["1", "5", "15", "30", "60", "D", "W", "M"],
+  "has_intraday": true,
+  "has_no_volume": false,
+  "minmov": 1,
+  "minmov2": 0,
+  "pointvalue": 1,
+  "pricescale": 100,
+  "has_daily": true,
+  "has_weekly_and_monthly": false,
+  "has_empty_bars": false,
+  "intraday_multipliers": ["1"],
+  "session": "0900-1500"
+}

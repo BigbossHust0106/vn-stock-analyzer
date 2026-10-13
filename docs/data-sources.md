@@ -1,5 +1,55 @@
 # Nguồn dữ liệu và mức độ xác minh
 
+## Phần 2 — khảo sát live trước triển khai, 13/10/2026
+
+Đã đọc JavaScript công khai của `https://banggia.vps.com.vn`:
+`config.js?v=20260601`, `static/js/main.9a59a9fc.chunk.js`; và chart
+`https://chart.vps.com.vn/tv/`: `common/js/config.js?v=1.0.20251215`,
+`datafeeds/udf/dist/bundle.js?v=1.0.20241213`. Endpoint dưới đây được tìm từ
+chính client này rồi gọi thật, không suy đoán URL. Kết quả là thời điểm khảo sát,
+không phải SLA hay quota được VPS công bố.
+
+| Nguồn / endpoint                                                          | Tham số đã thử                                                                | Kết quả / độ trễ quan sát                                                                        |
+| ------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| VPS `GET bgapidatafeed.vps.com.vn/getliststockdata/{symbols}`             | `VNM,FPT,HPG`                                                                 | 200, 3 quote / 1956 ms; đủ 57 trường                                                             |
+| VPS `GET bgapidatafeed.vps.com.vn/getlistallstock`                        | Không tham số                                                                 | 503 hai lần / 5313–5508 ms; chưa có schema danh mục hợp lệ                                       |
+| VPS `GET bgapidatafeed.vps.com.vn/getlistckindex/{exchange}`              | `hose` theo client                                                            | 503 / 5559 ms; không đoán mapping mã sàn `mc`                                                    |
+| VPS `GET bgapidatafeed.vps.com.vn/getliststockbaseinfo/{symbol}`          | Một mã FPT; batch VNM,FPT,HPG                                                 | FPT 503 / 5293 ms; batch 200 body rỗng, không xem là dữ liệu                                     |
+| VPS `GET histdatafeed.vps.com.vn/tradingview/symbols`                     | `symbol=VNM`, FPT, HPG                                                        | 200 / 730–1499 ms; tên, description, type=stock, exchange-listed=HOSE, timezone Asia/Ho_Chi_Minh |
+| VPS `GET histdatafeed.vps.com.vn/tradingview/history`                     | `symbol`, `resolution=D`, `from=1759276800`, `to=1791936000`, `countback=300` | 200 / 493–776 ms; mỗi mã 256 bar, có cả bar phiên 13/10 đang hình thành                          |
+| VPS `GET histdatafeed.vps.com.vn/tradingview/symbol_info`                 | `group=HOSE`, đường dẫn trong UDF client                                      | 404 / 1725 ms; không dùng làm danh mục                                                           |
+| KBS `GET kbbuddywts.kbsec.com.vn/iis-server/investment/stock/search/data` | Không tham số                                                                 | 200 / 15033 ms; danh mục symbol/name/exchange/type. Chỉ giữ type=stock và HOSE/HNX/UPCOM         |
+
+KBS catalog được tìm từ mã nguồn Listing tại
+`https://github.com/thinh-vu/vnstock/blob/main/vnstock/explorer/kbs/listing.py`
+và `const.py`, rồi gọi trực tiếp bằng HTTP, không chạy/copy thư viện Vnstock.
+VPS không trả danh mục hợp lệ trong lần thử này: cấu hình tách catalog=KBS,
+quotes/history/profile=VPS. Nguồn của mỗi dữ liệu được giữ rõ; không fallback ngầm.
+KBS/Vietcap/SSI vẫn là nguồn bổ sung nếu VPS đổi/chặn. BCTC không có contract đã
+xác minh trong các endpoint VPS này; không suy EPS/BVPS hay báo cáo tài chính từ quote.
+
+History VPS trả `symbol`, `s=ok`, các mảng `t/o/h/l/c/v`. `t` là Unix seconds;
+ngày phiên lấy theo Asia/Ho_Chi_Minh, không tạo bar cuối tuần/ngày nghỉ và không
+điền OHLC bằng giá phiên trước. Giá history là nghìn VND: bar FPT 12/10 có
+O=58.1/H=58.8/L=57.1/C=57.1, khớp mẫu KBS 58100/58800/57100/57100 VND.
+Volume history FPT=5930000 khớp KBS; không nhân 10 cho `v` history.
+Đơn vị và đối soát mới có mẫu nhỏ, không chứng nhận mọi loại tài sản/phiên.
+`pricescale=100` của symbol metadata là độ chia giá biểu đồ, không phải hệ số VND.
+
+Cơ sở điều chỉnh chia tách/cổ tức chưa được VPS công bố trong phản hồi đã thử.
+Lưu history với `price_basis=unverified`, provenance nguồn và volume unit;
+không gán nhãn adjusted/unadjusted, không đưa vào scoring tài chính.
+Bar ngày hiện tại chưa được coi là giá đóng cửa cuối cùng. MA biểu đồ tính trên
+chuỗi close cùng một nguồn; đủ 20/50/200 phiên mới có MA tương ứng.
+
+Quota chính thức, quyền phân phối dữ liệu và độ trễ so với sàn chưa có tài liệu.
+Giới hạn ứng dụng: batch quotes tối đa 50, cách request ít nhất 1 giây, timeout
+25 giây cho metadata/history, 2 retry network/429/5xx có backoff và Retry-After;
+401/403/schema lỗi không retry. Cache catalog 24 giờ, history 15 phút, quotes 15 giây,
+giới hạn số entry và trả clone để tránh mutation. Không load fixture trong production.
+Độ trễ request ở bảng trên không phải độ trễ bản tin thị trường; quote vẫn thiếu
+timestamp sàn. Endpoint không chính thức có thể đổi/chặn; phải hiển thị lỗi và thời điểm lấy.
+
 ## Giá hiện tại VPS
 
 Endpoint người dùng xác nhận: `GET https://bgapidatafeed.vps.com.vn/getliststockdata/{mã1,mã2,...}`.
@@ -122,19 +172,19 @@ Trường thêm được giữ trong raw response nhưng không tự diễn gi�
 trường, NaN/Infinity, dữ liệu rỗng, scientific notation, room âm, book tuple,
 mã trùng/thiếu/trả dư. ACB được kiểm tra với đáp án đối chiếu cố định.
 
-Cache 15 giây mỗi batch (tối đa 30 batch), bản sao tránh mutation; serialize
+Cache quotes 15 giây (cache chung tối đa 100 entry), bản sao tránh mutation; serialize
 requests và cách ít nhất 1 giây. Retry network/429/5xx tối đa 2 lần, backoff
-500ms/1000ms, timeout mỗi lần 10s; tuân thủ Retry-After, bỏ lần retry nếu yêu cầu
+500ms/1000ms, timeout mỗi lần 25s; tuân thủ Retry-After, bỏ lần retry nếu yêu cầu
 chờ >30s. 401/403 không retry. Các giới hạn này là lựa chọn vận hành, cần điều
 chỉnh theo chính sách VPS được xác nhận. Cache/rate limit thuộc mỗi isolate;
-chưa phải giới hạn tổng toàn hệ thống. API công khai đọc snapshot Supabase,
-không gọi VPS theo từng request người dùng.
+chưa phải giới hạn tổng toàn hệ thống. API quotes cũ đọc snapshot Supabase;
+API chi tiết Phần 2 gọi provider có cache, fallback snapshot có thông báo rõ.
 
 ## Còn thiếu
 
-1. Lịch sử OHLCV: đã tìm và gọi thật endpoint KBS/Vietcap trong khảo sát
+1. Lịch sử OHLCV (ghi nhận khảo sát Phần 1, đã được mở rộng ở Phần 2 phía trên): đã tìm và gọi thật endpoint KBS/Vietcap trong khảo sát
    [13/10/2026](api-research-2026-10-13.md). OHLC 4 mã khớp nhưng volume SHS lệch;
-   basis và quyền production chưa xác minh. Chưa có adapter ingest lịch sử,
+   basis và quyền production chưa xác minh. Phần 2 đã thêm adapter VPS/KBS và bảng prices_history với basis unverified;
    không suy ra OHLCV từ quote hiện tại, không ghi snapshot vào `prices_daily`.
 2. BCTC ACB: đã nhận payload thật từ KBS và Vietcap (BALANCE_SHEET), chưa
    xác minh mapping EPS năm/TTM, BVPS, FCFE, số cổ phiếu và đơn vị với báo cáo gốc.
@@ -142,8 +192,8 @@ không gọi VPS theo từng request người dùng.
 3. Đối chiếu thêm đơn vị lot ở nhiều mã/ngày/sàn; xác minh lastVolume,
    volume sổ lệnh, giá trị nước ngoài, timestamp phiên, mã sàn,
    quy ước marker, dữ liệu trước mở cửa/đấu giá/ngừng giao dịch/HNX/UPCOM/chứng quyền.
-4. Danh mục mã và sàn cùng lịch phiên/ngày nghỉ có nguồn chính thức. `stocks` và
-   `trading_sessions` không được seed bằng fixture hay giả định cuối tuần.
+4. Lịch phiên/ngày nghỉ có nguồn chính thức vẫn thiếu. Danh mục mã/sàn đã lấy từ
+   KBS trong Phần 2; `stocks` và `trading_sessions` không seed bằng fixture hay giả định.
 5. Nguồn tin tức, quyền sử dụng và mô hình sentiment; Phần 1 không thu thập tin.
 
 ## Bằng chứng bổ sung người dùng xác nhận
@@ -161,4 +211,4 @@ Xem [API research 13/10/2026](api-research-2026-10-13.md) để có endpoint th�
 đối soát ACB/FPT/SHS/QNS, SSI chính thức cần credentials, ứng viên thương mại và
 giới hạn sử dụng. Chạy `npm run verify:sources` để đối chiếu live KBS/Vietcap;
 REVIEW_NEEDED/exit 2 khi volume SHS lệch là phát hiện chất lượng dữ liệu, không PASS.
-Parser khảo sát không tự đổi Cron/provider và không ghi dữ liệu chưa xác minh vào DB.
+Parser khảo sát cũ chỉ đọc; Phần 2 dùng adapter riêng có validate/provenance và lưu history basis unverified, không ghi vào bảng đã xác minh prices_daily.

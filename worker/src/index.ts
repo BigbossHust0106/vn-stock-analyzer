@@ -1,12 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 import deployment from '../../config/public-deployment.json';
+import { marketResponse } from './api/market';
+import type { ProviderConfig } from '../../modules/providers/registry';
+import { syncMarket } from './market-sync';
 import { healthResponse } from './api/health';
 import { canIngest, vietnamDate } from '../../modules/market/calendar';
 import {
   validatedSymbols,
   VpsProvider,
 } from '../../modules/providers/vps-provider';
-export interface Env {
+export interface Env extends ProviderConfig {
+  SYNC_SYMBOLS?: string;
+  ASSETS?: Pick<Fetcher, 'fetch'>;
   SUPABASE_URL?: string;
   SUPABASE_PUBLISHABLE_KEY?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
@@ -69,7 +74,11 @@ export async function ingest(env: Env, timestamp: number): Promise<void> {
   if (error) throw new Error('Không cập nhật được trạng thái');
 }
 export default {
-  async fetch(request: Request, env: Env = {}): Promise<Response> {
+  async fetch(
+    request: Request,
+    env: Env = {},
+    context?: Pick<ExecutionContext, 'waitUntil'>,
+  ): Promise<Response> {
     const url = new URL(request.url);
     const supabaseUrl = env.SUPABASE_URL || deployment.supabaseUrl;
     const headers = {
@@ -102,6 +111,11 @@ export default {
         { headers: { ...headers, 'Cache-Control': 'no-store' } },
       );
     }
+    const market = await marketResponse(request, env, context);
+    if (market) return market;
+    if (url.pathname !== '/v1/quotes')
+      if (env.ASSETS && !url.pathname.startsWith('/v1/'))
+        return env.ASSETS.fetch(request);
     if (url.pathname !== '/v1/quotes')
       return Response.json(
         { error: 'Không tìm thấy' },
@@ -154,6 +168,17 @@ export default {
     env: Env,
     context: Pick<ExecutionContext, 'waitUntil'>,
   ): void {
+    if (controller.cron !== '30 8 * * 1-5') {
+      context.waitUntil(
+        syncMarket(env).catch(() => {
+          console.error(
+            'Đồng bộ thị trường thất bại; kiểm tra cấu hình và nguồn',
+          );
+          throw new Error('Đồng bộ thị trường thất bại');
+        }),
+      );
+      return;
+    }
     context.waitUntil(
       ingest(env, controller.scheduledTime).catch(() => {
         console.error(

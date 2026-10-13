@@ -1,0 +1,68 @@
+[
+  {
+    "symbol": "QNS",
+    "nameEn": "Quang Ngai Sugar Joint Stock Company",
+    "exchange": "UPCOM",
+    "re": 50800,
+    "ceiling": 58400,
+    "floor": 43200,
+    "type": "stock",
+    "index": 1,
+    "name": "CTCP Đường Quảng Ngãi"
+  },
+  {
+    "symbol": "ACB",
+    "nameEn": "Asia Commercial Joint Stock Bank",
+    "exchange": "HOSE",
+    "re": 20450,
+    "ceiling": 21850,
+    "floor": 19050,
+    "type": "stock",
+    "index": 1,
+    "name": "Ngân hàng TMCP Á Châu"
+  },
+  {
+    "symbol": "SHS",
+    "nameEn": "Saigon - Hanoi Securities Joint Stock Company",
+    "exchange": "HNX",
+    "re": 11700,
+    "ceiling": 12800,
+    "floor": 10600,
+    "type": "stock",
+    "index": 1,
+    "name": "CTCP Chứng khoán Sài Gòn - Hà Nội"
+  },
+  {
+    "symbol": "VNM",
+    "nameEn": "Vietnam Dairy Products Joint Stock Company",
+    "exchange": "HOSE",
+    "re": 58400,
+    "ceiling": 62400,
+    "floor": 54400,
+    "type": "stock",
+    "index": 1,
+    "name": "CTCP Sữa Việt Nam"
+  },
+  {
+    "symbol": "FPT",
+    "nameEn": "FPT Corporation",
+    "exchange": "HOSE",
+    "re": 57100,
+    "ceiling": 61000,
+    "floor": 53200,
+    "type": "stock",
+    "index": 1,
+    "name": "CTCP FPT"
+  },
+  {
+    "symbol": "HPG",
+    "nameEn": "Hoa Phat Group Joint Stock Company",
+    "exchange": "HOSE",
+    "re": 20700,
+    "ceiling": 22100,
+    "floor": 19300,
+    "type": "stock",
+    "index": 1,
+    "name": "CTCP Tập đoàn Hòa Phát"
+  }
+]

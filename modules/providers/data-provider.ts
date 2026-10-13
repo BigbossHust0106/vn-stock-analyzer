@@ -13,7 +13,7 @@ export interface CurrentQuote {
   };
   totalVolumeShares: number;
   volumeVerificationScope: 'ACB_2026-10-12_only';
-  marketCodeRaw: string;
+  marketCodeRaw: string | null;
   fetchedAt: string;
   exchangeTimestamp: null;
   priceBasis: 'unverified';
@@ -24,4 +24,30 @@ export interface CurrentQuote {
 }
 export interface DataProvider {
   fetchQuotes(symbols: readonly string[]): Promise<CurrentQuote[]>;
+  fetchStocks(exchange?: Exchange): Promise<StockInfo[]>;
+  fetchProfile(symbol: string): Promise<StockInfo>;
+  fetchHistory(symbol: string, from: string, to: string): Promise<DailyBar[]>;
+}
+
+export type Exchange = 'HOSE' | 'HNX' | 'UPCOM';
+export interface StockInfo {
+  symbol: string;
+  name: string;
+  exchange: Exchange;
+  source: 'VPS' | 'KBS';
+  fetchedAt: string;
+}
+export interface DailyBar {
+  symbol: string;
+  sessionDate: string;
+  openVnd: number;
+  highVnd: number;
+  lowVnd: number;
+  closeVnd: number;
+  volumeReported: number;
+  volumeUnit: 'shares';
+  source: 'VPS' | 'KBS';
+  priceBasis: 'unverified';
+  fetchedAt: string;
+  isFinal: boolean;
 }
