@@ -3,7 +3,7 @@
 ```mermaid
 flowchart TD
   U[Người dùng] --> P[Cloudflare Pages: Next.js static + Tailwind]
-  P --> A[Workers API: health / quotes]
+  P --> A[Workers API: health / quotes / public-config]
   P --> AU[Supabase Auth: session JWT]
   P --> R[Supabase PostgREST: publishable key + JWT]
   R --> DB[(Postgres: RLS owner_id)]
@@ -23,12 +23,21 @@ flowchart TD
 
 Web xuất trang tĩnh bằng Next.js `output: export`; không có Next server ở
 Cloudflare Pages. SSR/server actions nếu cần ở phần sau sẽ cần kiến trúc và adapter
-khác. Trang hiện tại chỉ hiển thị hello world tiếng Việt và cảnh báo tham khảo.
+khác. Trang hiện tại hiển thị hello world tiếng Việt, cảnh báo tham khảo và nút
+kiểm tra kết nối: health Worker, ba bảng thị trường công khai ở Supabase, snapshot
+ACB qua Worker. Nút này không ghi dữ liệu, không phải dashboard phân tích.
 
 Workers API có `GET /health` và `GET /v1/quotes?symbols=ACB,BID`. Route quotes chỉ đọc
 snapshot dùng Supabase publishable key; không nhận service key/JWT từ client để
 tự nâng quyền. Dữ liệu riêng được truy cập qua Supabase Auth + RLS khi UI được xây
 ở phần sau. Chưa có luồng đăng nhập hay quản lý watchlist trên giao diện Phần 1.
+
+`GET /v1/public-config` xuất URL Supabase và key `sb_publishable_*` đã đặt trong
+Worker để browser lấy cấu hình lúc chạy, có CORS và không cache. Không trả service
+role hay `sb_secret_*`; biến publishable đặt nhầm loại key bị chặn. URL mặc định
+do người dùng cung cấp nằm ở `config/public-deployment.json`, env có thể ghi đè;
+key thật không hard-code vào GitHub. Publishable key công khai không thay thế RLS.
+Health xanh không chứng minh migration hosted, snapshot hay Cron đã hoạt động.
 
 Cron `30 8 * * 1-5` chạy 15:30 giờ Việt Nam. Đây là lựa chọn vận hành, không phải
 khẳng định giờ giao dịch đã xác minh cho mọi sàn. Worker kiểm tra `trading_sessions`
