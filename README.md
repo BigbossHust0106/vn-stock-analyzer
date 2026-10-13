@@ -347,3 +347,27 @@ quyền phân phối; chưa có mapping BCTC cho production hay lịch nghỉ l�
 `lot × 10` mới đối chiếu ACB một ngày; `lastVolume` và timestamp sàn chưa rõ.
 Chưa có ranking/scoring/tin tức/đăng nhập/watchlist UI trong Phần 2.
 Không mô tả deploy, CI hosted hay kiểm thử Auth JWT thành công nếu chưa chạy thật.
+
+## Phần 3: engine chấm điểm
+
+Trang chi tiết `/stocks?symbol=VNM` có điểm Graham/Buffett, từng tiêu chí, định giá,
+biên an toàn, mức tin cậy/rủi ro và bảng BCTC năm. `/settings` chỉnh trọng số và giả
+định DCF; cài đặt trình duyệt khi chưa đăng nhập, lưu theo tài khoản Supabase khi đăng
+nhập bằng email/password tài khoản Auth đã xác nhận. Tạo tài khoản tại Supabase
+Authentication → Users nếu muốn dùng lưu cài đặt theo tài khoản. Không đặt mật khẩu
+hoặc service-role key vào frontend.
+
+```bash
+npm run verify
+npm run verify:financials:live       # live, read-only, không chạy CI
+npm run sync:financials -- --migrate # Management token qua Environment Secrets
+npm run verify:scoring:browser      # app local/production qua MARKET_APP_URL
+```
+
+`FUNDAMENTALS_PROVIDER=kbs`, bổ sung Vietcap ROIC/số CP; VPS chưa có BCTC đã xác nhận.
+Lưu bảng `fundamentals`, `financial_snapshots`, điểm mặc định `scores`, preferences có
+RLS. Cron16:00 Việt Nam sau sync thị trường đồng bộ BCTC nhóm SYNC_SYMBOLS.
+Xem [nguồn/đơn vị](docs/data-sources.md) và [định nghĩa engine](docs/scoring-engine.md).
+Chỉ dùng BCTC năm hợp nhất đã kiểm toán theo metadata, 3 năm để sàng lọc rút gọn;
+DCF là proxy CFO−Capex với giả định, chưa phải Owner Earnings được chứng nhận.
+Nguồn chưa đối chiếu PDF gốc: confidence bị giới hạn, kết luận giữ Quan sát.

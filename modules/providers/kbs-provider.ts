@@ -1,3 +1,9 @@
+import {
+  parseKbsReport,
+  financialData,
+  type ReportType,
+} from './financial-schema';
+import type { FinancialData } from './financial-types';
 import type {
   DataProvider,
   Exchange,
@@ -17,6 +23,50 @@ export class KbsProvider implements DataProvider {
     options: HttpOptions = defaultHttpOptions,
   ) {
     this.http = new ProviderHttp('KBS', transport, options);
+  }
+  async fetchFinancials(symbol: string): Promise<FinancialData> {
+    symbolValue(symbol);
+    return this.http.cached('financials:' + symbol, 86400000, async () => {
+      const now = new Date().toISOString();
+      const reports: Record<ReportType, ReturnType<typeof parseKbsReport>> = {
+        KQKD: [],
+        CDKT: [],
+        LCTT: [],
+        CSTC: [],
+      };
+      for (const type of Object.keys(reports) as ReportType[]) {
+        for (const page of [1, 2]) {
+          const url = new URL(
+            `https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/${symbol}`,
+          );
+          for (const [key, value] of Object.entries({
+            page: String(page),
+            pageSize: '4',
+            type,
+            unit: '1000',
+            termtype: '1',
+            languageid: '1',
+          }))
+            url.searchParams.set(key, value);
+          const parsed = parseKbsReport(
+            await this.http.request(url.href),
+            type,
+            now,
+          );
+          reports[type].push(...parsed);
+          if (parsed.length < 4) break;
+        }
+      }
+      let ratios: unknown = null;
+      try {
+        ratios = await this.http.request(
+          `https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/${symbol}/statistics-financial`,
+        );
+      } catch {
+        /* Source capability unavailable; no invented values. */
+      }
+      return financialData(symbol, reports, ratios, now);
+    });
   }
   async fetchStocks(exchange?: Exchange): Promise<StockInfo[]> {
     const data = await this.http.cached('catalog', 86400000, async () =>

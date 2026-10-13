@@ -1,3 +1,4 @@
+import { syncFinancials } from './financial-sync';
 import { createClient } from '@supabase/supabase-js';
 import type { Env } from './index';
 import deployment from '../../config/public-deployment.json';
@@ -81,6 +82,7 @@ export async function syncMarket(env: Env): Promise<void> {
     })),
   });
   if (error) throw new Error('Không ghi được quotes');
+  await syncFinancials(env);
   const { error: statusError } = await db.from('system_status').upsert({
     component: 'prices',
     state: 'ok',

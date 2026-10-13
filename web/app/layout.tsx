@@ -23,6 +23,7 @@ export default function RootLayout({
           </Link>
           <nav>
             <Link href="/">Tra cứu mã</Link>
+            <Link href="/settings">Cài đặt</Link>
             <ThemeSwitch />
           </nav>
         </header>

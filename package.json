@@ -33,7 +33,11 @@
     "tools:install": "bash scripts/install-tools.sh",
     "prepare": "husky",
     "smoke": "node scripts/smoke.mjs",
-    "verify:sources": "node --use-env-proxy --import tsx scripts/probe-data-sources.ts"
+    "verify:sources": "node --use-env-proxy --import tsx scripts/probe-data-sources.ts",
+    "sync:financials": "node --use-env-proxy --import tsx scripts/sync-financials.ts",
+    "verify:financials:live": "node --use-env-proxy --import tsx scripts/verify-financials-live.ts",
+    "verify:scoring:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-scoring.ts",
+    "verify:settings:live": "node --use-env-proxy --import tsx scripts/verify-settings-live.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.3",

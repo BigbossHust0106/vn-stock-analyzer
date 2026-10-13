@@ -13,6 +13,7 @@ import { symbolValue } from '../../../modules/providers/market-schema';
 const instances = new Map<string, ReturnType<typeof providers>>();
 export function marketProviders(env: Env) {
   const key = JSON.stringify([
+    env.FUNDAMENTALS_PROVIDER,
     env.CATALOG_PROVIDER,
     env.HISTORY_PROVIDER,
     env.QUOTE_PROVIDER,

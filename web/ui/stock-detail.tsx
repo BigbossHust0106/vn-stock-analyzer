@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { stockDetail, type StockDetail as Detail } from '../lib/market-client';
 import { changePercent } from '../../modules/market/chart';
 import { PriceChart } from './price-chart';
+import { ScoringPanel } from './scoring-panel';
 export function StockDetail() {
   const params = useSearchParams();
   const symbol = (params.get('symbol') ?? 'VNM').trim().toUpperCase();
@@ -137,6 +138,11 @@ function DetailContent({ symbol }: { symbol: string }) {
         </p>
       ))}
       <PriceChart bars={data.bars} />
+      <ScoringPanel
+        symbol={symbol}
+        priceVnd={q?.lastPriceVnd ?? null}
+        quoteFetchedAt={q?.fetchedAt ?? null}
+      />
       <section className="overview-panel">
         <h2>Tổng quan</h2>
         <dl>
@@ -154,7 +160,6 @@ function DetailContent({ symbol }: { symbol: string }) {
           </div>
         </dl>
         <p>{data.notice}</p>
-        <p>Thông tin báo cáo tài chính chưa được cung cấp.</p>
       </section>
     </>
   );

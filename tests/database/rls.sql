@@ -84,3 +84,35 @@ do $$ begin
 end $$;
 rollback;
 \echo RLS PASS: A/B isolation, own read/write, owner forgery, parent ownership, anonymous market read, market write denied
+
+-- Các phép kiểm tra trên rollback; tạo riêng hai user để kiểm tra preference Phần 3.
+begin;
+insert into auth.users(id) values ('10000000-0000-4000-8000-000000000001'),('10000000-0000-4000-8000-000000000002');
+set local role authenticated;
+select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000002',true);
+insert into public.user_settings(scoring_preferences) values('{"grahamWeight":70,"buffettWeight":30,"growthRate":0.05,"discountRate":0.12,"terminalGrowth":0.02,"projectionYears":5,"maintenanceCapexFraction":1}');
+select set_config('request.jwt.claim.sub','10000000-0000-4000-8000-000000000001',true);
+do $$ declare affected integer; begin
+ if exists(select 1 from public.user_settings) then raise exception 'A read B scoring preferences'; end if;
+ update public.user_settings set scoring_preferences=default where owner_id='10000000-0000-4000-8000-000000000002';
+ get diagnostics affected=row_count;
+ if affected<>0 then raise exception 'A updated B scoring preferences'; end if;
+ begin
+ insert into public.user_settings(scoring_preferences) values('{}');
+ raise exception 'Invalid preference accepted';
+ exception when check_violation then null; end;
+ begin
+ perform public.ingest_financials('{}');
+ raise exception 'Authenticated can ingest financials';
+ exception when insufficient_privilege then null; end;
+end $$;
+set local role anon;
+select count(*) from public.financial_snapshots;
+do $$ begin
+ begin
+ insert into public.financial_snapshots(stock_id,source,fetched_at,payload) values(gen_random_uuid(),'KBS_VIETCAP',now(),'{"annual":[]}');
+ raise exception 'Anon can write financial snapshots';
+ exception when insufficient_privilege then null; end;
+end $$;
+rollback;
+\echo RLS PASS: scoring preferences owner isolation, malformed settings denied, financial ingestion service-only, anon market read

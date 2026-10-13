@@ -1,3 +1,4 @@
+import type { FinancialData } from './financial-types';
 export interface CurrentQuote {
   symbol: string;
   referenceVnd: number;
@@ -23,6 +24,7 @@ export interface CurrentQuote {
   };
 }
 export interface DataProvider {
+  fetchFinancials(symbol: string): Promise<FinancialData>;
   fetchQuotes(symbols: readonly string[]): Promise<CurrentQuote[]>;
   fetchStocks(exchange?: Exchange): Promise<StockInfo[]>;
   fetchProfile(symbol: string): Promise<StockInfo>;

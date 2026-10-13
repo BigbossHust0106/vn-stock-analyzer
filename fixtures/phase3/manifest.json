@@ -1,0 +1,245 @@
+{
+  "scope": "Observed provider payloads; original audited PDFs not independently reconciled",
+  "evidence": [
+    {
+      "file": "VNM-KQKD-1.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/VNM?page=1&pageSize=4&type=KQKD&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 2466,
+      "capturedAt": "2026-10-13T09:20:50.838Z",
+      "sha256": "349d97b0ddafff766d48331abd2ddf6d5cc6a364e3b373cebafa9f0d427c7d9c"
+    },
+    {
+      "file": "VNM-KQKD-2.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/VNM?page=2&pageSize=4&type=KQKD&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 521,
+      "capturedAt": "2026-10-13T09:20:52.361Z",
+      "sha256": "7429b194a07d7a6a71318c8fb9423b85039dcd9f084cfc1ab7dcdc61e3d9f88f"
+    },
+    {
+      "file": "VNM-CDKT-1.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/VNM?page=1&pageSize=4&type=CDKT&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 971,
+      "capturedAt": "2026-10-13T09:20:54.333Z",
+      "sha256": "d631d8dae67403975e1ae1b8c96dec052eec648de00b5faaf9c028bd51e391cb"
+    },
+    {
+      "file": "VNM-CDKT-2.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/VNM?page=2&pageSize=4&type=CDKT&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 1119,
+      "capturedAt": "2026-10-13T09:20:56.453Z",
+      "sha256": "b37c4001408881a9022c7306afb60869d7115fac7b3ccd9c72a2777f6be0824f"
+    },
+    {
+      "file": "VNM-LCTT-1.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/VNM?page=1&pageSize=4&type=LCTT&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 956,
+      "capturedAt": "2026-10-13T09:20:58.410Z",
+      "sha256": "25f660aaca812e2f879df47f717b231717766a20c4febce88ce49fe3d2cae6ae"
+    },
+    {
+      "file": "VNM-LCTT-2.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/VNM?page=2&pageSize=4&type=LCTT&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 1476,
+      "capturedAt": "2026-10-13T09:21:00.887Z",
+      "sha256": "b346e3791a7eb0c7191a48333cd3614060a582740d53fa3a618224b7e1bb70da"
+    },
+    {
+      "file": "VNM-CSTC-1.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/VNM?page=1&pageSize=4&type=CSTC&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 822,
+      "capturedAt": "2026-10-13T09:21:02.710Z",
+      "sha256": "d54d23e6ccddf6ec52cee3ab0cae1799f5e420880712bf29c6eb362572042eb7"
+    },
+    {
+      "file": "VNM-CSTC-2.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/VNM?page=2&pageSize=4&type=CSTC&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 946,
+      "capturedAt": "2026-10-13T09:21:04.657Z",
+      "sha256": "7bc600a1f8722ff1e5436e545e36e018472fafcc33479ae82e9bd0df8724855a"
+    },
+    {
+      "file": "VNM-vci-ratios.json",
+      "url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/VNM/statistics-financial",
+      "status": 200,
+      "latencyMs": 1770,
+      "capturedAt": "2026-10-13T09:21:07.428Z",
+      "sha256": "076619e58066c0c261cfd7ce5b87c4e510f3a9612236e438884b0626c98bb54d"
+    },
+    {
+      "file": "FPT-KQKD-1.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/FPT?page=1&pageSize=4&type=KQKD&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 953,
+      "capturedAt": "2026-10-13T09:21:08.381Z",
+      "sha256": "d1a4d7e25bec44ff8b8e0fbbeb622ea1fe96d4a8552c6f9aa8a94fcfdad4fb98"
+    },
+    {
+      "file": "FPT-KQKD-2.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/FPT?page=2&pageSize=4&type=KQKD&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 1097,
+      "capturedAt": "2026-10-13T09:21:10.479Z",
+      "sha256": "7429b194a07d7a6a71318c8fb9423b85039dcd9f084cfc1ab7dcdc61e3d9f88f"
+    },
+    {
+      "file": "FPT-CDKT-1.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/FPT?page=1&pageSize=4&type=CDKT&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 1127,
+      "capturedAt": "2026-10-13T09:21:12.607Z",
+      "sha256": "7476bb903203cbafbeb6c61916ef9f20bb7e952b53d70bbadb277d0b3ba42abc"
+    },
+    {
+      "file": "FPT-CDKT-2.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/FPT?page=2&pageSize=4&type=CDKT&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 975,
+      "capturedAt": "2026-10-13T09:21:14.583Z",
+      "sha256": "b37c4001408881a9022c7306afb60869d7115fac7b3ccd9c72a2777f6be0824f"
+    },
+    {
+      "file": "FPT-LCTT-1.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/FPT?page=1&pageSize=4&type=LCTT&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 1103,
+      "capturedAt": "2026-10-13T09:21:16.686Z",
+      "sha256": "7db8a86297e4ffe221b5b47a5f6e88d9199c2e4a4c7880dae0fb65ffbe53fc68"
+    },
+    {
+      "file": "FPT-LCTT-2.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/FPT?page=2&pageSize=4&type=LCTT&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 964,
+      "capturedAt": "2026-10-13T09:21:18.651Z",
+      "sha256": "b346e3791a7eb0c7191a48333cd3614060a582740d53fa3a618224b7e1bb70da"
+    },
+    {
+      "file": "FPT-CSTC-1.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/FPT?page=1&pageSize=4&type=CSTC&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 1167,
+      "capturedAt": "2026-10-13T09:21:20.820Z",
+      "sha256": "345f1aaffd349d22380a98ecf2617c4711d78dee3342fc3a911b6166820aafeb"
+    },
+    {
+      "file": "FPT-CSTC-2.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/FPT?page=2&pageSize=4&type=CSTC&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 945,
+      "capturedAt": "2026-10-13T09:21:22.766Z",
+      "sha256": "7bc600a1f8722ff1e5436e545e36e018472fafcc33479ae82e9bd0df8724855a"
+    },
+    {
+      "file": "FPT-vci-ratios.json",
+      "url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/FPT/statistics-financial",
+      "status": 200,
+      "latencyMs": 2415,
+      "capturedAt": "2026-10-13T09:21:26.182Z",
+      "sha256": "c4516a7c6f13a41d85d728ce698a7483b2bb12f0a62dcb4519814eec31c0545d"
+    },
+    {
+      "file": "HPG-KQKD-1.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/HPG?page=1&pageSize=4&type=KQKD&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 945,
+      "capturedAt": "2026-10-13T09:21:27.127Z",
+      "sha256": "9ccb928da80673a1a92abc6262b3578c0fb55052a1bdc55029b5ba2b9cea2bf3"
+    },
+    {
+      "file": "HPG-KQKD-2.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/HPG?page=2&pageSize=4&type=KQKD&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 970,
+      "capturedAt": "2026-10-13T09:21:29.098Z",
+      "sha256": "7429b194a07d7a6a71318c8fb9423b85039dcd9f084cfc1ab7dcdc61e3d9f88f"
+    },
+    {
+      "file": "HPG-CDKT-1.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/HPG?page=1&pageSize=4&type=CDKT&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 969,
+      "capturedAt": "2026-10-13T09:21:31.067Z",
+      "sha256": "b17cb38789791538cf1e057dbdd7ab1936c947059515b6311cd0cd03866c7490"
+    },
+    {
+      "file": "HPG-CDKT-2.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/HPG?page=2&pageSize=4&type=CDKT&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 819,
+      "capturedAt": "2026-10-13T09:21:32.887Z",
+      "sha256": "b37c4001408881a9022c7306afb60869d7115fac7b3ccd9c72a2777f6be0824f"
+    },
+    {
+      "file": "HPG-LCTT-1.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/HPG?page=1&pageSize=4&type=LCTT&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 968,
+      "capturedAt": "2026-10-13T09:21:34.857Z",
+      "sha256": "d95204bd9ef8971726aab300b038c7fbc014da7542767185612d3787356009f0"
+    },
+    {
+      "file": "HPG-LCTT-2.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/HPG?page=2&pageSize=4&type=LCTT&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 796,
+      "capturedAt": "2026-10-13T09:21:36.654Z",
+      "sha256": "b346e3791a7eb0c7191a48333cd3614060a582740d53fa3a618224b7e1bb70da"
+    },
+    {
+      "file": "HPG-CSTC-1.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/HPG?page=1&pageSize=4&type=CSTC&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 944,
+      "capturedAt": "2026-10-13T09:21:38.599Z",
+      "sha256": "7673079328a971d0edae94040cdc521283be8aac7b4fc1fb3000d4c7676beea3"
+    },
+    {
+      "file": "HPG-CSTC-2.json",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/HPG?page=2&pageSize=4&type=CSTC&unit=1000&termtype=1&languageid=1",
+      "status": 200,
+      "latencyMs": 798,
+      "capturedAt": "2026-10-13T09:21:40.398Z",
+      "sha256": "7bc600a1f8722ff1e5436e545e36e018472fafcc33479ae82e9bd0df8724855a"
+    },
+    {
+      "file": "HPG-vci-ratios.json",
+      "url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/HPG/statistics-financial",
+      "status": 200,
+      "latencyMs": 2292,
+      "capturedAt": "2026-10-13T09:21:43.691Z",
+      "sha256": "bb86e72884ff2de36fd56d0df2cfdca8a42663e2a3435c79bd50068765252822"
+    },
+    {
+      "file": "VNM-vci-balance.json",
+      "url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/VNM/financial-statement?section=BALANCE_SHEET",
+      "status": 200,
+      "latencyMs": 3547,
+      "capturedAt": "2026-10-13T09:39:19.048Z",
+      "sha256": "71d10fb2e74f3b16417882212f3ccf415eecdc37609e7b2cbe13981ed59e554a"
+    },
+    {
+      "file": "VNM-vci-income.json",
+      "url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/VNM/financial-statement?section=INCOME_STATEMENT",
+      "status": 200,
+      "latencyMs": 1946,
+      "capturedAt": "2026-10-13T09:39:20.995Z",
+      "sha256": "98dc3502fe5ccff2208158a50816df5897db2959a3bd42c75959489d45502883"
+    },
+    {
+      "file": "VNM-vci-cash.json",
+      "url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/VNM/financial-statement?section=CASH_FLOW",
+      "status": 200,
+      "latencyMs": 1077,
+      "capturedAt": "2026-10-13T09:39:22.072Z",
+      "sha256": "a0df03bb63e1b6cf8027e28c85c1486557308011c2e4e9ad1b41158e04d3906c"
+    }
+  ]
+}

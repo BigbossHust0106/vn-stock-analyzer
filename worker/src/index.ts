@@ -1,3 +1,4 @@
+import { financialResponse } from './api/financials';
 import { createClient } from '@supabase/supabase-js';
 import deployment from '../../config/public-deployment.json';
 import { marketResponse } from './api/market';
@@ -111,6 +112,8 @@ export default {
         { headers: { ...headers, 'Cache-Control': 'no-store' } },
       );
     }
+    const financial = await financialResponse(request, env, context);
+    if (financial) return financial;
     const market = await marketResponse(request, env, context);
     if (market) return market;
     if (url.pathname !== '/v1/quotes')

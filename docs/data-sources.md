@@ -212,3 +212,83 @@ Xem [API research 13/10/2026](api-research-2026-10-13.md) để có endpoint th�
 giới hạn sử dụng. Chạy `npm run verify:sources` để đối chiếu live KBS/Vietcap;
 REVIEW_NEEDED/exit 2 khi volume SHS lệch là phát hiện chất lượng dữ liệu, không PASS.
 Parser khảo sát cũ chỉ đọc; Phần 2 dùng adapter riêng có validate/provenance và lưu history basis unverified, không ghi vào bảng đã xác minh prices_daily.
+
+## Phần 3 — BCTC và chấm điểm (13/10/2026)
+
+**Chọn KBS cho BCTC năm, bổ sung Vietcap cho ROIC năm và số cổ phiếu.** VPS chưa
+có endpoint BCTC được xác nhận; `VpsProvider.fetchFinancials` báo thiếu capability.
+`DataProvider.fetchFinancials` dùng cùng interface với giá; `FUNDAMENTALS_PROVIDER=kbs`
+chọn adapter KBS, không có fallback ngầm. Chi tiết mô hình: [scoring-engine.md](scoring-engine.md).
+
+| Nguồn                                    | Ưu điểm                                                                                            | Hạn chế / trạng thái                                                                                                                                         |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| KBS KB Buddy                             | Nhãn tiếng Việt, metadata hợp nhất/kiểm toán/ngày công bố; không cần key trong các lần thử         | Endpoint web không chính thức; chỉ trả 4 năm trong khảo sát, trang 2 rỗng; có thể đổi/chặn; chưa đối chiếu toàn bộ PDF gốc                                   |
+| Vietcap IQ                               | Metadata chỉ tiêu, 8 năm BCTC VNM, ratios phân biệt RATIO_YEAR/RATIO_TTM; bổ sung ROIC/số cổ phiếu | Endpoint web không chính thức, không SLA; công thức ROIC do nhà cung cấp tính chưa đối chiếu định nghĩa vốn đầu tư; không đủ để chứng nhận corporate actions |
+| Báo cáo kiểm toán công ty / HOSE / HNX   | Tài liệu gốc và thuyết minh, ưu tiên để chứng nhận số liệu/Owner Earnings                          | PDF khác mẫu, cần trích xuất và đối chiếu thủ công; chưa có adapter PDF trong Phần 3                                                                         |
+| FiinQuant / nguồn thương mại có hợp đồng | Ứng viên xác nhận quyền sử dụng/phân phối, lịch sử và hỗ trợ                                       | Cần gói/credentials/hợp đồng; chưa gọi API authenticated và chưa khẳng định chi phí/SLA                                                                      |
+
+### Request được gọi thật trước khi tích hợp
+
+```text
+GET https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/{symbol}
+    ?page=1&pageSize=4&type={KQKD|CDKT|LCTT|CSTC}&unit=1000&termtype=1&languageid=1
+GET cùng URL, page=2 (Head rỗng trong cả 3 mã được thử)
+GET https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/{symbol}/statistics-financial
+GET https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/VNM/financial-statement
+    ?section={BALANCE_SHEET|INCOME_STATEMENT|CASH_FLOW}
+GET https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/VNM/financial-statement/metrics
+```
+
+Đã gọi KBS 4 loại × 2 trang và Vietcap ratios cho **VNM/FPT/HPG**, HTTP200.
+Mỗi mã có 4 kỳ 2022–2025. Không giả định `pageSize` lớn hơn trả thêm dữ liệu.
+Độ trễ từng request, thời điểm, URL và SHA256 nằm trong
+[manifest fixture thật](../fixtures/phase3/manifest.json); không phải SLA.
+Không xác minh được quota/rate limit của nhà cung cấp. Ứng dụng tự giới hạn 1 request/giây,
+cache toàn bộ BCTC 24 giờ mỗi isolate, tối đa 100 cache entries, retry/timeout theo
+`ProviderHttp`; lịch sử thử không chứng nhận mọi mã/sàn. Không đưa credentials/cookie vào fixture.
+
+### Mapping đã quan sát, không đoán từ mã chỉ tiêu
+
+KBS root `Unit` mô tả **hợp nhất/đơn lẻ/công ty mẹ**, không phải đơn vị tiền.
+`Head.ID` ánh xạ `Value1…Value4`, không dựa vào vị trí mảng Head. CSTC có nhiều nhóm
+Content, parser ghép tất cả nhóm và từ chối ID trùng, thiếu Value, kiểu sai, kỳ quý,
+nhãn/đơn vị đổi. Chỉ dùng `TermCode=N`, năm lịch 01–12, BCTC hợp nhất `HN`, kiểm toán `KT`.
+Không gọi báo cáo riêng lẻ là hợp nhất. Nếu thiếu kỳ/chỉ tiêu thì để null; không biến null thành 0.
+
+| Chỉ tiêu                               | ReportNormID / nguồn                                | Đơn vị / xử lý                                                                                                                           |
+| -------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Doanh thu thuần                        | KQKD 2216                                           | raw nghìn VND × 1000                                                                                                                     |
+| LNST tổng / công ty mẹ                 | KQKD 2212 / 2214                                    | raw nghìn VND × 1000, giữ số âm                                                                                                          |
+| EPS cơ bản năm                         | KQKD 2215, nhãn VNĐ                                 | **raw VND, không × 1000**; không dùng EPS TTM CSTC 53 hay EPS quý × 4                                                                    |
+| Vốn chủ / lợi ích CĐ không kiểm soát   | CDKT 2998 / 5320                                    | raw nghìn VND × 1000                                                                                                                     |
+| BVPS công ty mẹ                        | (2998 − 5320) × 1000 / số cổ phiếu cuối năm Vietcap | VND/CP; không lấy CSTC 54 vì mẫu VNM dùng tổng vốn gồm NCI                                                                               |
+| ROE / ROA năm                          | CSTC 45 ROEA / 47 ROAA                              | raw % / 100; vốn/tài sản bình quân theo nhà cung cấp                                                                                     |
+| Biên gộp / ròng                        | CSTC 41 / 44                                        | raw % / 100; ròng dùng LNST tổng/doanh thu                                                                                               |
+| Nợ vay/vốn chủ                         | CSTC 11                                             | raw % / 100; không thay bằng tổng nợ phải trả                                                                                            |
+| TS ngắn hạn / nợ ngắn hạn / nợ dài hạn | CDKT 3000 / 3014 / 3017                             | raw nghìn VND × 1000; nợ dài hạn là tổng liabilities, bảo thủ hơn chỉ nợ vay                                                             |
+| CFO / tiền chi đầu tư tài sản dài hạn  | LCTT 2234 / 2254                                    | raw nghìn VND × 1000; Capex là số dương sau đổi dấu dòng chi âm                                                                          |
+| FCF                                    | CFO − Capex                                         | VND; **không phải FCFE**, không điền `fcfe_vnd`                                                                                          |
+| Cổ tức/lợi nhuận đã trả                | LCTT 2266                                           | raw nghìn VND × 1000 rồi đổi dấu; số tiền cả tập đoàn, không là DPS hay tỷ suất cổ tức. Có NCI: tiêu chí cổ tức công ty mẹ thiếu dữ liệu |
+| Số cổ phiếu / ROIC                     | Vietcap `numberOfSharesMktCap` / `roic`             | dùng `ratioType=RATIO_YEAR`, `quarter=5` cùng năm; ROIC raw là fraction. Không thay ROIC bằng ROCE CSTC46                                |
+| Số cổ phiếu mới nhất                   | Vietcap ratios kỳ mới nhất đã kết thúc              | số CP; chưa xác nhận biến động sau kỳ mới nhất. Khác CP cuối năm: **tạm dừng EPS/BVPS/Graham định giá**                                  |
+
+Đối chiếu VNM2025: KBS doanh thu 63645886756 nghìn VND → 63645886756000 VND;
+Vietcap `isa3=63645886756227`, lệch 227 VND do thang raw KBS, nhỏ hơn 1000 VND.
+EPS cả hai **4028 VND**, khác EPS TTM CSTC53=4502,58.
+CFO=8668137049000 VND, Capex=1762010725000 VND, FCF=6906126324000 VND.
+BVPS mẹ=(34483015286000−3797632379000)/2089955445=**14682,314391 VND**,
+khác BVPS tổng vốn CSTC54=16499,4. Đây là đối chiếu endpoint, chưa kiểm toán PDF gốc.
+
+### Thời điểm, nguồn và phần còn thiếu
+
+`DatePubDepartment` chỉ được dùng như ngày công bố theo metadata, gán **cuối ngày
+Việt Nam** để bảo thủ vì không có timezone/giờ công bố được chứng nhận. Không dùng
+BCTC công bố sau thời điểm tính điểm. Dữ liệu hiện tại có hồi tố; **không dùng làm
+backtest point-in-time**. EPS/BVPS và số CP sau corporate actions cần đối chiếu thêm;
+không tự điều chỉnh EPS bằng cách lấy tỷ lệ số CP hoặc dùng lịch sử price basis unverified.
+
+Còn thiếu: PDF kiểm toán gốc cho mọi chỉ tiêu/mã, lịch cổ tức thông thường của công ty mẹ,
+phân tách maintenance/growth Capex, Owner Earnings/FCFE thuộc CĐ công ty mẹ, điểm thời
+thông báo và dữ liệu điều chỉnh sau chia tách, quota/quyền dùng lại/SLA của nguồn,
+mapping ngành ngân hàng/chứng khoán/bảo hiểm và năm tài chính khác năm lịch.
+Phần 3 không giả định các phần này đã được xác minh.

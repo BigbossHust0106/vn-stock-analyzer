@@ -30,7 +30,10 @@ function stock(value: unknown): value is MarketStock {
     typeof value.source === 'string'
   );
 }
-async function json(path: string, signal: AbortSignal): Promise<unknown> {
+export async function marketJson(
+  path: string,
+  signal: AbortSignal,
+): Promise<unknown> {
   const base =
     process.env.NEXT_PUBLIC_WORKER_URL ||
     (typeof window !== 'undefined' &&
@@ -53,7 +56,7 @@ export async function searchStocks(
 ): Promise<MarketStock[]> {
   const params = new URLSearchParams({ q: query });
   if (exchange) params.set('exchange', exchange);
-  const body = await json('/v1/stocks?' + params, signal);
+  const body = await marketJson('/v1/stocks?' + params, signal);
   if (!record(body) || !Array.isArray(body.data) || !body.data.every(stock))
     throw new Error('Danh mục trả về không hợp lệ.');
   return body.data;
@@ -62,7 +65,10 @@ export async function stockDetail(
   symbol: string,
   signal: AbortSignal,
 ): Promise<StockDetail> {
-  const body = await json('/v1/stocks/' + encodeURIComponent(symbol), signal);
+  const body = await marketJson(
+    '/v1/stocks/' + encodeURIComponent(symbol),
+    signal,
+  );
   if (
     !record(body) ||
     !stock(body.stock) ||

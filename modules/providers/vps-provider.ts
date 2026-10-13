@@ -70,6 +70,14 @@ export function validatedSymbols(symbols: readonly string[]): string[] {
   return [...new Set(symbols)].sort();
 }
 export class VpsProvider implements DataProvider {
+  async fetchFinancials(
+    symbol: string,
+  ): Promise<import('./financial-types').FinancialData> {
+    symbolValue(symbol);
+    throw new Error(
+      'VPS không có endpoint BCTC được xác minh; cấu hình FUNDAMENTALS_PROVIDER=kbs',
+    );
+  }
   private http: ProviderHttp;
   constructor(
     transport: typeof fetch = fetch,
