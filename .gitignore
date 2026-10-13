@@ -10,5 +10,5 @@ coverage/
 !.env.example
 *.tsbuildinfo
 *.log
-worker/.dev.vars
+.dev.vars*
 supabase/.temp/

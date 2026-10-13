@@ -13,6 +13,7 @@
   "scripts": {
     "dev:web": "npm run dev --workspace web",
     "dev:worker": "npm run dev --workspace worker",
+    "deploy:worker": "node scripts/wrangler.mjs deploy",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
     "format:check": "prettier --check .",

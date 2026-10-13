@@ -5,6 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "node ../scripts/wrangler.mjs dev --ip 127.0.0.1",
-    "build": "node ../scripts/wrangler.mjs deploy --dry-run --outdir dist"
+    "build": "node ../scripts/wrangler.mjs deploy --dry-run --outdir worker/dist"
   }
 }

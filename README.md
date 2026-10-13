@@ -131,11 +131,49 @@ node scripts/wrangler.mjs pages project create "$CF_PAGES_PROJECT" --production-
 node scripts/wrangler.mjs deploy
 ```
 
-Tên Worker mặc định `vn-stock-analyzer-api`, Cron trong `worker/wrangler.jsonc`.
+Tên Worker mặc định `vn-stock-analyzer`, Cron trong `wrangler.jsonc` ở gốc repo.
+Đây là cấu hình duy nhất cho CLI, workspace `worker/` và GitHub Actions; entrypoint
+`worker/src/index.ts` là API Worker. `npm run deploy:worker` chạy deploy từ root
+và đặt thư mục cache Wrangler cho môi trường hạn chế quyền ghi HOME.
 Tài khoản Cloudflare và quyền network cần sẵn có để các lệnh ghi này chạy. CI
 build/dry-run không tạo resource hay publish.
 
-3. Tạo Worker secrets qua CLI/dashboard, nhập giá trị an toàn khi CLI hỏi:
+### Nếu kết nối GitHub bằng Cloudflare Workers Builds
+
+Trong Workers & Pages → Worker `vn-stock-analyzer` → Settings → Build, cấu hình:
+
+| Thiết lập         | Giá trị                             |
+| ----------------- | ----------------------------------- |
+| Root directory    | Gốc repository (để trống hoặc `/`)  |
+| Production branch | `main`                              |
+| Build command     | `npm run build`                     |
+| Deploy command    | `npx wrangler deploy`               |
+| Node.js version   | `24` (biến build `NODE_VERSION=24`) |
+
+Lệnh deploy mặc định tìm `wrangler.jsonc` tại root, thay vì tự phát hiện ứng dụng
+ở gốc monorepo. Build vẫn biên dịch cả web và worker; deploy này chỉ phát hành
+API Worker. Kiểm tra trước từ root: `node scripts/wrangler.mjs deploy --dry-run`.
+Sau deploy, URL Worker `/health` trả hello world; `/v1/quotes` cần các secret Supabase
+bên dưới. Thông báo dry-run `No bindings found` không phải lỗi, vì repo không ghi
+giá trị secret vào config.
+
+Giao diện Next.js xuất ra `web/out`, cần dự án **Pages** riêng. Nếu tạo Pages bằng
+Git integration, chọn root repo, framework preset `None`,
+build `npm run build --workspace web`, output `web/out`, `NODE_VERSION=24` và nhánh `main`.
+Chọn một cơ chế CD cho mỗi ứng dụng: Workers Builds/Pages Git integration **hoặc**
+job deploy GitHub Actions bên dưới. Nếu dùng hoàn toàn Git integration, đặt
+repository variable `CF_DEPLOYMENT_MODE=git-integration` trong GitHub Actions
+để bỏ qua job `deploy`, giữ job `verify`; tránh hai pipeline cùng deploy một
+Worker/Pages. Bỏ trống biến này để dùng CD bằng Actions như mặc định.
+Workers Builds chạy build riêng; không chứng minh check `verify` đã xanh trên GitHub.
+
+Nếu đã lưu biến local vào `worker/.dev.vars`, chuyển file sang `.dev.vars` ở gốc
+repo: Wrangler đọc biến cạnh config. Cả hai vị trí và các biến thể `.dev.vars.*`
+đều bị Git ignore; không commit file này.
+
+### Secrets của Worker
+
+Tạo Worker secrets qua CLI/dashboard, nhập giá trị an toàn khi CLI hỏi:
 
 ```bash
 node scripts/wrangler.mjs secret put SUPABASE_URL
@@ -146,7 +184,7 @@ node scripts/wrangler.mjs secret put SUPABASE_SERVICE_ROLE_KEY
 `SUPABASE_SERVICE_ROLE_KEY` chỉ dùng trong scheduled handler ghi market data.
 Phần đọc public dùng publishable key. Secret runtime đã đặt được giữ khi deploy;
 workflow không in hay tự suy ra giá trị. Local đặt các tên Worker vào
-`worker/.dev.vars` (ignored). `.env.example` liệt kê tên, không chứa giá trị secret;
+`.dev.vars` ở gốc repo (ignored). `.env.example` liệt kê tên, không chứa giá trị secret;
 web nếu cần dùng biến public thì tạo `web/.env.local` (ignored). Không copy nguyên
 secret Worker sang biến `NEXT_PUBLIC_*`.
 
@@ -161,11 +199,12 @@ API VPS live không chạy trong CI. CD chưa tự áp dụng migration cloud; d
 
 Trong Settings → Secrets and variables → Actions, đặt:
 
-| Loại     | Tên                   | Dùng cho                           |
-| -------- | --------------------- | ---------------------------------- |
-| Secret   | CLOUDFLARE_API_TOKEN  | Deploy Worker/Pages                |
-| Secret   | CLOUDFLARE_ACCOUNT_ID | Chọn account                       |
-| Variable | CF_PAGES_PROJECT      | Pages project Direct Upload đã tạo |
+| Loại     | Tên                   | Dùng cho                                                      |
+| -------- | --------------------- | ------------------------------------------------------------- |
+| Secret   | CLOUDFLARE_API_TOKEN  | Deploy Worker/Pages                                           |
+| Secret   | CLOUDFLARE_ACCOUNT_ID | Chọn account                                                  |
+| Variable | CF_PAGES_PROJECT      | Pages project Direct Upload đã tạo                            |
+| Variable | CF_DEPLOYMENT_MODE    | `git-integration` bỏ qua CD Actions; để trống dùng CD Actions |
 
 Bật Actions, thiết lập environment `production` chỉ cho nhánh `main`. Không cần
 Supabase service key trong GitHub Actions vì migration CI dùng container và key
@@ -188,7 +227,8 @@ Git client/HUSKY=0; ruleset + CI là lớp bắt buộc ở server.
 
 ```text
 web/                  Next.js app + ui, static export
-worker/               Workers API, news scaffold, wrangler Cron
+worker/               Workers API, news scaffold, bundle dist/
+wrangler.jsonc        Cấu hình Worker/Cron dùng chung, CLI deploy từ root
 modules/providers/    DataProvider, VpsProvider, wire types/validation
 modules/strategies/   Công thức + kiểm tra đầu vào, chưa có chiến lược production
 modules/scoring/      Biên an toàn; chưa tạo score model

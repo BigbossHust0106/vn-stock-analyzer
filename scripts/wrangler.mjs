@@ -11,7 +11,7 @@ const child = spawn(
   ),
   process.argv.slice(2),
   {
-    cwd: fileURLToPath(new URL('../worker', import.meta.url)),
+    cwd: root,
     env: {
       ...process.env,
       XDG_CONFIG_HOME: config,

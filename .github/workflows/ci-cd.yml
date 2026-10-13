@@ -41,7 +41,7 @@ jobs:
   deploy:
     name: deploy
     needs: verify
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.CF_DEPLOYMENT_MODE != 'git-integration'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: production
@@ -69,12 +69,12 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CF_PAGES_PROJECT"
       - name: Deploy Workers API and Cron
-        run: node scripts/wrangler.mjs deploy
+        run: npm run deploy:worker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - name: Deploy static Next.js to Pages
-        run: node scripts/wrangler.mjs pages deploy ../web/out --project-name "$CF_PAGES_PROJECT" --branch main
+        run: node scripts/wrangler.mjs pages deploy web/out --project-name "$CF_PAGES_PROJECT" --branch main
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

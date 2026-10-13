@@ -87,3 +87,46 @@ coverage tài chính về 0%. Không hạ threshold hay bỏ assertion; quote gl
 chạy lại đầy đủ 37 unit tests. Lệnh live dùng Node 24 --use-env-proxy, giữ TLS.
 Live đối soát ghi REVIEW_NEEDED với SHS (volume lệch 5603); không đổi fixture
 để hai nguồn khớp và không đưa dữ liệu còn thiếu basis vào ứng dụng.
+
+## Sửa Cloudflare Workers Builds — 13/10/2026
+
+Đã chạy `npm run verify` với 9/9 PASS trước lượt tự review này. Log đầy đủ,
+nguyên văn của lần chạy đó được lưu tại
+[verification-cloudflare-2026-10-13.txt](verification-cloudflare-2026-10-13.txt).
+37 unit tests và 14 provider tests PASS, 1 TODO `lastVolume` theo yêu cầu;
+coverage statements/functions/lines 100%, branches 97.75%.
+
+Nguyên nhân trong log người dùng: build workspace thành công nhưng deploy mặc
+định `npx wrangler deploy` ở root không tìm thấy config trong `worker/`, đi vào
+auto-detection monorepo và lỗi. Tên config cũng khác tên Worker mà Workers Builds
+truyền vào. Chuyển config duy nhất sang root, khai báo rõ entrypoint
+`worker/src/index.ts` và tên `vn-stock-analyzer`. Wrapper cũng chạy từ root.
+
+Tự review đã kiểm tra các tác động của việc chuyển config:
+
+- Đường dẫn bundle vẫn là `worker/dist`; Pages dùng `web/out`, không còn
+  `../web/out` sau khi đổi thư mục làm việc của wrapper.
+- Secret local được đọc cạnh config mới tại root `.dev.vars`. `git check-ignore`
+  xác nhận cả `.dev.vars`, `.dev.vars.production` và `worker/.dev.vars` bị ignore.
+  Không sao chép secret vào source, không đổi quyền RLS hay public API.
+- `CF_DEPLOYMENT_MODE=git-integration` bỏ qua CD Actions khi dùng hoàn toàn
+  Cloudflare Git integration, giữ check `verify`. Mặc định CD Actions vẫn cần
+  verify PASS trước deploy. Biến này chưa được đặt trong GitHub từ môi trường local.
+- Không thay đổi công thức, đáp án test, schema, mapping nguồn dữ liệu hay lịch
+  Cron. Checklist tài chính/bảo mật/múi giờ ở trên tiếp tục áp dụng; dữ liệu thiếu
+  và lịch phiên chưa xác minh vẫn bị chặn như trước.
+
+Kiểm tra bổ sung đã chạy thật:
+
+- `npx --no-install wrangler deploy --dry-run --outdir worker/dist` từ root:
+  exit 0, không còn lỗi monorepo. Đặt XDG cache trong repo để không ghi HOME.
+- Cùng lệnh với `WRANGLER_CI_OVERRIDE_NAME=vn-stock-analyzer`: exit 0,
+  không còn cảnh báo Worker name mismatch. Chỉ còn cảnh báo proxy của môi trường.
+- `npm run smoke`: HTTP 200 đúng nội dung cho cả web và Worker; API input sai
+  trả 400, thiếu Supabase trả 503. Không dùng secret production.
+
+Chưa xác minh: deploy thật ở account Cloudflare, secret runtime và lần chạy
+Actions sau push. Dry-run không chứng minh đã phát hành. Worker là API; giao diện
+Next.js cần Pages riêng theo README. Nếu đã có Worker tên cũ
+`vn-stock-analyzer-api`, phải cấu hình secrets cho Worker `vn-stock-analyzer`;
+secret không tự chuyển giữa hai Worker khác tên.
