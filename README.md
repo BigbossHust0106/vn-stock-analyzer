@@ -164,7 +164,9 @@ Chọn một cơ chế CD cho mỗi ứng dụng: Workers Builds/Pages Git integ
 job deploy GitHub Actions bên dưới. Nếu dùng hoàn toàn Git integration, đặt
 repository variable `CF_DEPLOYMENT_MODE=git-integration` trong GitHub Actions
 để bỏ qua job `deploy`, giữ job `verify`; tránh hai pipeline cùng deploy một
-Worker/Pages. Bỏ trống biến này để dùng CD bằng Actions như mặc định.
+Worker/Pages. Để dùng CD Actions, bỏ trống biến mode và cấu hình `CF_PAGES_PROJECT`
+cùng token/Account ID bên dưới. Chưa đặt Pages project thì job `deploy` SKIPPED;
+job `verify` vẫn chạy đầy đủ, không bỏ qua kiểm thử để CI xanh.
 Workers Builds chạy build riêng; không chứng minh check `verify` đã xanh trên GitHub.
 
 Nếu đã lưu biến local vào `worker/.dev.vars`, chuyển file sang `.dev.vars` ở gốc
@@ -192,8 +194,9 @@ secret Worker sang biến `NEXT_PUBLIC_*`.
 
 Workflow `.github/workflows/ci-cd.yml` chạy mọi pull request và push main:
 `npm ci` → cài Gitleaks → `npm run verify` → smoke. Artifact giữ log/coverage và
-static web đã build. Job deploy **needs verify**, chỉ push `main`, triển khai Worker
-rồi Pages từ artifact đó. PR không nhận deployment secrets và không deploy.
+static web đã build. Job deploy **needs verify**, chỉ push `main` khi đã cấu hình
+`CF_PAGES_PROJECT` và không chọn mode `git-integration`, triển khai Worker rồi Pages
+từ artifact đó. PR không nhận deployment secrets và không deploy.
 API VPS live không chạy trong CI. CD chưa tự áp dụng migration cloud; dùng db push
 được review trước khi deploy phiên bản cần schema mới.
 
@@ -208,7 +211,9 @@ Trong Settings → Secrets and variables → Actions, đặt:
 
 Bật Actions, thiết lập environment `production` chỉ cho nhánh `main`. Không cần
 Supabase service key trong GitHub Actions vì migration CI dùng container và key
-runtime nằm ở Cloudflare. Job deploy sẽ lỗi rõ khi thiếu token/account/project.
+runtime nằm ở Cloudflare. Job deploy SKIPPED khi chưa đặt Pages project hoặc đã chọn
+Git integration; khi đã bật CD Actions bằng Pages project, job sẽ lỗi rõ nếu thiếu
+token/account. Không coi job deploy SKIPPED là bằng chứng đã phát hành lên Cloudflare.
 
 **Workflow không tự chặn merge.** Trong Settings → Rules → Rulesets tạo branch
 ruleset cho `main`: require pull request, require status checks, chọn check

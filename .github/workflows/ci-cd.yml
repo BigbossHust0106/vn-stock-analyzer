@@ -41,7 +41,7 @@ jobs:
   deploy:
     name: deploy
     needs: verify
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.CF_DEPLOYMENT_MODE != 'git-integration'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.CF_DEPLOYMENT_MODE != 'git-integration' && vars.CF_PAGES_PROJECT != ''
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: production

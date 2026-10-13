@@ -112,6 +112,8 @@ Tự review đã kiểm tra các tác động của việc chuyển config:
 - `CF_DEPLOYMENT_MODE=git-integration` bỏ qua CD Actions khi dùng hoàn toàn
   Cloudflare Git integration, giữ check `verify`. Mặc định CD Actions vẫn cần
   verify PASS trước deploy. Biến này chưa được đặt trong GitHub từ môi trường local.
+  CD Actions chỉ bật khi có `CF_PAGES_PROJECT`; chưa cấu hình project thì job deploy
+  SKIPPED, các bước verify/migration/RLS/coverage vẫn bắt buộc.
 - Không thay đổi công thức, đáp án test, schema, mapping nguồn dữ liệu hay lịch
   Cron. Checklist tài chính/bảo mật/múi giờ ở trên tiếp tục áp dụng; dữ liệu thiếu
   và lịch phiên chưa xác minh vẫn bị chặn như trước.
@@ -130,3 +132,11 @@ Actions sau push. Dry-run không chứng minh đã phát hành. Worker là API; 
 Next.js cần Pages riêng theo README. Nếu đã có Worker tên cũ
 `vn-stock-analyzer-api`, phải cấu hình secrets cho Worker `vn-stock-analyzer`;
 secret không tự chuyển giữa hai Worker khác tên.
+
+Sau push đầu tiên, đã đọc được Actions run `38332384545` của commit trước đó:
+job `verify` success; job `deploy` fail ở Check deployment configuration do cả
+token, Account ID và Pages project rỗng. Đây là lỗi cấu hình CD ngoài CI test,
+không phải test bị bỏ qua. Thêm điều kiện Pages project để CD chưa cấu hình không
+làm đỏ CI khi người dùng đang dùng Workers Builds. API đọc repository variables/
+secrets trả HTTP 403 Resource not accessible by integration, nên chưa thay đổi
+setting nào trong GitHub; không yêu cầu đưa credential vào chat hay source.
