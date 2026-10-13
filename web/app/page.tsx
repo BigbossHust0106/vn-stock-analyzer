@@ -1,4 +1,5 @@
 import { Disclaimer } from '../ui/disclaimer';
+import { ConnectionStatus } from '../ui/connection-status';
 
 export default function Home() {
   return (
@@ -11,6 +12,7 @@ export default function Home() {
         Bộ khung ứng dụng đã sẵn sàng. Chưa có dữ liệu thị trường được xác minh.
       </p>
       <Disclaimer />
+      <ConnectionStatus />
     </main>
   );
 }

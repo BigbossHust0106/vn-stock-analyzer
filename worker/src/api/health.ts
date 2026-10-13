@@ -7,6 +7,7 @@ export function healthResponse() {
     },
     {
       headers: {
+        'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'no-store',
         'X-Content-Type-Options': 'nosniff',
       },

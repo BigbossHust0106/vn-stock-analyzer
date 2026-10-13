@@ -140,3 +140,52 @@ không phải test bị bỏ qua. Thêm điều kiện Pages project để CD ch
 làm đỏ CI khi người dùng đang dùng Workers Builds. API đọc repository variables/
 secrets trả HTTP 403 Resource not accessible by integration, nên chưa thay đổi
 setting nào trong GitHub; không yêu cầu đưa credential vào chat hay source.
+
+## Nối project Supabase và Workers API — 13/10/2026
+
+Đã chạy `npm run verify`: 9/9 PASS, 52 unit tests + 14 provider tests PASS,
+1 TODO lastVolume theo yêu cầu; coverage tài chính giữ nguyên
+100% statements/functions/lines, 97.75% branches. Log nguyên văn và bảng live:
+[verification-connections-2026-10-13.txt](verification-connections-2026-10-13.txt).
+
+Tự review sau verify:
+
+- Không đổi công thức, đáp án, migration/RLS, múi giờ hoặc điều kiện lịch Cron.
+  URL công khai được người dùng cung cấp nằm trong config; không đoán endpoint
+  thị trường, không seed fixture vào Supabase thật.
+- Không hard-code publishable key thật hay service key. File local public config
+  chỉ dùng cho probe CLI nằm trong `.cache/connection.env`, đã xác nhận Git ignore.
+  Gitleaks source và lịch sử đều PASS; frontend không tham chiếu service role.
+- `/health` trước đó thiếu CORS, đã thêm và kiểm tra. `/v1/public-config` chỉ trả
+  hai trường công khai, chặn secret/service_role bị đặt nhầm; có test chứng minh
+  service key không xuất hiện trong body, response lỗi không echo credential.
+- Không thêm plaintext Wrangler var trùng với secret Supabase đã đặt ở dashboard;
+  dùng URL mặc định từ config với env override để tránh xung đột khi deploy.
+- Browser gửi publishable key bằng header `apikey`; `sb_publishable_*` không phải
+  JWT nên không dùng Bearer key. Test kiểm tra header, chỉ GET và chỉ bảng thị trường.
+- Health 200 không đại diện schema/quotes đã hoạt động. Test schema thiếu, HTTP 200
+  với body sai cấu trúc, bảng rỗng, URL hỏng, transport error. Snapshot object/array
+  cần thời gian hợp lệ và giá dương; `{}`, null hoặc thiếu giá không báo có snapshot.
+- UI không fetch live trong static build; chỉ khi nhấn nút. Live probe là lệnh riêng,
+  không nằm trong verify/CI. Không hiển thị raw lỗi upstream hay credential.
+
+Đã gọi thật Supabase bằng publishable key người dùng cung cấp: ba bảng
+`stocks`, `prices_current`, `trading_sessions` trả HTTP 404 `PGRST205`.
+Điều này chứng minh Data API chưa tìm thấy bảng trong schema cache; chưa chứng minh
+bảng chắc chắn không tồn tại ở database. Cần migration hoặc kiểm tra expose/cache.
+Probe ban đầu dùng client urllib mặc định bị Cloudflare HTTP 403/code 1010;
+thử lại với User-Agent định danh `vn-stock-analyzer/0.1 connection-check` và TLS
+chuẩn nhận `/health` 200, quotes 502. Không giả browser hay tắt TLS.
+`npm run verify:connections` thực sự exit 1: Worker PASS, Supabase/quotes FAIL.
+
+Môi trường không có credential quản trị Supabase/Cloudflare hoặc binding tương ứng;
+Wrangler `whoami` xác nhận chưa authenticated. Đã lưu yêu cầu secure secret
+`SUPABASE_ACCESS_TOKEN` (api.supabase.com), `CLOUDFLARE_API_TOKEN`
+(api.cloudflare.com), biến Account ID và project ref vào bản nháp môi trường.
+Chưa chạy migration hosted hay ghi secret runtime qua API. Việc lưu yêu cầu không
+cấp quyền, không áp dụng runtime hay publish. Git integration có thể triển khai
+code sau push; phải kiểm tra endpoint thật sau build trước khi khẳng định đã deploy.
+
+Kết nối tổng thể chưa hoàn tất vì probe live còn FAIL. UI không có đăng nhập hay
+dashboard phân tích ở Phần 1; nút kiểm tra nằm ở giao diện Pages, URL workers.dev
+là API riêng. Cần quyền quản trị và migration hosted để tiếp tục phần còn lại.

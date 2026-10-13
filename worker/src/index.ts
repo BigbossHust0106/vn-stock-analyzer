@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import deployment from '../../config/public-deployment.json';
 import { healthResponse } from './api/health';
 import { canIngest, vietnamDate } from '../../modules/market/calendar';
 import {
@@ -12,9 +13,10 @@ export interface Env {
 }
 
 export async function ingest(env: Env, timestamp: number): Promise<void> {
-  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY)
+  const supabaseUrl = env.SUPABASE_URL || deployment.supabaseUrl;
+  if (!env.SUPABASE_SERVICE_ROLE_KEY)
     throw new Error('Thiếu cấu hình Supabase');
-  const db = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+  const db = createClient(supabaseUrl, env.SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
   const { data: session, error: sessionError } = await db
@@ -69,6 +71,7 @@ export async function ingest(env: Env, timestamp: number): Promise<void> {
 export default {
   async fetch(request: Request, env: Env = {}): Promise<Response> {
     const url = new URL(request.url);
+    const supabaseUrl = env.SUPABASE_URL || deployment.supabaseUrl;
     const headers = {
       'Access-Control-Allow-Origin': '*',
       'X-Content-Type-Options': 'nosniff',
@@ -79,6 +82,26 @@ export default {
         { status: 405, headers: { ...headers, Allow: 'GET' } },
       );
     if (url.pathname === '/health') return healthResponse();
+    if (url.pathname === '/v1/public-config') {
+      // Publishable keys được phép dùng trong browser. Chặn secret/service_role
+      // dù người vận hành vô tình đặt nhầm vào biến publishable.
+      if (
+        !/^sb_publishable_[A-Za-z0-9_-]+$/.test(
+          env.SUPABASE_PUBLISHABLE_KEY ?? '',
+        )
+      )
+        return Response.json(
+          { error: 'Cấu hình công khai chưa sẵn sàng' },
+          { status: 503, headers: { ...headers, 'Cache-Control': 'no-store' } },
+        );
+      return Response.json(
+        {
+          supabaseUrl,
+          supabasePublishableKey: env.SUPABASE_PUBLISHABLE_KEY,
+        },
+        { headers: { ...headers, 'Cache-Control': 'no-store' } },
+      );
+    }
     if (url.pathname !== '/v1/quotes')
       return Response.json(
         { error: 'Không tìm thấy' },
@@ -95,14 +118,14 @@ export default {
         { status: 400, headers },
       );
     }
-    if (!env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY)
+    if (!env.SUPABASE_PUBLISHABLE_KEY)
       return Response.json(
         { error: 'Nguồn dữ liệu chưa được cấu hình' },
         { status: 503, headers },
       );
     // Requests công khai chỉ dùng publishable key: không dùng service_role để đọc dữ liệu người dùng.
     try {
-      const db = createClient(env.SUPABASE_URL, env.SUPABASE_PUBLISHABLE_KEY, {
+      const db = createClient(supabaseUrl, env.SUPABASE_PUBLISHABLE_KEY, {
         auth: { persistSession: false, autoRefreshToken: false },
       });
       const { data, error } = await db

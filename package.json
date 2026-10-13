@@ -23,6 +23,7 @@
     "build": "npm run build --workspace web && npm run build --workspace worker",
     "verify": "node scripts/verify.mjs",
     "verify:live": "node --use-env-proxy --import tsx scripts/verify-live.ts",
+    "verify:connections": "node --use-env-proxy --env-file-if-exists=.cache/connection.env --import tsx scripts/verify-connections.ts",
     "verify:migrations": "node scripts/database.mjs migrations",
     "verify:rls": "node scripts/database.mjs rls",
     "verify:secrets": "node scripts/secrets.mjs",

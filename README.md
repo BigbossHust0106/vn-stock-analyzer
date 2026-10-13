@@ -43,6 +43,49 @@ Không có endpoint HTTP cho service_role hay thao tác private ở Phần 1.
 `npm run smoke` tự khởi động/dừng hai dịch vụ ở port 3100/8788 và kiểm tra nội dung
 HTTP thật. Nó yêu cầu port trống và không dừng dịch vụ đã có của người dùng.
 
+### Project Supabase và Worker đã chọn
+
+URL mặc định được lưu trong `config/public-deployment.json`:
+
+- Supabase: `https://aszceahzutkhqfpyclev.supabase.co`.
+- Workers API: `https://vn-stock-analyzer.manhhuong.workers.dev`.
+
+Đây là URL công khai, không phải credential. `SUPABASE_URL` ở Worker có thể ghi đè
+URL mặc định. Publishable key vẫn lấy từ biến `SUPABASE_PUBLISHABLE_KEY` đã đặt
+trong Cloudflare; không ghi key thật vào source hay `.env.example`.
+Không khai báo thêm Wrangler plaintext var trùng tên secret đã có trong dashboard.
+
+Trang chủ có nút **Kiểm tra kết nối**. Nó kiểm tra health Worker, khả năng đọc ba
+bảng thị trường công khai ở Supabase và đọc snapshot ACB qua Worker. Health xanh
+không biến lỗi database thành PASS; bảng rỗng không được mô tả là đã có giá.
+Không truy vấn watchlist/cảnh báo/cài đặt cá nhân và không ghi dữ liệu.
+
+`GET /v1/public-config` trả URL Supabase và publishable key từ Worker, có CORS và
+`Cache-Control: no-store`. Chỉ chấp nhận key `sb_publishable_*`; service_role,
+`sb_secret_*` hoặc key thiếu trả 503, không xuất key. Publishable key được thiết kế
+để công khai cho browser; bảo vệ dữ liệu riêng vẫn bằng RLS. Nếu trước đây Worker
+dùng legacy anon JWT, thay biến publishable bằng publishable key mới trong dashboard.
+Secret service_role chỉ dành cho Cron, không có trong endpoint này.
+
+Pages không cần copy key vào biến build: browser lấy public config lúc kiểm tra.
+Có thể ghi đè bằng `NEXT_PUBLIC_WORKER_URL`, hoặc cặp `NEXT_PUBLIC_SUPABASE_URL` /
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` trong build environment. Biến Next public
+được đóng vào bundle lúc build, đổi biến cần build lại; tuyệt đối không đặt service
+role/secret key vào `NEXT_PUBLIC_*`.
+
+`npm run verify:connections` gọi thật Supabase/Worker, là lệnh read-only ngoài CI.
+Để kiểm tra project trực tiếp trước khi endpoint public-config được deploy, đặt
+các biến public vào file local ignored `.cache/connection.env` (hoặc export biến
+tương ứng); lệnh không in key hay raw payload. Exit 1 khi kết nối/schema lỗi,
+không coi lỗi live là PASS chỉ vì unit tests xanh.
+
+Kết quả live ngày 13/10/2026 trước thay đổi này: Supabase nhận publishable key nhưng
+Data API trả `PGRST205` cho `stocks`, `prices_current`, `trading_sessions`;
+Worker health HTTP 200, quotes HTTP 502. Cần áp dụng migration bằng CLI ở phần
+Supabase bên dưới hoặc kiểm tra bảng đã được expose/schema cache. Không seed fixture
+vào database production. Môi trường Codex chưa có quyền quản trị hai dịch vụ;
+việc kết nối chúng trong dashboard của bạn không tự cấp credential cho Codex.
+
 ## Lệnh verify bắt buộc
 
 `npm run verify` chạy **tuần tự**, dừng khi bước đầu tiên thất bại, trả exit code
