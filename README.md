@@ -5,6 +5,7 @@ Supabase PostgreSQL/Auth/RLS và GitHub Actions. Chỉ hỗ trợ thị trườn
 (HOSE/HNX/UPCOM). Chỉ mang tính tham khảo, không phải lời khuyên đầu tư.
 
 Kiến trúc và sơ đồ Mermaid: [docs/architecture.md](docs/architecture.md).
+Khảo sát nguồn bổ sung và endpoint đã gọi thật: [API research 13/10/2026](docs/api-research-2026-10-13.md).
 Nguồn VPS, tất cả 57 trường và mức độ xác minh:
 [docs/data-sources.md](docs/data-sources.md).
 
@@ -80,7 +81,11 @@ hiện tại không cần credential theo nguồn người dùng xác nhận; kh
 Provider dùng `VPS_LOT_SIZE=10` (config có version trong repo) chỉ cho `lot`;
 ACB 796910 → 7.969.100 cổ phiếu, đã xác minh 1 mã/ngày, cần đối chiếu thêm.
 `lastVolume` giữ nguyên, có test pending, không dùng scoring/rankings.
-Không có live check OHLCV hoặc báo cáo tài chính vì chưa có nguồn xác nhận.
+Có `npm run verify:sources` đọc-only đối chiếu bar KBS/Vietcap trên 4 mã/1 phiên.
+Lệnh dùng proxy môi trường Node 24, chạy riêng ngoài CI, không ghi Supabase hay
+tự đổi provider; exit 2 khi có khác biệt (SHS volume), exit 1 khi mạng/schema lỗi.
+Ví dụ đổi phiên/mã: `SOURCE_PROBE_DATE=2026-10-12 SOURCE_PROBE_SYMBOLS=ACB npm run verify:sources`.
+Nguồn BCTC mới có payload thật, mapping/đơn vị chưa xác minh; chưa ingest/scoring.
 
 ## Supabase
 
@@ -196,7 +201,8 @@ scripts/              Verify tuần tự, smoke, database, Gitleaks, Wrangler wr
 docs/                 Kiến trúc, nguồn dữ liệu và kết quả review
 ```
 
-Giới hạn hiện tại: nguồn lịch sử/fundamentals/tin tức chưa xác nhận; lot × 10 mới đối chiếu ACB một ngày; đơn vị lastVolume
+Giới hạn hiện tại: KBS/Vietcap có bar/BCTC mẫu thật, nhưng contract production,
+price basis và mapping tài chính chưa xác minh; tin tức chưa có nguồn; lot × 10 mới đối chiếu ACB một ngày; đơn vị lastVolume
 và timestamp sàn chưa rõ; app chỉ hello world, chưa có màn hình phân tích. Xem
 `docs/data-sources.md`. Không mô tả CI trên GitHub, hosted migration hay deploy
 thành công nếu chỉ chạy các kiểm thử local.

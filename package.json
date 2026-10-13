@@ -17,17 +17,18 @@
     "lint": "eslint . --max-warnings 0",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
-    "test": "vitest run --coverage --exclude tests/providers/**",
+    "test": "vitest run --coverage --exclude 'tests/providers/**'",
     "test:provider": "vitest run tests/providers",
     "build": "npm run build --workspace web && npm run build --workspace worker",
     "verify": "node scripts/verify.mjs",
-    "verify:live": "tsx scripts/verify-live.ts",
+    "verify:live": "node --use-env-proxy --import tsx scripts/verify-live.ts",
     "verify:migrations": "node scripts/database.mjs migrations",
     "verify:rls": "node scripts/database.mjs rls",
     "verify:secrets": "node scripts/secrets.mjs",
     "tools:install": "bash scripts/install-tools.sh",
     "prepare": "husky",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "verify:sources": "node --use-env-proxy --import tsx scripts/probe-data-sources.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.3",

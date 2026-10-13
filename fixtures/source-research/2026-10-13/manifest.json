@@ -1,0 +1,149 @@
+{
+  "captured_date": "2026-10-13",
+  "target_session": "2026-10-12",
+  "not_for_production_ingestion": true,
+  "scope": "Four symbols, one session; adjustment basis and volume definitions not certified; no authorization headers/cookies saved",
+  "evidence": [
+    {
+      "file": "kbs-FPT.json",
+      "sha256": "23ac9e567ef2560cb7ee8776009a460caf20771fa9b305437cce170cb043cddb",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stocks/FPT/data_day",
+      "method": "GET",
+      "query": {
+        "sdate": "12-10-2026",
+        "edate": "12-10-2026"
+      },
+      "payload": null,
+      "http_status": 200,
+      "kind": "historical_daily_bar"
+    },
+    {
+      "file": "kbs-QNS.json",
+      "sha256": "747d7ed079655ddd86b01f41079d6e33b6955dd32fdec419c2727adc936efc64",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stocks/QNS/data_day",
+      "method": "GET",
+      "query": {
+        "sdate": "12-10-2026",
+        "edate": "12-10-2026"
+      },
+      "payload": null,
+      "http_status": 200,
+      "kind": "historical_daily_bar"
+    },
+    {
+      "file": "kbs-SHS.json",
+      "sha256": "6f8acf4b77766e642f108aad5f84e22e2b75390dff6cd61951ce37afe5a153a6",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stocks/SHS/data_day",
+      "method": "GET",
+      "query": {
+        "sdate": "12-10-2026",
+        "edate": "12-10-2026"
+      },
+      "payload": null,
+      "http_status": 200,
+      "kind": "historical_daily_bar"
+    },
+    {
+      "file": "kbs-current.json",
+      "sha256": "fc3c18a7341f60c2f6686ed151d6131b45a5cf9c1d635cddf920c137b521adbc",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/iss",
+      "method": "POST",
+      "query": null,
+      "payload": {
+        "code": "ACB,FPT,SHS,QNS"
+      },
+      "http_status": 200,
+      "kind": "pre_session_quote"
+    },
+    {
+      "file": "kbs-ohlc.json",
+      "sha256": "2583f31dda0e9a7ae988efbf4a7820673aa2d4c94ec4611c7bc10055841b334d",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stocks/ACB/data_day",
+      "method": "GET",
+      "query": {
+        "sdate": "12-10-2026",
+        "edate": "12-10-2026"
+      },
+      "payload": null,
+      "http_status": 200,
+      "kind": "historical_daily_bar"
+    },
+    {
+      "file": "ssi-ohlc.json",
+      "sha256": "75965e209dc26ce079278b3470999f2e1a8e874de843c898aa210b86848c9de3",
+      "url": "https://fc-data.ssi.com.vn/api/v2/Market/DailyOhlc",
+      "method": "GET",
+      "query": {
+        "symbol": "ACB",
+        "fromDate": "12/10/2026",
+        "toDate": "12/10/2026",
+        "pageIndex": 1,
+        "pageSize": 10,
+        "ascending": true
+      },
+      "payload": null,
+      "http_status": 200,
+      "kind": "auth_error"
+    },
+    {
+      "file": "vci-FPT.json",
+      "sha256": "1a7ac5a7066bfb8c7d2db2aee0c03bb9838358824739fb3f959620b525567839",
+      "url": "https://trading.vietcap.com.vn/api/chart/OHLCChart/gap-chart",
+      "method": "POST",
+      "query": null,
+      "payload": {
+        "timeFrame": "ONE_DAY",
+        "symbols": ["FPT"],
+        "to": 1791824400,
+        "countBack": 2
+      },
+      "http_status": 200,
+      "kind": "historical_daily_bar"
+    },
+    {
+      "file": "vci-QNS.json",
+      "sha256": "df56b760d078cd8e6eac59c6ec647bc518f016aa0f50b8fe3373205a6d494fbc",
+      "url": "https://trading.vietcap.com.vn/api/chart/OHLCChart/gap-chart",
+      "method": "POST",
+      "query": null,
+      "payload": {
+        "timeFrame": "ONE_DAY",
+        "symbols": ["QNS"],
+        "to": 1791824400,
+        "countBack": 2
+      },
+      "http_status": 200,
+      "kind": "historical_daily_bar"
+    },
+    {
+      "file": "vci-SHS.json",
+      "sha256": "d5434d68c94043b16c2b002745797ecf1a000d2120b02b4b6c6ac6f292240e5a",
+      "url": "https://trading.vietcap.com.vn/api/chart/OHLCChart/gap-chart",
+      "method": "POST",
+      "query": null,
+      "payload": {
+        "timeFrame": "ONE_DAY",
+        "symbols": ["SHS"],
+        "to": 1791824400,
+        "countBack": 2
+      },
+      "http_status": 200,
+      "kind": "historical_daily_bar"
+    },
+    {
+      "file": "vci-ohlc.json",
+      "sha256": "20c4fe35c84ef81ada9a0770442f8f1ce4ba93433eeb6a74481d74abed971b5a",
+      "url": "https://trading.vietcap.com.vn/api/chart/OHLCChart/gap-chart",
+      "method": "POST",
+      "query": null,
+      "payload": {
+        "timeFrame": "ONE_DAY",
+        "symbols": ["ACB"],
+        "to": 1791824400,
+        "countBack": 5
+      },
+      "http_status": 200,
+      "kind": "historical_daily_bar"
+    }
+  ]
+}

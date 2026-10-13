@@ -1,4 +1,4 @@
-# Tự review Phần 1 trước bàn giao
+# Tự review Phần 1 trước bàn giao — 12/10/2026
 
 Đã chạy `npm run verify` trước khi review. Log nguyên văn lần chạy cuối:
 `.cache/verify.log`; summary có runId ở `.cache/verify-summary.json`.
@@ -75,3 +75,15 @@ Từ root repo: `npm ci`, `npm run tools:install`, `npm run verify`, `npm run sm
 `npm run verify:live` là kiểm tra riêng, không nằm trong CI. So raw log với summary,
 đọc coverage JSON riêng strategies/scoring; phân biệt PASS, FAIL và 1 TODO lastVolume.
 Xem README để migrate project do bạn sở hữu và bật required check `verify`.
+
+## Khảo sát bổ sung 13/10/2026
+
+Tình trạng nguồn ở báo cáo bên trên là thời điểm bàn giao Phần 1. Xem
+[API research 13/10/2026](api-research-2026-10-13.md) và docs/data-sources.md
+để biết endpoint KBS/Vietcap mới đã gọi thật và giới hạn chưa xác minh.
+Đã sửa lệnh test để quote glob `tests/providers/**`: khi có hai file provider,
+shell trước đây bung glob thành hai tham số và vô tình chỉ chạy test VPS, khiến
+coverage tài chính về 0%. Không hạ threshold hay bỏ assertion; quote glob giúp
+chạy lại đầy đủ 37 unit tests. Lệnh live dùng Node 24 --use-env-proxy, giữ TLS.
+Live đối soát ghi REVIEW_NEEDED với SHS (volume lệch 5603); không đổi fixture
+để hai nguồn khớp và không đưa dữ liệu còn thiếu basis vào ứng dụng.

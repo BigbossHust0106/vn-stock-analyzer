@@ -1,0 +1,4 @@
+{
+  "message": "Missing Authorization header",
+  "status": 401
+}

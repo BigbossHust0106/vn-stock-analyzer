@@ -14,7 +14,8 @@ cùng ngày. Chưa có timestamp sàn trong phản hồi; chưa đối chiếu n
 
 Mức "chắc chắn" ở đây là đối chiếu với số liệu bảng giá ACB do người dùng xác nhận,
 không phải kiểm chứng bằng một lần gọi mạng thành công của agent. Gọi thật trong
-cloud bị proxy từ chối CONNECT HTTP 403. Đã thêm domain vào bản nháp môi trường;
+cloud trong onboarding ngày 12/10/2026 bị proxy từ chối CONNECT HTTP 403.
+Khảo sát bổ sung 13/10/2026 gọi VPS nhận HTTP503. Đã thêm domain vào bản nháp môi trường;
 bản nháp chưa tự áp dụng vào mạng đang chạy. `npm run verify:live` tách riêng,
 không chạy trong CI.
 
@@ -131,10 +132,13 @@ không gọi VPS theo từng request người dùng.
 
 ## Còn thiếu
 
-1. Lịch sử OHLCV: **chưa có nguồn/endpoint xác nhận**; không suy ra OHLCV từ quote
-   hiện tại, không ghi snapshot vào `prices_daily`.
-2. Báo cáo tài chính, EPS năm/TTM, BVPS, FCFE và số cổ phiếu: **chưa có nguồn xác nhận**.
-   Bảng `fundamentals`, `scores`, `rankings` chỉ là hạ tầng ở Phần 1.
+1. Lịch sử OHLCV: đã tìm và gọi thật endpoint KBS/Vietcap trong khảo sát
+   [13/10/2026](api-research-2026-10-13.md). OHLC 4 mã khớp nhưng volume SHS lệch;
+   basis và quyền production chưa xác minh. Chưa có adapter ingest lịch sử,
+   không suy ra OHLCV từ quote hiện tại, không ghi snapshot vào `prices_daily`.
+2. BCTC ACB: đã nhận payload thật từ KBS và Vietcap (BALANCE_SHEET), chưa
+   xác minh mapping EPS năm/TTM, BVPS, FCFE, số cổ phiếu và đơn vị với báo cáo gốc.
+   Bảng `fundamentals`, `scores`, `rankings` vẫn chỉ là hạ tầng ở Phần 1.
 3. Đối chiếu thêm đơn vị lot ở nhiều mã/ngày/sàn; xác minh lastVolume,
    volume sổ lệnh, giá trị nước ngoài, timestamp phiên, mã sàn,
    quy ước marker, dữ liệu trước mở cửa/đấu giá/ngừng giao dịch/HNX/UPCOM/chứng quyền.
@@ -150,3 +154,11 @@ Các giá là nghìn VND. Bằng chứng khớp fixture O/H/L/lastPrice/r và h�
 Đây là bằng chứng **1 mã, 1 ngày**, chưa đại diện mọi sàn hay quy ước đấu giá.
 Không có số đối chiếu cho `lastVolume=1440`. Không sửa đáp án ACB trong test để
 khớp code; đáp án và hệ số ở test lấy từ bằng chứng này. Không tạo endpoint lịch sử.
+
+## Khảo sát nguồn bổ sung
+
+Xem [API research 13/10/2026](api-research-2026-10-13.md) để có endpoint thật,
+đối soát ACB/FPT/SHS/QNS, SSI chính thức cần credentials, ứng viên thương mại và
+giới hạn sử dụng. Chạy `npm run verify:sources` để đối chiếu live KBS/Vietcap;
+REVIEW_NEEDED/exit 2 khi volume SHS lệch là phát hiện chất lượng dữ liệu, không PASS.
+Parser khảo sát không tự đổi Cron/provider và không ghi dữ liệu chưa xác minh vào DB.

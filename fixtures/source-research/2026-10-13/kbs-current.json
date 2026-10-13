@@ -1,0 +1,82 @@
+[
+  {
+    "SB": "ACB",
+    "RE": 20450,
+    "CL": 21850,
+    "FL": 19050,
+    "FR": 390422231,
+    "FO": 1741326587,
+    "EX": "HOSE",
+    "MS": "K",
+    "IT": "08:14:52",
+    "CA": [
+      {
+        "SYMBOL": "ACB",
+        "NKHQ": null,
+        "REPORTDATE": null,
+        "T": null,
+        "DESCRIPTION": null
+      }
+    ]
+  },
+  {
+    "SB": "FPT",
+    "RE": 57100,
+    "CL": 61000,
+    "FL": 53200,
+    "FR": 355651677,
+    "FO": 840019946,
+    "EX": "HOSE",
+    "MS": "K",
+    "IT": "08:14:52",
+    "CA": [
+      {
+        "SYMBOL": "FPT",
+        "NKHQ": null,
+        "REPORTDATE": null,
+        "T": null,
+        "DESCRIPTION": null
+      }
+    ]
+  },
+  {
+    "SB": "SHS",
+    "RE": 11700,
+    "CL": 12800,
+    "FL": 10600,
+    "FR": 356716010,
+    "FO": 440736487,
+    "EX": "HNX",
+    "MS": "13",
+    "IT": "08:14:52",
+    "CA": [
+      {
+        "SYMBOL": "SHS",
+        "NKHQ": null,
+        "REPORTDATE": null,
+        "T": null,
+        "DESCRIPTION": null
+      }
+    ]
+  },
+  {
+    "SB": "QNS",
+    "RE": 50800,
+    "CL": 58400,
+    "FL": 43200,
+    "FR": 149584794,
+    "FO": 183824076,
+    "EX": "UPCOM",
+    "MS": "13",
+    "IT": "08:14:52",
+    "CA": [
+      {
+        "SYMBOL": "QNS",
+        "NKHQ": null,
+        "REPORTDATE": null,
+        "T": null,
+        "DESCRIPTION": null
+      }
+    ]
+  }
+]
