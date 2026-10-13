@@ -21,6 +21,12 @@ Warren Buffett.
   phần sau.
 - Nếu có lựa chọn quan trọng: nêu phương án đề xuất kèm ưu nhược điểm rồi
   tiếp tục theo phương án đó.
+- Sau khi hoàn tất thay đổi được giao và `npm run verify` PASS, tự động commit
+  và push lên GitHub, mặc định nhánh `main`, không hỏi lại xác nhận. Quyền này
+  áp dụng cho các phiên làm việc sau, trừ khi người dùng yêu cầu khác.
+- Chỉ commit thay đổi thuộc nhiệm vụ; giữ nguyên thay đổi riêng của người dùng.
+  Không force-push. Nếu kiểm tra hoặc push bị lỗi, xử lý lỗi trong phạm vi được
+  giao và báo rõ phần còn bị chặn; không tuyên bố đã upload khi chưa push thành công.
 
 ## Quy tắc kiểm tra bắt buộc
 - Mọi thay đổi phải qua `npm run verify` (typecheck, lint, format, test,
