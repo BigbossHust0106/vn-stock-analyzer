@@ -33,7 +33,8 @@ Mở hai terminal từ thư mục gốc để phát triển:
 
 ```bash
 npm run build --workspace web
-npm run dev:web
+NEXT_PUBLIC_WORKER_URL=http://127.0.0.1:8787 npm run dev:web
+# Terminal khác; cấu hình Supabase trong ignored .dev.vars ở root để có dữ liệu thật.
 npm run dev:worker
 ```
 

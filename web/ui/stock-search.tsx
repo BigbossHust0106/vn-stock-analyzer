@@ -47,9 +47,10 @@ export function StockSearch() {
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               const candidate = query.trim().toUpperCase();
-              const symbol = /^[A-Z0-9]{3,12}$/.test(candidate)
-                ? candidate
-                : results[0]?.symbol;
+              const symbol =
+                results.find((s) => s.symbol === candidate)?.symbol ??
+                results[0]?.symbol ??
+                (/^[A-Z0-9]{3,12}$/.test(candidate) ? candidate : undefined);
               if (symbol)
                 router.push('/stocks?symbol=' + encodeURIComponent(symbol));
             }

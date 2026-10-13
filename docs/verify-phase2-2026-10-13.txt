@@ -31,8 +31,8 @@ All matched files use Prettier code style!
 
  Test Files  7 passed (7)
       Tests  58 passed (58)
-   Start at  04:23:26
-   Duration  998ms (transform 40%, import 29%, tests 20%, worker 11%)
+   Start at  04:29:08
+   Duration  955ms (transform 38%, import 30%, tests 21%, worker 11%)
 
  % Coverage report from v8
 -------------------|---------|----------|---------|---------|-------------------
@@ -60,18 +60,18 @@ Lines        : 100% ( 69/69 )
 > next build --webpack
 
 ▲ Next.js 16.4.0 (webpack)
-✓ Running next.config.mjs took 22ms
+✓ Running next.config.mjs took 11ms
 
   Creating an optimized production build ...
-✓ Compiled successfully in 2.6s
+✓ Compiled successfully in 1978ms
   Running TypeScript ...
-  Finished TypeScript in 1924ms ...
+  Finished TypeScript in 1646ms ...
   Collecting page data using 4 workers ...
   Generating static pages using 4 workers (0/4) ...
   Generating static pages using 4 workers (1/4) 
   Generating static pages using 4 workers (2/4) 
   Generating static pages using 4 workers (3/4) 
-✓ Generating static pages using 4 workers (4/4) in 705ms
+✓ Generating static pages using 4 workers (4/4) in 596ms
   Finalizing page optimization ...
   Collecting build traces ...
 
@@ -106,11 +106,11 @@ env.ASSETS         Assets
 > vn-stock-analyzer@0.1.0 verify:secrets
 > node scripts/secrets.mjs
 
-4:23AM INF scanned ~412480 bytes (412.48 KB) in 78.4ms
-4:23AM INF no leaks found
-4:23AM INF 9 commits scanned.
-4:23AM INF scanned ~468203 bytes (468.20 KB) in 242ms
-4:23AM INF no leaks found
+4:29AM INF scanned ~424667 bytes (424.67 KB) in 104ms
+4:29AM INF no leaks found
+4:29AM INF 10 commits scanned.
+4:29AM INF scanned ~641887 bytes (641.89 KB) in 225ms
+4:29AM INF no leaks found
 
 [7/9] Migrations PostgreSQL
 
@@ -176,8 +176,8 @@ RLS PASS: A/B isolation, own read/write, owner forgery, parent ownership, anonym
 
  Test Files  3 passed (3)
       Tests  20 passed | 1 todo (21)
-   Start at  04:23:53
-   Duration  835ms (tests 58%, transform 34%, import 7%, worker 1%)
+   Start at  04:29:33
+   Duration  516ms (tests 46%, transform 42%, import 10%, worker 2%)
 
 
 BẢNG TỔNG KẾT VERIFY

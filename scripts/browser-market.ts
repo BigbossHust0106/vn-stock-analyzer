@@ -44,6 +44,17 @@ try {
   if (!page.url().includes('symbol=VNM'))
     throw new Error('Enter không mở đúng mã');
   console.log('BROWSER LIVE PASS: Enter mở đúng VNM');
+  await page.goto(base);
+  await page.getByLabel('Tìm mã hoặc tên công ty').fill('Sữa Việt Nam');
+  await page
+    .locator('#stock-suggestions a')
+    .first()
+    .waitFor({ timeout: 30000 });
+  await page.getByLabel('Tìm mã hoặc tên công ty').press('Enter');
+  await page.getByTestId('price-chart').waitFor({ timeout: 60000 });
+  if (!page.url().includes('symbol=VNM'))
+    throw new Error('Tên công ty không mở đúng mã');
+  console.log('BROWSER LIVE PASS: Sữa Việt Nam + Enter mở đúng VNM');
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole('button', { name: /Chuyển sang chế độ/ }).click();
   const theme = await page.locator('html').getAttribute('data-theme');

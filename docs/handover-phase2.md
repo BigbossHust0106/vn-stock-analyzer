@@ -13,8 +13,9 @@
 ```text
 BROWSER LIVE PASS: VNM, 57.900 VND, search → detail, canvas, 1D/1W/1M, MA/volume
 BROWSER LIVE PASS: FPT, 56.700 VND, search → detail, canvas, 1D/1W/1M, MA/volume
-BROWSER LIVE PASS: HPG, 20.550 VND, search → detail, canvas, 1D/1W/1M, MA/volume
+BROWSER LIVE PASS: HPG, 20.600 VND, search → detail, canvas, 1D/1W/1M, MA/volume
 BROWSER LIVE PASS: Enter mở đúng VNM
+BROWSER LIVE PASS: Sữa Việt Nam + Enter mở đúng VNM
 BROWSER LIVE PASS: 390px responsive, theme toggle/reload, no JS errors
 ```
 
@@ -36,6 +37,7 @@ Giá trên là snapshot lúc chạy test, không phải mức giá cố định.
 - Giá giảm VPS có trường mức thay đổi dạng trị tuyệt đối; UI tính dấu từ last/reference và chống chia 0/tràn số.
 - Volume label từng lẫn trên trục giá; tách scale và ẩn last-value label của volume.
 - Query đổi mã có thể giữ dữ liệu cũ; keyed detail/AbortController và kiểm tra abort trước set state ngăn ghi kết quả cũ.
+- Enter theo tên công ty phải ưu tiên kết quả gợi ý, không coi mọi chuỗi chữ là ticker.
 - MA phải tính trên toàn bộ chuỗi trước zoom; không lấy cửa sổ 1 tháng để tính MA200. Test SMA đối chiếu thư viện và đáp án tính tay.
 - Tên miền hiện có chỉ phục vụ API; thêm Workers Static Assets để deploy giao diện cùng URL. Actions có mode worker-only, Pages không bắt buộc.
 - Đối chiếu lại Graham sqrt(22.5×EPS×BVPS), MOS 1−price/intrinsic, DCF FCFE/Gordon, RSI/ATR Wilder, MACD EMA và Fibonacci retracement từ đỉnh. Không đổi công thức/đáp án Phần 1, các test vẫn PASS. Không dùng EPS quý như EPS năm.
@@ -47,7 +49,7 @@ Giá trên là snapshot lúc chạy test, không phải mức giá cố định.
 - Rate limit/cache thuộc từng isolate, chưa có giới hạn tổng toàn hệ thống. Cache history 15 phút có thể khác quote 15 giây; UI hiển thị riêng thời điểm hai nguồn.
 - Catalog đồng bộ toàn bộ, history/quote định kỳ chỉ nhóm SYNC_SYMBOLS mặc định VNM/FPT/HPG; mã khác lấy khi mở trang. Đây không phải đồng bộ history toàn bộ 1.522 mã.
 - Snapshot/history hôm nay chưa chứng nhận giá cuối phiên; không tự bù cuối tuần/ngày nghỉ hoặc suy lịch từ bar.
-- Chưa chạy cron tự động trên Cloudflare bằng token đúng account, chưa xác minh ruleset chặn merge đỏ. Deployment cần kiểm tra riêng sau push.
+- CI GitHub của commit đầu đã PASS; job deploy SKIPPED vì chưa bật cấu hình CD Actions. URL cũ vẫn 404 với route mới sau push tại thời điểm kiểm tra. Chưa chạy cron tự động trên Cloudflare bằng token đúng account, chưa xác minh ruleset chặn merge đỏ.
 
 ## CÁCH TÔI TỰ KIỂM TRA
 
