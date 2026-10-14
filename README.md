@@ -371,3 +371,23 @@ Xem [nguồn/đơn vị](docs/data-sources.md) và [định nghĩa engine](docs/
 Chỉ dùng BCTC năm hợp nhất đã kiểm toán theo metadata, 3 năm để sàng lọc rút gọn;
 DCF là proxy CFO−Capex với giả định, chưa phải Owner Earnings được chứng nhận.
 Nguồn chưa đối chiếu PDF gốc: confidence bị giới hạn, kết luận giữ Quan sát.
+
+## Phần 4: Top 10, Auth, Watchlist
+
+`/top10` hiển thị ba horizon với lọc sàn/ngành/vốn hóa, mức bao phủ dữ liệu và nút
+thêm vào danh sách. `/login` có email/password, đăng ký/reset và Google PKCE;
+`/watchlists` bảo vệ bằng getUser + RLS, nhiều danh sách, ghi chú/giá mục tiêu và
+điểm so với ngày xếp hạng trước. [Hành vi, trọng số, nguồn và các điều kiện còn thiếu](docs/phase4.md).
+
+```bash
+npm run verify
+npm run configure:auth
+npm run sync:rankings -- --migrate --refresh --metadata
+npm run verify:phase4:live -- --browser
+```
+
+Google provider chưa được cấu hình. Lịch phiên/price basis chưa có nguồn xác minh:
+Cron intraday/EOD được bảo vệ và chưa tự chạy; điểm kỹ thuật/volume thiếu được ghi
+rõ, không chấm history unverified. Giá tham chiếu KBS lưu riêng và có nhãn, không
+đóng giả giá giao dịch VPS. Có `import:evidence` để nhập lịch/sự kiện có nguồn sau
+khi xác minh; không suy ngày nghỉ/KQKD hay đưa fixture vào production.

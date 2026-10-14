@@ -60,11 +60,13 @@ export const vpsFieldTypes = {
   sBenefit: 'string',
 } as const;
 export type VpsRawQuote = {
-  [K in keyof typeof vpsFieldTypes]: (typeof vpsFieldTypes)[K] extends 'number'
-    ? number
-    : (typeof vpsFieldTypes)[K] extends 'string'
-      ? string
-      : null;
+  [K in keyof typeof vpsFieldTypes]: K extends 'openPrice' | 'side'
+    ? string | null
+    : (typeof vpsFieldTypes)[K] extends 'number'
+      ? number
+      : (typeof vpsFieldTypes)[K] extends 'string'
+        ? string
+        : null;
 };
 export type VpsResponse = VpsRawQuote[];
 
@@ -121,7 +123,14 @@ export function validateVpsResponse(payload: unknown): VpsResponse {
     for (const [field, type] of Object.entries(vpsFieldTypes)) {
       const path = `${base}.${field}`;
       if (!Object.hasOwn(row, field)) fail(path, 'thiếu trường bắt buộc');
-      if (type === 'null' ? row[field] !== null : typeof row[field] !== type)
+      const preOpenNull =
+        (field === 'openPrice' || field === 'side') &&
+        row[field] === null &&
+        row.lastPrice === 0;
+      if (
+        !preOpenNull &&
+        (type === 'null' ? row[field] !== null : typeof row[field] !== type)
+      )
         fail(path, `cần ${type}`);
       if (type === 'number' && !Number.isFinite(row[field]))
         fail(path, 'cần số hữu hạn');
@@ -158,12 +167,19 @@ export function validateVpsResponse(payload: unknown): VpsResponse {
       'fSVolume',
       'fSValue',
       'fRoom',
-    ] as const)
+    ] as const) {
+      if (
+        field === 'openPrice' &&
+        typed[field] === null &&
+        typed.lastPrice === 0
+      )
+        continue;
       numericString(
-        typed[field],
+        typed[field]!,
         `${base}.${field}`,
         ['fRoom', 'ot', 'changePc', 'oichange'].includes(field),
       );
+    }
     for (const field of ['g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'g7'] as const)
       parseBookLevel(typed[field], `${base}.${field}`);
     return typed;

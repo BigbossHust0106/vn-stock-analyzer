@@ -139,6 +139,7 @@ export function rls() {
   const { name } = state();
   try {
     sqlFile(name, 'tests/database/rls.sql');
+    sqlFile(name, 'tests/database/rankings.sql');
   } finally {
     cleanup();
   }

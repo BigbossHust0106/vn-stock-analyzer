@@ -47,10 +47,42 @@ export function settingsClient(): Promise<SupabaseClient> {
       !/^sb_publishable_[A-Za-z0-9_-]+$/.test(config.supabasePublishableKey)
     )
       throw new Error('Cấu hình Supabase công khai chưa sẵn sàng.');
-    return createClient(config.supabaseUrl, config.supabasePublishableKey);
+    return createClient(config.supabaseUrl, config.supabasePublishableKey, {
+      auth: { flowType: 'pkce', detectSessionInUrl: false },
+    });
   })().catch((e) => {
     client = null;
     throw e;
   });
   return client;
+}
+
+export async function googleAuthEnabled(): Promise<boolean> {
+  const base = process.env.NEXT_PUBLIC_WORKER_URL || deployment.workerUrl;
+  const configResponse = await fetch(new URL('/v1/public-config', base), {
+    signal: AbortSignal.timeout(10000),
+    cache: 'no-store',
+  });
+  const config = (await configResponse.json()) as {
+    supabaseUrl: string;
+    supabasePublishableKey: string;
+  };
+  if (
+    !configResponse.ok ||
+    !/^sb_publishable_[A-Za-z0-9_-]+$/.test(config.supabasePublishableKey)
+  )
+    throw new Error('Chưa kiểm tra được đăng nhập Google.');
+  const response = await fetch(
+    new URL('/auth/v1/settings', config.supabaseUrl),
+    {
+      headers: { apikey: config.supabasePublishableKey },
+      signal: AbortSignal.timeout(10000),
+      cache: 'no-store',
+    },
+  );
+  if (!response.ok) throw new Error('Chưa kiểm tra được đăng nhập Google.');
+  const settings = (await response.json()) as {
+    external?: { google?: boolean };
+  };
+  return settings.external?.google === true;
 }

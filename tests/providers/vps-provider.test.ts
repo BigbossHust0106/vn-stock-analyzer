@@ -186,3 +186,16 @@ describe('VpsProvider — fixture thật do người dùng cung cấp', () => {
     ).rejects.toThrow('job sau');
   });
 });
+
+it('Payload thật trước mở cửa 14/10: openPrice/side null và lastPrice0, không bịa giá khớp lệnh', async () => {
+  const { default: preopen } =
+    await import('../../fixtures/phase4/vps-preopen.json');
+  const { parseVpsPayload } =
+    await import('../../modules/providers/vps-provider');
+  const rows = parseVpsPayload(preopen, '2026-10-14T01:44:00Z');
+  expect(rows[0]!.lastPriceVnd).toBeNull();
+  expect(rows[0]!.referenceVnd).toBe(58000); // raw r58 nghìn VND =>58000VND.
+  expect(() =>
+    parseVpsPayload([{ ...preopen[0], lastPrice: 58 }], '2026-10-14T01:44:00Z'),
+  ).toThrow('openPrice');
+});

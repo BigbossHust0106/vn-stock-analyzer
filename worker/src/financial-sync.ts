@@ -1,3 +1,4 @@
+import { rankingUniverse } from '../../modules/market/ranking-universe';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Env } from './index';
 import deployment from '../../config/public-deployment.json';
@@ -48,39 +49,53 @@ export async function syncFinancials(env: Env): Promise<void> {
     { auth: { persistSession: false, autoRefreshToken: false } },
   );
   const provider = marketProviders(env);
+  let synced = 0,
+    failed = 0;
   for (const symbol of validatedSymbols(
-    (env.SYNC_SYMBOLS || 'VNM,FPT,HPG').split(','),
+    (env.SYNC_SYMBOLS || rankingUniverse).split(','),
   )) {
-    const { data: stock, error } = await db
-      .from('stocks')
-      .select('id')
-      .eq('symbol', symbol)
-      .eq('active', true)
-      .maybeSingle();
-    if (error || !stock) throw new Error('Mã BCTC không thuộc catalog');
-    const financials = await provider.fundamentals.fetchFinancials(symbol);
-    if (financials.supported && !financials.annual.length)
-      throw new Error('Nguồn BCTC không có kỳ năm hợp lệ');
-    const { data: quote, error: readError } = await db
-      .from('prices_current')
-      .select('last_price_vnd,fetched_at')
-      .eq('stock_id', stock.id)
-      .maybeSingle();
-    if (readError) throw new Error('Không đọc được giá chấm điểm');
-    const report = scoreStock(
-      financials,
-      quote?.last_price_vnd ?? null,
-      new Date().toISOString(),
-      undefined,
-      quote?.fetched_at ?? null,
-    );
-    await persistFinancials(db, stock.id, financials, report);
+    try {
+      const { data: stock, error } = await db
+        .from('stocks')
+        .select('id')
+        .eq('symbol', symbol)
+        .eq('active', true)
+        .maybeSingle();
+      if (error || !stock) throw new Error('Mã BCTC không thuộc catalog');
+      const financials = await provider.fundamentals.fetchFinancials(symbol);
+      if (financials.supported && !financials.annual.length)
+        throw new Error('Nguồn BCTC không có kỳ năm hợp lệ');
+      const { data: quote, error: readError } = await db
+        .from('prices_current')
+        .select('last_price_vnd,fetched_at')
+        .eq('stock_id', stock.id)
+        .maybeSingle();
+      if (readError) throw new Error('Không đọc được giá chấm điểm');
+      const report = scoreStock(
+        financials,
+        quote?.last_price_vnd ?? null,
+        new Date().toISOString(),
+        undefined,
+        quote?.fetched_at ?? null,
+      );
+      await persistFinancials(db, stock.id, financials, report);
+      synced++;
+      console.log(
+        `BCTC SYNC: ${symbol}, ${financials.annual.length} kỳ năm thật`,
+      );
+    } catch {
+      failed++;
+      console.warn(
+        `BCTC SYNC FAIL: ${symbol}; giữ dữ liệu cũ, không bịa đầu vào`,
+      );
+    }
   }
   const { error } = await db.from('system_status').upsert({
     component: 'fundamentals',
-    state: 'ok',
-    last_success_at: new Date().toISOString(),
+    state: failed ? 'degraded' : 'ok',
+    ...(synced ? { last_success_at: new Date().toISOString() } : {}),
     updated_at: new Date().toISOString(),
   });
   if (error) throw new Error('Không cập nhật được trạng thái BCTC');
+  if (!synced) throw new Error('Không cập nhật được BCTC cho mã nào');
 }

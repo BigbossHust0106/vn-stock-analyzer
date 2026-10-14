@@ -1,0 +1,302 @@
+'use client';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import {
+  fetchRankings,
+  formatNumber,
+  formatTime,
+  horizonLabels,
+  type RankingsResult,
+} from '../lib/rankings';
+import { priceChange, type Horizon } from '../../modules/scoring/rankings';
+import { AddWatchButton } from './add-watch-button';
+const strategyLabels: Record<string, string> = {
+  momentum: 'Động lượng',
+  unusualVolume: 'Volume bất thường',
+  shortTechnical: 'KT ngắn hạn',
+  mediumTechnical: 'KT trung hạn',
+  quality: 'Lọc cơ bản',
+  graham: 'Graham',
+  buffett: 'Buffett',
+  valuation: 'Định giá',
+  safety: 'Biên an toàn',
+  events: 'Sự kiện',
+};
+function RankingTable({
+  horizon,
+  exchange,
+  sector,
+  cap,
+  onSectors,
+}: {
+  horizon: Horizon;
+  exchange: string;
+  sector: string;
+  cap: string;
+  onSectors: (sectors: string[]) => void;
+}) {
+  const [result, setResult] = useState<RankingsResult | null>(null),
+    [error, setError] = useState(''),
+    [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let stopped = false,
+      first = true,
+      controller: AbortController | undefined;
+    const update = async () => {
+      controller?.abort();
+      controller = new AbortController();
+      try {
+        const data = await fetchRankings(
+          horizon,
+          exchange,
+          sector,
+          cap,
+          controller.signal,
+        );
+        if (stopped) return;
+        setResult(data);
+        onSectors(data.sectors);
+        setError('');
+      } catch (e) {
+        if (!stopped && !controller.signal.aborted)
+          setError(e instanceof Error ? e.message : 'Không tải được dữ liệu.');
+      } finally {
+        if (!stopped) {
+          setLoading(false);
+          first = false;
+        }
+      }
+    };
+    // Xóa kết quả bộ lọc cũ ngay khi đổi bộ lọc.
+    void update();
+    const timer = window.setInterval(() => {
+      if (!first && document.visibilityState === 'visible') void update();
+    }, 30000);
+    return () => {
+      stopped = true;
+      controller?.abort();
+      window.clearInterval(timer);
+    };
+  }, [horizon, exchange, sector, cap, onSectors]);
+  return (
+    <section className="ranking-section" data-testid={'ranking-' + horizon}>
+      <div className="section-heading">
+        <h2>Top 10 · {horizonLabels[horizon]}</h2>
+        <span>
+          {result?.run
+            ? `Chấm ${formatTime(result.run.computed_at)} · ${result.run.universe_count} mã có BCTC`
+            : 'Chưa có lượt chấm'}
+        </span>
+      </div>
+      {error && (
+        <p role="alert">
+          {error}
+          {result ? ' Đang hiển thị bản đã tải trước đó.' : ''}
+        </p>
+      )}
+      {loading && <p role="status">Đang tải dữ liệu…</p>}
+      {result && result.data.length === 0 && (
+        <p>
+          Chưa có cổ phiếu đủ dữ liệu phù hợp bộ lọc này. Không dùng dữ liệu mẫu
+          để lấp đầy.
+        </p>
+      )}
+      {result && result.data.length > 0 && (
+        <div className="table-scroll">
+          <table className="ranking-table">
+            <thead>
+              <tr>
+                <th>Hạng / mã</th>
+                <th>Giá / thay đổi</th>
+                <th>Điểm tổng</th>
+                <th>Điểm chiến lược</th>
+                <th>Lý do chính</th>
+                <th>Theo dõi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {result.data.map((row) => {
+                const change = priceChange(row.price_vnd, row.reference_vnd);
+                return (
+                  <tr key={row.stock_id}>
+                    <td>
+                      <strong>
+                        {row.position}.{' '}
+                        <Link href={'/stocks?symbol=' + row.symbol}>
+                          {row.symbol}
+                        </Link>
+                      </strong>
+                      <span>{row.name}</span>
+                      <small>
+                        {row.exchange} · {row.sector ?? 'Chưa có ngành'} ·{' '}
+                        {formatNumber(
+                          (row.explanation.marketCapVnd ?? 0) / 1e9,
+                        )}{' '}
+                        tỷ
+                      </small>
+                    </td>
+                    <td>
+                      <strong>
+                        {formatNumber(row.price_vnd ?? row.reference_vnd)} đ
+                      </strong>
+                      <span
+                        className={
+                          change !== null && change >= 0
+                            ? 'positive'
+                            : 'negative'
+                        }
+                      >
+                        {change !== null && change > 0 ? '+' : ''}
+                        {formatNumber(change, 2)}%
+                      </span>
+                      {row.price_vnd === null && (
+                        <small>
+                          Giá tham chiếu; chưa có giá giao dịch cập nhật
+                        </small>
+                      )}
+                      <small>
+                        {row.explanation.quoteSource ?? 'VPS'} ·{' '}
+                        {formatTime(row.quote_fetched_at)}
+                      </small>
+                    </td>
+                    <td>
+                      <strong className="ranking-score">
+                        {formatNumber(row.score, 1)}
+                      </strong>
+                      <small>
+                        /100 · Bao phủ{' '}
+                        {formatNumber(row.explanation.coverage * 100)}%
+                      </small>
+                      <small>Tin cậy {row.explanation.confidence}%</small>
+                    </td>
+                    <td>
+                      <div className="strategy-chips">
+                        {Object.entries(row.explanation.strategies)
+                          .filter(([key]) =>
+                            horizon === 'day'
+                              ? [
+                                  'momentum',
+                                  'unusualVolume',
+                                  'shortTechnical',
+                                  'quality',
+                                ].includes(key)
+                              : horizon === 'month'
+                                ? [
+                                    'mediumTechnical',
+                                    'valuation',
+                                    'events',
+                                  ].includes(key)
+                                : ['graham', 'buffett', 'safety'].includes(key),
+                          )
+                          .map(([key, value]) => (
+                            <span key={key}>
+                              {strategyLabels[key]}:{' '}
+                              {value === null
+                                ? 'không đủ dữ liệu'
+                                : formatNumber(value, 1)}
+                            </span>
+                          ))}
+                      </div>
+                    </td>
+                    <td>
+                      {row.explanation.reasons.map((reason) => (
+                        <p key={reason}>{reason}</p>
+                      ))}
+                    </td>
+                    <td>
+                      <AddWatchButton
+                        stockId={row.stock_id}
+                        symbol={row.symbol}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {result && result.data.length > 0 && result.data.length < 10 && (
+        <p>
+          Chỉ có {result.data.length} mã đủ điều kiện; bảng không bổ sung mã
+          thiếu dữ liệu.
+        </p>
+      )}
+    </section>
+  );
+}
+export function TopRankings() {
+  const [exchange, setExchange] = useState(''),
+    [sector, setSector] = useState(''),
+    [cap, setCap] = useState(''),
+    [sectors, setSectors] = useState<string[]>([]);
+  const [onSectors] = useState(
+    () => (values: string[]) =>
+      setSectors((previous) =>
+        previous.join('|') === values.join('|') ? previous : values,
+      ),
+  );
+  return (
+    <div className="phase4-page">
+      <span className="eyebrow">SÀNG LỌC CỔ PHIẾU VIỆT NAM</span>
+      <h1>Ba góc nhìn. Top 10 cổ phiếu.</h1>
+      <p>
+        Điểm trên dữ liệu nguồn thật, trọng số cố định. Tiêu chí chưa xác minh
+        giữ trạng thái không đủ dữ liệu và không phân bổ lại trọng số. Giá cập
+        nhật mỗi 30 giây; điểm tính sau lượt đồng bộ.
+      </p>
+      <div className="ranking-filters">
+        <label>
+          Sàn
+          <select
+            aria-label="Sàn"
+            value={exchange}
+            onChange={(e) => setExchange(e.target.value)}
+          >
+            <option value="">Tất cả sàn</option>
+            {['HOSE', 'HNX', 'UPCOM'].map((s) => (
+              <option key={s}>{s}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Ngành
+          <select
+            aria-label="Ngành"
+            value={sector}
+            onChange={(e) => setSector(e.target.value)}
+          >
+            <option value="">Tất cả ngành</option>
+            {sectors.map((s) => (
+              <option key={s}>{s}</option>
+            ))}
+          </select>
+          {!sectors.length && <small>Chưa có phân ngành có nguồn.</small>}
+        </label>
+        <label>
+          Vốn hóa
+          <select
+            aria-label="Vốn hóa"
+            value={cap}
+            onChange={(e) => setCap(e.target.value)}
+          >
+            <option value="">Tất cả vốn hóa</option>
+            <option value="small">Dưới 1.000 tỷ</option>
+            <option value="mid">1.000–10.000 tỷ</option>
+            <option value="large">Từ 10.000 tỷ</option>
+          </select>
+        </label>
+      </div>
+      {(['day', 'month', 'quarter'] as const).map((horizon) => (
+        <RankingTable
+          key={horizon + exchange + sector + cap}
+          horizon={horizon}
+          exchange={exchange}
+          sector={sector}
+          cap={cap}
+          onSectors={onSectors}
+        />
+      ))}
+    </div>
+  );
+}

@@ -12,3 +12,5 @@ coverage/
 *.log
 .dev.vars*
 supabase/.temp/
+
+/work/

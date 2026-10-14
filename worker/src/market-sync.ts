@@ -1,3 +1,5 @@
+import { rankingUniverse } from '../../modules/market/ranking-universe';
+import { syncMetadata } from './metadata-sync';
 import { syncFinancials } from './financial-sync';
 import { createClient } from '@supabase/supabase-js';
 import type { Env } from './index';
@@ -33,59 +35,72 @@ export async function syncMarket(env: Env): Promise<void> {
     if (error) throw new Error('Không ghi được catalog');
   }
   const symbols = validatedSymbols(
-    (env.SYNC_SYMBOLS || 'VNM,FPT,HPG').split(','),
+    (env.SYNC_SYMBOLS || rankingUniverse).split(','),
   );
   const today = vietnamDate(Date.now());
+  let failedHistory = 0;
   for (const symbol of symbols) {
-    const { data: stock, error } = await db
-      .from('stocks')
-      .select('id')
-      .eq('symbol', symbol)
-      .eq('active', true)
-      .maybeSingle();
-    if (error || !stock) throw new Error('Mã đồng bộ không hợp lệ');
-    const bars = await provider.history.fetchHistory(
-      symbol,
-      yearsBefore(today, 3),
-      today,
-    );
-    if (!bars.length)
-      throw new Error('Nguồn lịch sử không có dữ liệu cho mã đồng bộ');
-    const { error: writeError } = await db.rpc('ingest_price_history', {
-      rows: bars.map((b) => ({
-        stock_id: stock.id,
-        session_date: b.sessionDate,
-        source: b.source,
-        open_vnd: b.openVnd,
-        high_vnd: b.highVnd,
-        low_vnd: b.lowVnd,
-        close_vnd: b.closeVnd,
-        volume_reported: b.volumeReported,
-        is_final: b.isFinal,
-        fetched_at: b.fetchedAt,
+    try {
+      const { data: stock, error } = await db
+        .from('stocks')
+        .select('id')
+        .eq('symbol', symbol)
+        .eq('active', true)
+        .maybeSingle();
+      if (error || !stock) throw new Error('Mã đồng bộ không hợp lệ');
+      const bars = await provider.history.fetchHistory(
+        symbol,
+        yearsBefore(today, 3),
+        today,
+      );
+      if (!bars.length)
+        throw new Error('Nguồn lịch sử không có dữ liệu cho mã đồng bộ');
+      const { error: writeError } = await db.rpc('ingest_price_history', {
+        rows: bars.map((b) => ({
+          stock_id: stock.id,
+          session_date: b.sessionDate,
+          source: b.source,
+          open_vnd: b.openVnd,
+          high_vnd: b.highVnd,
+          low_vnd: b.lowVnd,
+          close_vnd: b.closeVnd,
+          volume_reported: b.volumeReported,
+          is_final: b.isFinal,
+          fetched_at: b.fetchedAt,
+        })),
+      });
+      if (writeError) throw new Error('Không ghi được history');
+    } catch {
+      failedHistory++;
+      console.warn(`History SYNC FAIL: ${symbol}; giữ dữ liệu cũ`);
+    }
+  }
+  let failedQuotes = false;
+  try {
+    const quotes = await provider.quotes.fetchQuotes(symbols);
+    const { error } = await db.rpc('ingest_current_quotes', {
+      rows: quotes.map((q) => ({
+        symbol: q.symbol,
+        reference_vnd: q.referenceVnd,
+        ceiling_vnd: q.ceilingVnd,
+        floor_vnd: q.floorVnd,
+        last_price_vnd: q.lastPriceVnd,
+        bid3_price_vnd: q.bid3PriceVnd,
+        last_volume_raw: q.volumeRaw.lastVolume,
+        lot_raw: q.volumeRaw.lot,
+        fetched_at: q.fetchedAt,
       })),
     });
-    if (writeError) throw new Error('Không ghi được history');
+    if (error) throw new Error('Không ghi được quotes');
+  } catch {
+    failedQuotes = true;
+    console.warn('VPS quotes lỗi; giữ dữ liệu cũ và tham chiếu KBS có nhãn.');
   }
-  const quotes = await provider.quotes.fetchQuotes(symbols);
-  const { error } = await db.rpc('ingest_current_quotes', {
-    rows: quotes.map((q) => ({
-      symbol: q.symbol,
-      reference_vnd: q.referenceVnd,
-      ceiling_vnd: q.ceilingVnd,
-      floor_vnd: q.floorVnd,
-      last_price_vnd: q.lastPriceVnd,
-      bid3_price_vnd: q.bid3PriceVnd,
-      last_volume_raw: q.volumeRaw.lastVolume,
-      lot_raw: q.volumeRaw.lot,
-      fetched_at: q.fetchedAt,
-    })),
-  });
-  if (error) throw new Error('Không ghi được quotes');
   await syncFinancials(env);
+  await syncMetadata(env);
   const { error: statusError } = await db.from('system_status').upsert({
     component: 'prices',
-    state: 'ok',
+    state: failedHistory || failedQuotes ? 'degraded' : 'ok',
     last_success_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   });

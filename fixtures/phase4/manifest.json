@@ -1,0 +1,10 @@
+{
+  "fetchedAt": "2026-10-14T01:44:00Z",
+  "note": "HTTP200 thật, dữ liệu thị trường công khai; không dùng làm seed production.",
+  "sources": {
+    "vps-preopen.json": "https://bgapidatafeed.vps.com.vn/getliststockdata/VNM,FPT,HPG,VHC,DGC,REE,PNJ,MWG,GMD,DCM,DPM,NT2,BMP,NTP,PTB,QNS,VCS,PLC,IDC,VEA",
+    "kbs-sectors.json": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/sector/all",
+    "kbs-sectorstocks.json": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/sector/stock?code=19&l=1",
+    "vci-vnm-events.json": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/events?ticker=VNM&fromDate=20260101&toDate=20261130&eventCode=DIV,AGME,AGMR,EGME&page=0&size=50"
+  }
+}

@@ -1,3 +1,7 @@
+import { rankingsResponse } from './api/rankings';
+import { watchlistsResponse } from './api/watchlists';
+import { tradingSync } from './trading-sync';
+import { syncRankings } from './ranking-sync';
 import { financialResponse } from './api/financials';
 import { createClient } from '@supabase/supabase-js';
 import deployment from '../../config/public-deployment.json';
@@ -12,7 +16,7 @@ import {
 } from '../../modules/providers/vps-provider';
 export interface Env extends ProviderConfig {
   SYNC_SYMBOLS?: string;
-  ASSETS?: Pick<Fetcher, 'fetch'>;
+  ASSETS?: Pick<WorkerBindings['ASSETS'], 'fetch'>;
   SUPABASE_URL?: string;
   SUPABASE_PUBLISHABLE_KEY?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
@@ -112,6 +116,10 @@ export default {
         { headers: { ...headers, 'Cache-Control': 'no-store' } },
       );
     }
+    const privateResponse = await watchlistsResponse(request, env);
+    if (privateResponse) return privateResponse;
+    const ranking = await rankingsResponse(request, env);
+    if (ranking) return ranking;
     const financial = await financialResponse(request, env, context);
     if (financial) return financial;
     const market = await marketResponse(request, env, context);
@@ -171,14 +179,32 @@ export default {
     env: Env,
     context: Pick<ExecutionContext, 'waitUntil'>,
   ): void {
+    if (
+      controller.cron === '*/5 2-8 * * 1-5' ||
+      controller.cron === '15 8 * * 1-5'
+    ) {
+      context.waitUntil(
+        tradingSync(
+          env,
+          controller.scheduledTime,
+          controller.cron === '15 8 * * 1-5',
+        ).catch(() => {
+          console.error('Cron giá/xếp hạng thất bại');
+          throw new Error('Cron giá/xếp hạng thất bại');
+        }),
+      );
+      return;
+    }
     if (controller.cron !== '30 8 * * 1-5') {
       context.waitUntil(
-        syncMarket(env).catch(() => {
-          console.error(
-            'Đồng bộ thị trường thất bại; kiểm tra cấu hình và nguồn',
-          );
-          throw new Error('Đồng bộ thị trường thất bại');
-        }),
+        syncMarket(env)
+          .then(() => syncRankings(env))
+          .catch(() => {
+            console.error(
+              'Đồng bộ thị trường thất bại; kiểm tra cấu hình và nguồn',
+            );
+            throw new Error('Đồng bộ thị trường thất bại');
+          }),
       );
       return;
     }

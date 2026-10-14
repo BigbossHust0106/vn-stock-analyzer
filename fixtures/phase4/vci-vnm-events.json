@@ -1,0 +1,76 @@
+{
+  "serverDateTime": "2026-10-14T01:43:04.101574935",
+  "traceId": "de8caccbdc9f8dad81e4bfa2d0295cdd",
+  "status": 200,
+  "code": 0,
+  "msg": "Successful",
+  "exception": null,
+  "successful": true,
+  "data": {
+    "content": [
+      {
+        "id": "6a333a0ae56b40f0537015e0",
+        "organCode": "VNM",
+        "eventNameVi": "Trả cổ tức bằng tiền mặt",
+        "eventNameEn": "Cash Dividend",
+        "organNameEn": "Vietnam Dairy Products Joint Stock Company",
+        "organNameVi": "Công ty Cổ phần Sữa Việt Nam",
+        "ticker": "VNM",
+        "eventCode": "DIV",
+        "eventTitleVi": "Trả cổ tức bằng tiền mặt - Đợt 2 2025 - 1,850 VND",
+        "eventTitleEn": "Cash Dividend - Interim 2 2025 - 1,850 VND",
+        "displayDate1": "2026-06-26T00:00:00",
+        "displayDate2": "2026-06-19T00:00:00",
+        "publicDate": "2026-06-19T00:00:00",
+        "recordDate": "2026-06-29T00:00:00",
+        "exrightDate": "2026-06-26T00:00:00",
+        "payoutDate": "2026-07-17T00:00:00",
+        "valuePerShare": 1850,
+        "exerciseRatio": 0.185,
+        "category": "DIVIDEND"
+      },
+      {
+        "id": "69a0e433f24a113a2ff1870f",
+        "organCode": "VNM",
+        "eventNameVi": "Đại hội Đồng Cổ đông",
+        "eventNameEn": "Annual General Meeting",
+        "organNameEn": "Vietnam Dairy Products Joint Stock Company",
+        "organNameVi": "Công ty Cổ phần Sữa Việt Nam",
+        "ticker": "VNM",
+        "eventCode": "AGME",
+        "eventTitleVi": "VNM - Tổ chức ĐHĐCĐ thường niên 2026",
+        "eventTitleEn": "VNM - Holds 2026 AGM",
+        "displayDate1": "2026-04-22T00:00:00",
+        "displayDate2": "2026-03-17T00:00:00",
+        "publicDate": "2026-02-27T00:00:00",
+        "issueDate": "2026-04-22T00:00:00",
+        "recordDate": "2026-03-18T00:00:00",
+        "exrightDate": "2026-03-17T00:00:00",
+        "category": "SHAREHOLDER_MEETING"
+      }
+    ],
+    "pageable": {
+      "pageNumber": 0,
+      "pageSize": 50,
+      "sort": {
+        "orders": [],
+        "unsorted": true,
+        "sorted": false,
+        "empty": true
+      },
+      "offset": 0,
+      "unpaged": false,
+      "paged": true
+    },
+    "total": 2,
+    "totalElements": 2,
+    "last": true,
+    "totalPages": 1,
+    "numberOfElements": 2,
+    "first": true,
+    "size": 50,
+    "number": 0,
+    "sort": { "orders": [], "unsorted": true, "sorted": false, "empty": true },
+    "empty": false
+  }
+}

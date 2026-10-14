@@ -12,6 +12,7 @@ export default tseslint.config(
       '**/.wrangler/**',
       '**/coverage/**',
       '**/.cache/**',
+      'work/**',
       '**/.tools/**',
       'web/next-env.d.ts',
     ],

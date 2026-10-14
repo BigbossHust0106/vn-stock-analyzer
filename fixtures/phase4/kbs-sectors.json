@@ -1,0 +1,31 @@
+[
+  { "name": "Xây dựng", "code": 24, "change": 2.012289 },
+  { "name": "Bất động sản", "code": 3, "change": 0.964105 },
+  { "name": "Nông - Lâm - Ngư", "code": 12, "change": 0.164545 },
+  { "name": "Chăm sóc sức khỏe", "code": 8, "change": 0.012566 },
+  { "name": "Thiết bị điện", "code": 27, "change": -0.032512 },
+  { "name": "SX Thiết bị, máy móc", "code": 15, "change": -0.493876 },
+  { "name": "SX Phụ trợ", "code": 26, "change": -0.501673 },
+  { "name": "SX Nhựa - Hóa chất", "code": 18, "change": -0.508977 },
+  { "name": "Dịch vụ tư vấn, hỗ trợ", "code": 28, "change": -0.557204 },
+  { "name": "Tiện ích", "code": 22, "change": -0.565761 },
+  { "name": "Ngân hàng", "code": 11, "change": -0.568705 },
+  { "name": "Sản phẩm cao su", "code": 17, "change": -0.59625 },
+  { "name": "Chứng khoán", "code": 5, "change": -0.662257 },
+  { "name": "Bán lẻ", "code": 7, "change": -0.894725 },
+  { "name": "Vận tải - kho bãi", "code": 23, "change": -1.029224 },
+  { "name": "Thực phẩm - Đồ uống", "code": 19, "change": -1.145612 },
+  { "name": "Vật liệu xây dựng", "code": 21, "change": -1.160686 },
+  { "name": "Bán buôn", "code": 1, "change": -1.16481 },
+  { "name": "SX Hàng gia dụng", "code": 16, "change": -1.251105 },
+  { "name": "Công nghệ và thông tin", "code": 6, "change": -1.319351 },
+  { "name": "Bảo hiểm", "code": 2, "change": -1.453882 },
+  {
+    "name": "Dịch vụ lưu trú, ăn uống, giải trí",
+    "code": 25,
+    "change": -1.904176
+  },
+  { "name": "Chế biến Thủy sản", "code": 20, "change": -2.13087 },
+  { "name": "Tài chính khác", "code": 29, "change": -2.969679 },
+  { "name": "Khai khoáng", "code": 10, "change": -3.884585 }
+]

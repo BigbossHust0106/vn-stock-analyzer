@@ -292,3 +292,24 @@ phân tách maintenance/growth Capex, Owner Earnings/FCFE thuộc CĐ công ty m
 thông báo và dữ liệu điều chỉnh sau chia tách, quota/quyền dùng lại/SLA của nguồn,
 mapping ngành ngân hàng/chứng khoán/bảo hiểm và năm tài chính khác năm lịch.
 Phần 3 không giả định các phần này đã được xác minh.
+
+## Nguồn Phần 4 (14/10/2026)
+
+- KBS `GET /iis-server/investment/sector/all`: 25 ngành theo phân loại riêng KBS.
+  `GET /sector/stock?code=19&l=1`: `name`, `stocks[].sb`; ngành Thực phẩm - Đồ uống
+  có VNM. Không gọi phân loại này là ICB.
+- Vietcap `GET /api/iq-insight-service/v1/events?ticker=VNM&fromDate=20260101&toDate=20261130&eventCode=DIV,AGME,AGMR,EGME&page=0&size=50`
+  trả successful/status200, data.content; VNM cổ tức GDKHQ26/06/2026, ĐHĐCĐ22/04/2026.
+  Dùng `exrightDate` cho cổ tức, `issueDate` cho họp, `publicDate` là known_at.
+  Không dùng ngày tin làm ngày họp/cổ tức. Runtime bỏ AGMR và gộp sự kiện cùng loại/ngày.
+- KBS catalog `re` VND là giá tham chiếu, không là giá khớp lệnh. Lưu bảng riêng
+  `ranking_reference_prices`, không dùng làm momentum hoặc volume. Nguồn/phương án
+  dùng khi VPS lỗi được hiển thị, không đổi registry quote provider ngầm.
+- VPS trước phiên 14/10 có `openPrice=null`, `side=null`, `lastPrice=0`; parser chỉ
+  chấp nhận null này khi chưa có giao dịch, giữ last_price null. Không điền lastPrice
+  bằng closePrice/ref rồi gọi là giá khớp lệnh.
+- Khi mở rộng universe, VPS history có bar OHLC không hợp lệ và quotes có lỗi503;
+  giữ dữ liệu cũ/degraded, không tắt kiểm tra schema/basis để có điểm.
+- Endpoint nguồn được tìm trong snapshot tham khảo đã dẫn ở Phần 2, gọi trực tiếp
+  bằng TypeScript viết riêng; không cài/copy/chạy thư viện. Fixture Phần 4 là phản hồi
+  HTTP200 thật, có manifest; chỉ dùng kiểm tra parser, không seed production.

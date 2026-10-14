@@ -37,7 +37,11 @@
     "sync:financials": "node --use-env-proxy --import tsx scripts/sync-financials.ts",
     "verify:financials:live": "node --use-env-proxy --import tsx scripts/verify-financials-live.ts",
     "verify:scoring:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-scoring.ts",
-    "verify:settings:live": "node --use-env-proxy --import tsx scripts/verify-settings-live.ts"
+    "verify:settings:live": "node --use-env-proxy --import tsx scripts/verify-settings-live.ts",
+    "sync:rankings": "node --use-env-proxy --import tsx scripts/sync-rankings.ts",
+    "configure:auth": "node --use-env-proxy --import tsx scripts/configure-phase4-auth.ts",
+    "import:evidence": "node --use-env-proxy --import tsx scripts/import-market-evidence.ts",
+    "verify:phase4:live": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/verify-phase4-live.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.3",
