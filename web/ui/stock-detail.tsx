@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { stockDetail, type StockDetail as Detail } from '../lib/market-client';
 import { changePercent } from '../../modules/market/chart';
-import { PriceChart } from './price-chart';
+import { TradeWorkbench } from './trade-workbench';
+import type { FinancialData } from '../../modules/providers/financial-types';
 import { ScoringPanel } from './scoring-panel';
 export function StockDetail() {
   const params = useSearchParams();
@@ -11,6 +12,7 @@ export function StockDetail() {
   return <DetailContent key={symbol} symbol={symbol} />;
 }
 function DetailContent({ symbol }: { symbol: string }) {
+  const [financials, setFinancials] = useState<FinancialData | null>(null);
   const [data, setData] = useState<Detail | null>(null);
   const [error, setError] = useState('');
   const [refresh, setRefresh] = useState(0);
@@ -37,6 +39,7 @@ function DetailContent({ symbol }: { symbol: string }) {
       : n.toLocaleString('vi-VN', { maximumFractionDigits: 0 });
   function reload() {
     setData(null);
+    setFinancials(null);
     setError('');
     setRefresh((v) => v + 1);
   }
@@ -137,9 +140,10 @@ function DetailContent({ symbol }: { symbol: string }) {
           {n}
         </p>
       ))}
-      <PriceChart bars={data.bars} />
+      <TradeWorkbench detail={data} financials={financials} />
       <ScoringPanel
         symbol={symbol}
+        onFinancials={setFinancials}
         priceVnd={q?.lastPriceVnd ?? null}
         quoteFetchedAt={q?.fetchedAt ?? null}
       />

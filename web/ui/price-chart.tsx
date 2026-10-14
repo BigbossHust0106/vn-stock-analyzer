@@ -13,8 +13,17 @@ import {
   movingAverage,
   type ChartFrame,
 } from '../../modules/market/chart';
+import type { PlanLevel } from '../../modules/trading/trade-plan';
+import { priceZones } from './price-zones';
 import type { DailyBar } from '../../modules/providers/data-provider';
-export function PriceChart({ bars }: { bars: DailyBar[] }) {
+const emptyLevels: PlanLevel[] = [];
+export function PriceChart({
+  bars,
+  levels = emptyLevels,
+}: {
+  bars: DailyBar[];
+  levels?: PlanLevel[];
+}) {
   const target = useRef<HTMLDivElement>(null);
   const [frame, setFrame] = useState<ChartFrame>('day');
   const [range, setRange] = useState(365);
@@ -65,6 +74,38 @@ export function PriceChart({ bars }: { bars: DailyBar[] }) {
         close: b.closeVnd,
       })),
     );
+    for (const level of levels) {
+      if (level.price === null) continue;
+      const color = level.id.startsWith('buy')
+        ? '#16b68c'
+        : level.id === 'stop'
+          ? '#f05c75'
+          : level.id === 'trailing'
+            ? '#e6a93c'
+            : level.id.startsWith('tp')
+              ? '#729bff'
+              : '#8b9fad';
+      candles.createPriceLine({
+        price: level.price,
+        color,
+        lineWidth: 1,
+        lineStyle: 2,
+        axisLabelVisible: true,
+        title:
+          level.id === 'stop'
+            ? 'SL'
+            : level.id === 'trailing'
+              ? 'Trail'
+              : level.id.startsWith('tp')
+                ? level.id.toUpperCase()
+                : level.id === 'entry'
+                  ? 'Vào'
+                  : level.id === 'buy-low'
+                    ? 'Mua ↓'
+                    : 'Mua ↑',
+      });
+    }
+    candles.attachPrimitive(priceZones(candles, levels));
     const volume = chart.addSeries(HistogramSeries, {
       lastValueVisible: false,
       priceLineVisible: false,
@@ -133,7 +174,7 @@ export function PriceChart({ bars }: { bars: DailyBar[] }) {
       observer.disconnect();
       chart.remove();
     };
-  }, [bars, data, range]);
+  }, [bars, data, range, levels]);
   return (
     <section className="chart-panel">
       <div className="chart-heading">
@@ -199,6 +240,18 @@ export function PriceChart({ bars }: { bars: DailyBar[] }) {
         <p className="empty-state">
           Chưa có lịch sử giá; không tạo dữ liệu thay thế.
         </p>
+      )}
+      {levels.length > 0 && (
+        <div className="chart-level-legend" data-testid="chart-plan-levels">
+          {levels
+            .filter((l) => l.price !== null)
+            .map((l) => (
+              <span key={l.id} data-level={l.id}>
+                {l.label}: <b>{l.price!.toLocaleString('vi-VN')}</b>
+              </span>
+            ))}
+          <small>Đường nét đứt và vùng tô màu: kịch bản tham khảo.</small>
+        </div>
       )}
       <p className="chart-footnote">
         MA dùng{' '}

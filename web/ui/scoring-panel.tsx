@@ -15,10 +15,12 @@ export function ScoringPanel({
   symbol,
   priceVnd,
   quoteFetchedAt,
+  onFinancials,
 }: {
   symbol: string;
   priceVnd: number | null;
   quoteFetchedAt: string | null;
+  onFinancials?: (data: FinancialData | null) => void;
 }) {
   const [financials, setFinancials] = useState<FinancialData | null>(null),
     [notices, setNotices] = useState<string[]>([]),
@@ -44,6 +46,7 @@ export function ScoringPanel({
         )
           throw new Error('BCTC trả về sai mã/kiểu.');
         setFinancials(body.financials);
+        onFinancials?.(body.financials);
         setNotices(body.notices);
         setAsOf(new Date().toISOString());
         setLoading(false);
@@ -56,7 +59,7 @@ export function ScoringPanel({
         }
       });
     return () => controller.abort();
-  }, [symbol]);
+  }, [symbol, onFinancials]);
   if (loading)
     return (
       <section className="scoring-section" aria-live="polite">

@@ -410,3 +410,7 @@ Cron intraday/EOD được bảo vệ và chưa tự chạy; điểm kỹ thuậ
 rõ, không chấm history unverified. Giá tham chiếu KBS lưu riêng và có nhãn, không
 đóng giả giá giao dịch VPS. Có `import:evidence` để nhập lịch/sự kiện có nguồn sau
 khi xác minh; không suy ngày nghỉ/KQKD hay đưa fixture vào production.
+
+### Phần 5: vùng giá và quản lý rủi ro
+
+Trang chi tiết mã có vùng mua, TP1–TP3 đủ R:R ≥2, SL theo ATR/đáy/% và trailing stop; mỗi mức có lý do, bước giá và trạng thái so với biên độ phiên. Cảnh báo định giá/RSI/MACD/thanh khoản và giới hạn dữ liệu hiển thị ngay bên dưới. Cài đặt riêng mã/tài khoản lưu trên trình duyệt. Xem [phương pháp và kiểm thử Phần 5](docs/phase5.md); lịch sử chưa xác minh basis nên các vùng hiện là kịch bản tham khảo.

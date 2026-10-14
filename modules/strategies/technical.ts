@@ -137,3 +137,19 @@ export function fibonacci(
     ? { ok: true, value }
     : insufficient();
 }
+
+// Extension of the same upward swing low→high: low + ratio × (high−low).
+export function fibonacciExtension(
+  low?: number | null,
+  high?: number | null,
+): Result<Record<'1.272' | '1.618' | '2.618', number>> {
+  if (!positive(low) || !positive(high) || high <= low) return insufficient();
+  const value = {
+    '1.272': low + (high - low) * 1.272,
+    '1.618': low + (high - low) * 1.618,
+    '2.618': low + (high - low) * 2.618,
+  };
+  return Object.values(value).every(Number.isFinite)
+    ? { ok: true, value }
+    : insufficient();
+}
