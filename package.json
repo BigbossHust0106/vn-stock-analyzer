@@ -42,7 +42,8 @@
     "configure:auth": "node --use-env-proxy --import tsx scripts/configure-phase4-auth.ts",
     "import:evidence": "node --use-env-proxy --import tsx scripts/import-market-evidence.ts",
     "verify:phase4:live": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/verify-phase4-live.ts",
-    "verify:login:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-login.ts"
+    "verify:login:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-login.ts",
+    "verify:ranking-quality:live": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/verify-ranking-quality.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.3",

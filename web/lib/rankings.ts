@@ -5,6 +5,11 @@ export const horizonLabels = {
   quarter: 'Trong quý',
 };
 export interface RankingExplanation {
+  rankingEligibility?: {
+    eligible: boolean;
+    policy: string;
+    blockers: string[];
+  };
   coverage: number;
   confidence: number;
   quoteSource?: string;
@@ -19,10 +24,10 @@ export interface RankingRow {
   name: string;
   exchange: string;
   sector: string | null;
-  position: number;
+  position: number | null;
   as_of: string;
   computed_at: string;
-  score: number;
+  score: number | null;
   explanation: RankingExplanation;
   price_vnd: number | null;
   reference_vnd: number | null;
@@ -30,6 +35,8 @@ export interface RankingRow {
 }
 export interface RankingsResult {
   data: RankingRow[];
+  excluded?: RankingRow[];
+  qualityPolicy?: string;
   run: { as_of: string; computed_at: string; universe_count: number } | null;
   sectors: string[];
 }

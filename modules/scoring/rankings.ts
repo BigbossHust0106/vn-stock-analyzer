@@ -1,5 +1,5 @@
 import type { FinancialData } from '../providers/financial-types';
-import { scoreStock } from './engine';
+import { scoreStock, type QuoteEvidence } from './engine';
 import { availableAnnual } from '../strategies/strategy';
 import { rsi, macd } from '../strategies/technical';
 import { positive } from '../strategies/result';
@@ -30,6 +30,8 @@ export interface RankingInput {
   events: RankingEvent[];
   asOf: string;
   referenceOnly?: boolean;
+  quoteEvidence?: QuoteEvidence;
+  eventsChecked?: boolean;
 }
 function clamp(n: number) {
   return Math.max(0, Math.min(100, n));
@@ -102,6 +104,7 @@ export function rankStock(input: RankingInput) {
     asOf,
     undefined,
     quoteFetchedAt,
+    input.quoteEvidence,
   );
   const annual = availableAnnual(financials, asOf).at(-1);
   const fresh =
@@ -212,6 +215,34 @@ export function rankStock(input: RankingInput) {
             ),
           )
         : null;
+    const financialCoverage =
+      horizon === 'day' ? Number(eligible) : report.coverage;
+    const blockers: string[] = [];
+    if (!eligible)
+      blockers.push('Chưa qua bộ lọc BCTC, giá và vốn hóa tối thiểu.');
+    if (!report.quoteUsable || input.referenceOnly)
+      blockers.push(
+        'Chưa có giá giao dịch với thời điểm nguồn và phiên đã xác minh.',
+      );
+    if (coverage < 1)
+      blockers.push('Thiếu đầu vào cho đủ 100% trọng số của kỳ xếp hạng.');
+    if (horizon !== 'day') {
+      for (const strategy of report.strategies)
+        for (const c of strategy.criteria)
+          if (c.status === 'unknown')
+            blockers.push(strategy.name + ': ' + c.label + '.');
+    }
+    if (horizon === 'month' && !input.eventsChecked)
+      blockers.push(
+        'Chưa xác nhận phạm vi lịch sự kiện; không coi thiếu lịch là không có sự kiện.',
+      );
+    const rankingEligibility = {
+      policy: 'complete-v1',
+      eligible: blockers.length === 0 && financialCoverage === 1,
+      quoteVerified: report.quoteUsable && !input.referenceOnly,
+      financialCoverage,
+      blockers,
+    };
     const reasons =
       horizon === 'day'
         ? [
@@ -244,6 +275,7 @@ export function rankStock(input: RankingInput) {
       inputs_as_of: financials?.fetchedAt ?? asOf,
       explanation: {
         modelVersion: rankingModel,
+        rankingEligibility,
         referenceOnly: input.referenceOnly ?? false,
         components,
         strategies: parts,

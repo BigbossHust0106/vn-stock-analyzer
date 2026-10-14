@@ -216,6 +216,62 @@ function RankingTable({
           </table>
         </div>
       )}
+      {!!result?.excluded?.length && (
+        <details className="ranking-audit" open={result.data.length === 0}>
+          <summary>
+            {result.excluded.length} mã chưa đủ bằng chứng để xếp hạng
+          </summary>
+          <p>
+            Các mã dưới đây vẫn có thể tra cứu và theo dõi. Không gán thứ hạng
+            khi thiếu đầu vào quan trọng; danh sách sắp theo mã.
+          </p>
+          <div className="table-scroll">
+            <table className="ranking-table">
+              <thead>
+                <tr>
+                  <th>Mã / doanh nghiệp</th>
+                  <th>Phần còn thiếu</th>
+                  <th>Theo dõi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {result.excluded.map((row) => (
+                  <tr
+                    key={row.stock_id}
+                    data-testid={'unranked-' + horizon + '-' + row.symbol}
+                  >
+                    <td>
+                      <Link href={'/stocks?symbol=' + row.symbol}>
+                        <strong>{row.symbol}</strong>
+                      </Link>
+                      <span>{row.name}</span>
+                      <small>
+                        {row.exchange} · Bao phủ{' '}
+                        {formatNumber(row.explanation.coverage * 100)}% trọng số
+                      </small>
+                    </td>
+                    <td>
+                      {(
+                        row.explanation.rankingEligibility?.blockers ?? [
+                          'Chưa được kiểm tra theo điều kiện dữ liệu đầy đủ.',
+                        ]
+                      ).map((reason) => (
+                        <p key={reason}>{reason}</p>
+                      ))}
+                    </td>
+                    <td>
+                      <AddWatchButton
+                        stockId={row.stock_id}
+                        symbol={row.symbol}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      )}
       {result && result.data.length > 0 && result.data.length < 10 && (
         <p>
           Chỉ có {result.data.length} mã đủ điều kiện; bảng không bổ sung mã
@@ -241,9 +297,10 @@ export function TopRankings() {
       <span className="eyebrow">SÀNG LỌC CỔ PHIẾU VIỆT NAM</span>
       <h1>Ba góc nhìn. Top 10 cổ phiếu.</h1>
       <p>
-        Điểm trên dữ liệu nguồn thật, trọng số cố định. Tiêu chí chưa xác minh
-        giữ trạng thái không đủ dữ liệu và không phân bổ lại trọng số. Giá cập
-        nhật mỗi 30 giây; điểm tính sau lượt đồng bộ.
+        Chỉ xếp hạng khi đủ 100% đầu vào của kỳ, tiêu chí tài chính bắt buộc và
+        giá giao dịch có bằng chứng thời điểm nguồn. Mã chưa đủ thông tin được
+        liệt kê cùng phần còn thiếu, không dùng điểm tạm để so sánh mã tốt hơn.
+        Giá cập nhật mỗi 30 giây; điểm tính sau lượt đồng bộ.
       </p>
       <div className="ranking-filters">
         <label>

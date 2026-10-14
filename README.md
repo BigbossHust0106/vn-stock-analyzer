@@ -398,6 +398,13 @@ và `SUPABASE_ACCESS_TOKEN` trong môi trường quản trị; tự xóa user/d�
 `finally`, không ghi mật khẩu ra file/log. Không dùng account người dùng để kiểm thử.
 `MARKET_APP_URL` mặc định localhost:8878. SMTP và luồng chấp thuận Google kiểm tra riêng.
 
+Top 10 chỉ xếp hạng khi có đủ đầu vào và bằng chứng giá; các mã thiếu dữ liệu
+được hiển thị riêng, không có thứ hạng. Bảng có thể rỗng khi nguồn chưa đáp ứng.
+DPR đã bổ sung cổ tức/CFO/Capex công ty mẹ từ PDF kiểm toán, kèm trang và hash;
+DCF Buffett vẫn giữ thiếu dữ liệu nếu chưa có Owner Earnings. Xem
+[kiểm tra chất lượng DPR](docs/data-quality-dpr.md). Chạy
+`npm run verify:ranking-quality:live -- --browser` để kiểm tra sau sync/deploy.
+
 Google provider chưa được cấu hình. Lịch phiên/price basis chưa có nguồn xác minh:
 Cron intraday/EOD được bảo vệ và chưa tự chạy; điểm kỹ thuật/volume thiếu được ghi
 rõ, không chấm history unverified. Giá tham chiếu KBS lưu riêng và có nhãn, không

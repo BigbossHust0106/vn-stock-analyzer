@@ -320,3 +320,29 @@ it('Bằng chứng lịch/sự kiện phải có URL nguồn, không đoán ngà
     ),
   ).toThrow();
 });
+
+it('Điểm tạm không được coi là đủ bằng chứng: DPR/DCF thiếu không được vào Top 10', () => {
+  const rows = rankStock(input());
+  for (const row of rows)
+    expect(row.explanation.rankingEligibility.eligible).toBe(false);
+  expect(rows[0]!.value).toBe(32.5); // Momentum50×.35 + quality100×.15; raw arithmetic retained.
+  expect(rows[2]!.explanation.rankingEligibility.blockers.join(' ')).toContain(
+    'DCF',
+  );
+});
+it('Ngày đủ momentum/volume/kỹ thuật và quote nguồn verified mới được xếp hạng; số0 là dữ liệu hợp lệ', () => {
+  const i = input();
+  i.bars = bars();
+  i.quoteEvidence = {
+    verification: 'verified',
+    sourceTimestamp: stamp,
+    sessionDate: '2026-10-14',
+  };
+  const [day, month, quarter] = rankStock(i);
+  expect(day!.explanation.coverage).toBe(1);
+  expect(day!.explanation.rankingEligibility.eligible).toBe(true);
+  expect(month!.explanation.rankingEligibility.eligible).toBe(false);
+  expect(quarter!.explanation.rankingEligibility.eligible).toBe(false);
+  i.referenceOnly = true;
+  expect(rankStock(i)[0]!.explanation.rankingEligibility.eligible).toBe(false);
+});

@@ -32,6 +32,13 @@ do $$ declare dataset jsonb; rowdata jsonb; q public.prices_current%rowtype; ver
   raise exception 'Ratio loss replaced good financials';
  exception when raise_exception then if sqlerrm='Ratio loss replaced good financials' then raise; end if; end;
  if(select payload from public.financial_snapshots where stock_id=q.stock_id)<>dataset then raise exception 'Good snapshot lost'; end if;
+ update public.financial_snapshots set payload=payload||'{"documentEvidence":[{"year":2024}]}'::jsonb where stock_id=q.stock_id;
+ begin
+  update public.financial_snapshots set payload=payload-'documentEvidence' where stock_id=q.stock_id;
+  raise exception 'Primary evidence erased';
+ exception when raise_exception then if sqlerrm<>'Verified document evidence regression' then raise;end if;end;
+ if not exists(select 1 from public.financial_snapshots where stock_id=q.stock_id and payload->'documentEvidence'='[{"year":2024}]'::jsonb) then raise exception 'Document evidence not preserved';end if;
+
 end $$;
 rollback;
 \echo REVIEW SQL PASS: atomic rollback on score failure, exact input versions, stale quote rejected, empty/ratio regression preserves snapshot

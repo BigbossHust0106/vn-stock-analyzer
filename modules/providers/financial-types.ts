@@ -1,3 +1,7 @@
+import {
+  validDocumentEvidence,
+  type DocumentFinancialEvidence,
+} from './document-evidence';
 export interface AnnualFinancials {
   year: number;
   periodEnd: string;
@@ -36,6 +40,7 @@ export interface FinancialData {
   currentShares: number | null;
   annual: AnnualFinancials[];
   notices: string[];
+  documentEvidence?: DocumentFinancialEvidence[];
 }
 
 export const numericFields = [
@@ -76,6 +81,8 @@ export function isFinancialData(value: unknown): value is FinancialData {
     d.supported !== (d.businessType === 1) ||
     !Array.isArray(d.annual) ||
     d.annual.length > 8 ||
+    (d.documentEvidence !== undefined &&
+      !validDocumentEvidence(d.documentEvidence)) ||
     !Array.isArray(d.notices) ||
     !d.notices.every((n) => typeof n === 'string') ||
     (d.currentShares !== null &&
@@ -111,7 +118,12 @@ export function isFinancialData(value: unknown): value is FinancialData {
       return false;
     previous = a.year;
   }
-  return true;
+  return (
+    !d.documentEvidence ||
+    d.documentEvidence.every(
+      (e) => Date.parse(e.verifiedAt) <= Date.parse(d.fetchedAt),
+    )
+  );
 }
 
 // Reject regression rather than combining stale, provenance-incompatible values.
@@ -123,6 +135,13 @@ export function financialRegression(
   if (
     !incoming.annual.length ||
     incoming.annual.at(-1)!.year < previous.annual.at(-1)!.year
+  )
+    return true;
+  if (
+    previous.documentEvidence?.some(
+      (old) =>
+        !incoming.documentEvidence?.some((next) => next.year === old.year),
+    )
   )
     return true;
   return previous.annual.some((old) => {

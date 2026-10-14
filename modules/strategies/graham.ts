@@ -1,3 +1,4 @@
+import { parentEvidence } from '../providers/document-evidence';
 import type { FinancialData } from '../providers/financial-types';
 import { grahamNumber } from './valuation';
 import { marginOfSafety } from '../scoring/margin-of-safety';
@@ -33,7 +34,13 @@ export function graham(
       : null;
   const debt = last?.longTermLiabilitiesVnd;
   const profits = consecutiveSeries(rows, (r) => r.parentProfitVnd),
-    dividends = consecutiveSeries(rows, (r) => r.dividendsPaidVnd);
+    dividends = consecutiveSeries(
+      rows,
+      (r) =>
+        parentEvidence(data?.documentEvidence, r.year, asOf)
+          ?.dividendsPaidVnd ??
+        (r.minorityEquityVnd === 0 ? r.dividendsPaidVnd : null),
+    );
   const criteria = [
     criterion(
       'multiples',
@@ -78,10 +85,8 @@ export function graham(
       'dividends',
       'Có chi trả cổ tức 3 năm liên tiếp',
       10,
-      dividends && rows.slice(-3).every((r) => r.minorityEquityVnd === 0)
-        ? dividends.every(positive)
-        : null,
-      'Dòng tiền cổ tức của tập đoàn chỉ dùng khi không có CĐ thiểu số; còn CĐ thiểu số thì chưa đủ dữ liệu xác định phần chi cho CĐ công ty mẹ. Chưa xác minh chuỗi 20 năm nguyên bản.',
+      dividends ? dividends.every(positive) : null,
+      'Dùng cổ tức đã trả trong BCTC riêng công ty mẹ khi có bằng chứng gốc; chỉ dùng dòng tiền hợp nhất nếu không có CĐ thiểu số. Chưa xác minh chuỗi 20 năm nguyên bản.',
     ),
     criterion(
       'safety',

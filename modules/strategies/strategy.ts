@@ -119,3 +119,20 @@ export function ratio(a: unknown, b: unknown): number | null {
   const v = a / b;
   return Number.isFinite(v) ? v : null;
 }
+
+export function seriesEvidence(
+  rows: AnnualFinancials[],
+  field: keyof AnnualFinancials,
+  scale = 1,
+  unit = '',
+) {
+  return (
+    rows
+      .slice(-3)
+      .map((r) => {
+        const value = r[field];
+        return `${r.year}: ${typeof value === 'number' && Number.isFinite(value) ? (value / scale).toLocaleString('vi-VN', { maximumFractionDigits: 2 }) + unit : 'thiếu dữ liệu'}`;
+      })
+      .join('; ') + '.'
+  );
+}

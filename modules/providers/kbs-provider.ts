@@ -1,3 +1,4 @@
+import { documentEvidenceFor } from './document-evidence';
 import {
   parseKbsReport,
   financialData,
@@ -71,6 +72,7 @@ export class KbsProvider implements DataProvider {
         /* Source capability unavailable; no invented values. */
       }
       const data = financialData(symbol, reports, ratios, now);
+      data.documentEvidence = documentEvidenceFor(symbol, now);
       data.notices.push(...missing);
       return data;
     });

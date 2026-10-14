@@ -1,0 +1,44 @@
+{
+  "symbol": "DPR",
+  "verifiedAt": "2026-10-14T09:11:11Z",
+  "scope": "parent",
+  "unit": "VND",
+  "documents": [
+    {
+      "url": "https://doruco.com.vn/data/upload_file/File/Nam%202025/EN_Annual%20Report%202024%20%28F%29.pdf",
+      "sha256": "a6230821b1145347abe4c43e5c236a3dcf93cf679c638af290ead065204d8a27",
+      "pdfPage": 139,
+      "printedPage": 9,
+      "title": "BCTN 2024, BCTC riêng kiểm toán, lưu chuyển tiền tệ",
+      "observations": [
+        {
+          "year": 2023,
+          "operatingCashFlowVnd": 18240193458,
+          "capexVnd": 68790353188,
+          "dividendsPaidVnd": 130823850850
+        },
+        {
+          "year": 2024,
+          "operatingCashFlowVnd": 251145705262,
+          "capexVnd": 69021280190,
+          "dividendsPaidVnd": 129878461200
+        }
+      ]
+    },
+    {
+      "url": "https://doruco.com.vn/data/upload_file/File/Th%C3%B4ng%20Tin%20C%E1%BB%95%20%C4%90%C3%B4ng%202026/Audited%20Separate%20Financial%20Statements%202025.pdf",
+      "sha256": "49e986c03452e774e035c401646daf39305d5c59c95341ade2c693563cf5bc33",
+      "pdfPage": 11,
+      "printedPage": 9,
+      "title": "BCTC riêng kiểm toán 2025, lưu chuyển tiền tệ",
+      "observations": [
+        {
+          "year": 2025,
+          "operatingCashFlowVnd": 185871276131,
+          "capexVnd": 47675850674,
+          "dividendsPaidVnd": 173304337550
+        }
+      ]
+    }
+  ]
+}

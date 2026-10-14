@@ -47,10 +47,18 @@ export async function rankingsResponse(
     );
     const [
       { data, error },
+      { data: excluded, error: excludedError },
       { data: runs, error: runError },
       { data: sectors, error: sectorError },
     ] = await Promise.all([
       db.rpc('top_rankings', {
+        period: horizon,
+        market,
+        industry,
+        min_cap: min === null ? null : Number(min),
+        max_cap: max === null ? null : Number(max),
+      }),
+      db.rpc('ranking_candidates', {
         period: horizon,
         market,
         industry,
@@ -65,10 +73,13 @@ export async function rankingsResponse(
         .limit(1),
       db.from('stocks').select('sector').not('sector', 'is', null).limit(1000),
     ]);
-    if (error || runError || sectorError) throw new Error('Read failed');
+    if (error || excludedError || runError || sectorError)
+      throw new Error('Read failed');
     return Response.json(
       {
         data,
+        excluded,
+        qualityPolicy: 'complete-v1',
         run: runs?.[0] ?? null,
         sectors: [
           ...new Set((sectors ?? []).map((s) => s.sector as string)),

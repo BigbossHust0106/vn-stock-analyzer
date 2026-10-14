@@ -174,6 +174,14 @@ async function main() {
         ),
         'Score/mã không hợp lệ',
       );
+      assert(
+        data.every(
+          (row: {
+            explanation: { rankingEligibility?: { eligible?: boolean } };
+          }) => row.explanation.rankingEligibility?.eligible === true,
+        ),
+        'Top10 chứa mã chưa đủ bằng chứng',
+      );
       console.log(
         `TOP10 HOSTED PASS: ${horizon}, ${data.length} rows từ rankings/scores thật`,
       );

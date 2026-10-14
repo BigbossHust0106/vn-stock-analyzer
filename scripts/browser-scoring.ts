@@ -44,7 +44,9 @@ try {
     const decision = await page.getByTestId('score-conclusion').innerText();
     if (decision !== 'Quan sát')
       throw new Error('Insufficient evidence unexpectedly recommends purchase');
-    await page.getByText('Số liệu tài chính năm 2025', { exact: true }).click();
+    await page.locator('details.financial-table').evaluate((el) => {
+      (el as HTMLDetailsElement).open = true;
+    });
     if (
       !(await page.locator('.financial-table table').innerText()).includes(
         'EPS năm',
@@ -174,7 +176,9 @@ try {
     'SCORING BROWSER PASS: settings100/0 persists across reload; actual combined score equals Graham',
   );
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByText('Số liệu tài chính năm 2025', { exact: true }).click();
+  await page.locator('details.financial-table').evaluate((el) => {
+    (el as HTMLDetailsElement).open = true;
+  });
   if (
     await page.evaluate(
       () => document.documentElement.scrollWidth > window.innerWidth,

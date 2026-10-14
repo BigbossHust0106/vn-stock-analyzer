@@ -113,6 +113,7 @@ export function scoreStock(
   ];
   return {
     modelVersion: 'graham-buffett-v2-review',
+    quoteUsable: validQuote,
     quoteEvidence: {
       fetchedAt: quoteFetchedAt,
       sourceTimestamp,

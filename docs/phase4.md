@@ -10,6 +10,21 @@ Chỉ mang tính tham khảo, không phải lời khuyên đầu tư.
 - `/top10`: ba bảng cùng trang; sàn, phân ngành KBS, vốn hóa; lọc **trước** lấy 10 dòng. Hiển thị điểm thành phần, mức bao phủ, độ tin cậy, 3 dòng giải thích, thời gian nhận giá và thêm vào danh sách được chọn.
 - Watchlist: tạo/đổi tên/xóa nhiều danh sách; thêm/xóa mã, ghi chú tối đa 2.000 ký tự, giá mục tiêu VND. Xóa danh sách cascade mã. Thêm mã trùng không ghi đè ghi chú/giá đã lưu. Giá refresh 30 giây khi tab hiển thị; điểm so với ngày xếp hạng trước, không giả điểm cũ khi chưa có.
 
+## Điều kiện đủ bằng chứng trước khi xếp hạng
+
+Từ bản sửa DPR, điểm tạm và thứ hạng là hai trạng thái khác nhau. `rankings` và
+RPC `top_rankings` chỉ nhận các dòng có `rankingEligibility.policy=complete-v1`,
+đủ 100% trọng số kỳ, đủ tiêu chí tài chính bắt buộc và giá giao dịch đã xác minh
+thời điểm nguồn/phiên. Ngày dùng lọc cơ bản tối thiểu; tháng/quý yêu cầu toàn bộ
+tiêu chí Graham/Buffett, tháng thêm phạm vi lịch sự kiện đã kiểm tra. Không dùng
+`fetchedAt` để tự nâng bằng chứng giá. Không được tăng coverage hoặc điền số để đủ 10.
+
+`ranking_candidates` trả danh sách chưa đủ đầu vào, sắp theo mã và không có vị trí.
+Giao diện vẫn cho xem chi tiết, nguồn và thêm theo dõi; không gọi đây là Top 10.
+Nguồn hiện tại chưa đủ điều kiện nên bảng hạng có thể rỗng, `system_status` là
+`degraded`; giữ điểm tạm để truy nguyên. Migration loại các vị trí cũ không đạt
+nhưng giữ lại scores và đầu vào. Xem [đối chiếu DPR và bằng chứng PDF](data-quality-dpr.md).
+
 ## Mô hình và giới hạn dữ liệu
 
 `modules/market/ranking-universe.ts` cấu hình 35 ứng viên; `SYNC_SYMBOLS` có thể ghi đè (tối đa 50/lượt). Đây là sàng lọc trên universe có BCTC, **chưa phải quét cơ bản toàn bộ 1.522 mã**. Ngân hàng/chứng khoán/bảo hiểm tiếp tục chưa được engine Phần 3 hỗ trợ.

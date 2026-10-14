@@ -9,6 +9,7 @@ import {
   consecutiveSeries,
   criterion,
   strategyResult,
+  seriesEvidence,
 } from './strategy';
 export function ownerEarningsDcf(
   earningsVnd: number | null,
@@ -76,14 +77,16 @@ export function buffett(
       'ROE > 15%, ổn định 3 năm',
       20,
       stableHigh(roe, 0.15),
-      'ROE năm trên vốn chủ bình quân; chênh lệch cao nhất/thấp nhất ≤ 5 điểm phần trăm.',
+      seriesEvidence(rows, 'roe', 0.01, '%') +
+        ' ROE năm trên vốn chủ bình quân; chênh lệch cao nhất/thấp nhất ≤ 5 điểm phần trăm.',
     ),
     criterion(
       'roic',
       'ROIC > 15%',
       15,
       last?.roic == null ? null : last.roic > 0.15,
-      'ROIC năm theo Vietcap RATIO_YEAR; không thay ROIC bằng ROCE. Định nghĩa vốn đầu tư chưa đối chiếu báo cáo gốc.',
+      seriesEvidence(rows.slice(-1), 'roic', 0.01, '%') +
+        ' ROIC năm theo Vietcap RATIO_YEAR; không thay ROIC bằng ROCE. Định nghĩa vốn đầu tư chưa đối chiếu báo cáo gốc.',
     ),
     criterion(
       'margins',
@@ -92,7 +95,11 @@ export function buffett(
       gross && net
         ? stableHigh(gross, 0.2) === true && stableHigh(net, 0.1) === true
         : null,
-      'Đối chiếu 3 năm liên tiếp; độ dao động mỗi biên ≤ 5 điểm phần trăm. Đây là ngưỡng ứng dụng, không phải quy tắc chung của Buffett.',
+      'Biên gộp ' +
+        seriesEvidence(rows, 'grossMargin', 0.01, '%') +
+        ' Biên ròng ' +
+        seriesEvidence(rows, 'netMargin', 0.01, '%') +
+        ' Độ dao động mỗi biên ≤ 5 điểm phần trăm; đây là ngưỡng ứng dụng.',
     ),
     criterion(
       'debt',
@@ -101,21 +108,24 @@ export function buffett(
       last?.debtToEquity == null
         ? null
         : last.debtToEquity >= 0 && last.debtToEquity < 0.5,
-      'Dùng nợ vay, không trộn với toàn bộ nợ phải trả.',
+      seriesEvidence(rows.slice(-1), 'debtToEquity', 0.01, '%') +
+        ' Dùng nợ vay, không trộn với toàn bộ nợ phải trả.',
     ),
     criterion(
       'fcf',
       'FCF dương và tăng 3 năm liên tiếp',
       15,
       growing(fcf),
-      'FCF = CFO − tiền đầu tư TSCĐ/tài sản dài hạn. Không gọi FCF này là FCFE.',
+      seriesEvidence(rows, 'freeCashFlowVnd', 1e9, ' tỷ VND') +
+        ' FCF = CFO − tiền đầu tư TSCĐ/tài sản dài hạn. Không gọi FCF này là FCFE.',
     ),
     criterion(
       'growth',
       'Lợi nhuận công ty mẹ tăng bền vững',
       10,
       growing(earnings),
-      'Lợi nhuận dương và tăng từng năm trong 3 năm liên tiếp; không coi doanh thu tăng là lợi nhuận tăng.',
+      seriesEvidence(rows, 'parentProfitVnd', 1e9, ' tỷ VND') +
+        ' Lợi nhuận dương và tăng từng năm; không coi doanh thu tăng là lợi nhuận tăng.',
     ),
     criterion(
       'dcf',
