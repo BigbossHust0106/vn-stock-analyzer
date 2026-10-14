@@ -14,15 +14,13 @@ async function main() {
   const stocks = await provider.catalog.fetchStocks();
   if (stocks.length < 100)
     throw new Error('Danh mục quá ngắn, không ghi đè catalog');
-  for (let start = 0; start < stocks.length; start += 300) {
-    const rows = stocks.slice(start, start + 300).map((s) => ({
-      ...s,
-      search_text: normalizeSearch(s.symbol + ' ' + s.name),
-    }));
-    await databaseQuery(
-      `insert into public.stocks(symbol,name,exchange,source,source_verified_at,search_text) select r.symbol,r.name,r.exchange::public.exchange_code,r.source,r."fetchedAt"::timestamptz,r.search_text from jsonb_to_recordset(${sqlJson(rows)}) as r(symbol text,name text,exchange text,source text,"fetchedAt" text,search_text text) on conflict(symbol) do update set name=excluded.name,exchange=excluded.exchange,source=excluded.source,source_verified_at=excluded.source_verified_at,search_text=excluded.search_text;`,
-    );
-  }
+  const rows = stocks.map((s) => ({
+    ...s,
+    search_text: normalizeSearch(s.symbol + ' ' + s.name),
+  }));
+  await databaseQuery(
+    `select public.reconcile_stock_catalog(${sqlJson(rows)},true,'${stocks[0]!.fetchedAt}'::timestamptz);`,
+  );
   console.log(
     `CATALOG SYNC PASS: ${stocks.length} cổ phiếu thật từ KBS (HOSE/HNX/UPCOM)`,
   );

@@ -8,9 +8,30 @@ try {
     viewport: { width: 1280, height: 900 },
   });
   const errors: string[] = [];
+  // A stock detail may await three providers, each with bounded retries.
+  // Financials are requested only after that response, not on initial navigation.
+  page.setDefaultTimeout(300000);
   page.on('pageerror', (e) => errors.push(e.message));
   for (const symbol of ['VNM', 'FPT', 'HPG']) {
+    const financialResponse = page.waitForResponse(
+      (r) =>
+        new URL(r.url()).pathname === '/v1/financials/' + symbol &&
+        r.status() === 200,
+      { timeout: 300000 },
+    );
+    const marketResponse = page.waitForResponse(
+      (r) =>
+        new URL(r.url()).pathname === '/v1/stocks/' + symbol &&
+        r.status() === 200,
+      { timeout: 300000 },
+    );
     await page.goto(base + '/stocks?symbol=' + symbol);
+    const financial = (await (await financialResponse).json()) as {
+      financials: import('../modules/providers/financial-types').FinancialData;
+    };
+    const market = (await (await marketResponse).json()) as {
+      quote: { lastPriceVnd: number | null };
+    };
     await page.getByTestId('scoring-panel').waitFor({ timeout: 120000 });
     for (const id of ['graham', 'buffett'])
       await page.getByTestId('strategy-' + id).waitFor();
@@ -27,12 +48,98 @@ try {
       )
     )
       throw new Error('Missing annual EPS');
+    const last = financial.financials.annual.at(-1)!;
+    const eps2025: Record<string, number> = { VNM: 4028, FPT: 5216, HPG: 1973 };
+    if (last.year === 2025 && last.epsAnnualVnd !== eps2025[symbol])
+      throw new Error(
+        'Annual EPS differs from recorded independent fixture evidence',
+      );
+    const epsLabel =
+      last.epsAnnualVnd === null
+        ? '—'
+        : last.epsAnnualVnd.toLocaleString('vi-VN', {
+            maximumFractionDigits: 2,
+          });
+    if (
+      (await page
+        .getByTestId('financial-epsAnnualVnd')
+        .locator('td')
+        .last()
+        .innerText()) !== epsLabel
+    )
+      throw new Error('Rendered EPS unit/value mismatch');
+    const proxy =
+      last.operatingCashFlowVnd !== null && last.capexVnd !== null
+        ? last.operatingCashFlowVnd - last.capexVnd
+        : null;
+    if (proxy !== null && proxy > 0 && financial.financials.currentShares) {
+      // Independent DCF: default g5%, equity rate12%, terminal2%, five years; no engine imports.
+      let pv = 0;
+      for (let t = 1; t <= 5; t++) pv += (proxy * 1.05 ** t) / 1.12 ** t;
+      pv += (proxy * 1.05 ** 5 * 1.02) / (0.12 - 0.02) / 1.12 ** 5;
+      const value = pv / financial.financials.currentShares;
+      const expected =
+        value.toLocaleString('vi-VN', { maximumFractionDigits: 0 }) + ' VND';
+      if (
+        (await page.getByTestId('dcf-scenario-value').innerText()) !== expected
+      )
+        throw new Error('DCF scenario arithmetic mismatch');
+      if (market.quote?.lastPriceVnd) {
+        const mos =
+          (((value - market.quote.lastPriceVnd) / value) * 100).toFixed(1) +
+          '%';
+        if ((await page.getByTestId('dcf-scenario-mos').innerText()) !== mos)
+          throw new Error('Scenario MOS mismatch');
+      }
+    } else if (
+      (await page.getByTestId('dcf-scenario-value').innerText()) !==
+      'Không đủ dữ liệu'
+    )
+      throw new Error('Invalid/non-positive CFO scenario unexpectedly valued');
+    if (
+      (await page
+        .getByTestId('criterion-buffett-dcf')
+        .getAttribute('data-status')) !== 'unknown' ||
+      (await page.getByTestId('intrinsic-buffett').innerText()) !==
+        'Không đủ dữ liệu'
+    )
+      throw new Error(
+        'Unverified consolidated cashflow used as parent valuation',
+      );
+    const comparable =
+      last.sharesOutstanding !== null &&
+      last.sharesOutstanding === financial.financials.currentShares;
+    if (
+      comparable &&
+      last.epsAnnualVnd !== null &&
+      last.epsAnnualVnd > 0 &&
+      last.bvpsVnd !== null &&
+      last.bvpsVnd > 0
+    ) {
+      const value = Math.sqrt(22.5 * last.epsAnnualVnd * last.bvpsVnd);
+      if (
+        (await page.getByTestId('intrinsic-graham').innerText()) !==
+        value.toLocaleString('vi-VN', { maximumFractionDigits: 0 }) + ' VND'
+      )
+        throw new Error('Graham Number arithmetic mismatch');
+      if (market.quote?.lastPriceVnd) {
+        const mos =
+          (((value - market.quote.lastPriceVnd) / value) * 100).toFixed(1) +
+          '%';
+        if ((await page.getByTestId('mos-graham').innerText()) !== mos)
+          throw new Error('Graham MOS mismatch');
+      }
+    } else if (
+      (await page.getByTestId('intrinsic-graham').innerText()) !==
+      'Không đủ dữ liệu'
+    )
+      throw new Error('Graham missing-share guard not rendered');
     await page.screenshot({
       path: `.cache/screenshots/${symbol}-scoring.png`,
       fullPage: true,
     });
     console.log(
-      `SCORING BROWSER PASS: ${symbol}, score ${score.replace(/\s+/g, ' ')}, ${decision}, both strategies/criteria/intrinsic/MOS/yearly financials`,
+      `SCORING BROWSER PASS: ${symbol}, score ${score.replace(/\s+/g, ' ')}, ${decision}, annual EPS numeric/unit; Graham and scenarioDCF/MOS arithmetic or missing-data guard; parent DCF unknown`,
     );
   }
   await page.goto(base + '/settings');
@@ -51,7 +158,7 @@ try {
       '100',
   );
   await page.goto(base + '/stocks?symbol=VNM');
-  await page.getByTestId('scoring-panel').waitFor({ timeout: 120000 });
+  await page.getByTestId('scoring-panel').waitFor({ timeout: 300000 });
   await page.getByText('Graham 100% · Buffett 0%', { exact: true }).waitFor();
   const score = await page.getByTestId('combined-score').innerText();
   const graham = await page

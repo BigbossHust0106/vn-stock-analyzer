@@ -58,12 +58,18 @@ export function buffett(
     Number.isFinite(capex)
       ? cash - capex * settings.maintenanceCapexFraction
       : null;
-  const intrinsic = ownerEarningsDcf(
+  const scenarioValue = ownerEarningsDcf(
       proxy,
       data?.currentShares ?? null,
       settings,
     ),
-    mos = marginOfSafety(intrinsic.ok ? intrinsic.value : null, priceVnd);
+    scenarioMargin = marginOfSafety(
+      scenarioValue.ok ? scenarioValue.value : null,
+      priceVnd,
+    );
+  // No provider supplies verified parent Owner Earnings; never allocate by NCI equity.
+  const intrinsic = insufficient(),
+    mos = insufficient();
   const criteria = [
     criterion(
       'roe',
@@ -115,16 +121,25 @@ export function buffett(
       'dcf',
       'Giá thấp hơn DCF ước tính, biên an toàn ≥ 25%',
       10,
-      mos.ok ? mos.value >= 0.25 : null,
+      null,
       'DCF chiết khấu proxy CFO − vốn đầu tư duy trì giả định. Chưa tách tiền của CĐ thiểu số; không phải Owner Earnings đã xác minh.',
     ),
   ];
-  return strategyResult(
-    'buffett',
-    'Warren Buffett',
-    criteria,
-    intrinsic,
-    mos,
-    'DCF ước tính · proxy CFO − Capex duy trì',
-  );
+  return {
+    ...strategyResult(
+      'buffett',
+      'Warren Buffett',
+      criteria,
+      intrinsic,
+      mos,
+      'DCF công ty mẹ · chưa xác minh dòng tiền',
+    ),
+    scenario: {
+      label:
+        'Kịch bản proxy CFO hợp nhất − Capex duy trì; không dùng chấm điểm',
+      valueVnd: scenarioValue,
+      marginOfSafety: scenarioMargin,
+      usableForScoring: false as const,
+    },
+  };
 }

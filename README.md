@@ -111,10 +111,12 @@ Mặc định đồng bộ toàn bộ catalog và 3 năm history/quote cho VNM/F
 `SYNC_SYMBOLS` chọn tối đa 50 mã mỗi lượt. Các mã khác tải history khi mở trang;
 Worker ghi cache Supabase khi có service_role, bằng RPC kiểm tra quyền và chống
 snapshot cũ ghi đè. Cron `0 9 * * 1-5` (16:00 Việt Nam) cập nhật catalog và nhóm
-mã cấu hình; không có history hoặc lỗi ghi dữ liệu thì không báo success.
+mã cấu hình khi lịch phiên xác nhận mở và đã qua `closes_at`; thiếu lịch/ngày nghỉ
+thì bỏ tải. Lỗi từng nguồn được ghi degraded và giữ dữ liệu cũ.
 Cron này chỉ lưu dữ liệu nguồn, không tạo ngày giao dịch hay đánh dấu phiên đóng.
 `prices_history` giữ `price_basis=unverified`; chưa đưa vào scoring hoặc
-`prices_daily` vốn yêu cầu cơ sở giá/lịch phiên đã xác minh. Phiên hôm nay chưa final.
+`prices_daily` vốn yêu cầu cơ sở giá/lịch phiên đã xác minh. Mọi bar nguồn hiện tại
+đều chưa xác minh finality, kể cả ngày đã qua.
 
 Ngày 13/10/2026 đã chạy migration thật trên project Supabase được cung cấp:
 1.522 mã (HOSE 406, HNX 299, UPCOM 817); 746 bar/mã VNM, FPT, HPG;
@@ -369,7 +371,8 @@ Lưu bảng `fundamentals`, `financial_snapshots`, điểm mặc định `scores
 RLS. Cron16:00 Việt Nam sau sync thị trường đồng bộ BCTC nhóm SYNC_SYMBOLS.
 Xem [nguồn/đơn vị](docs/data-sources.md) và [định nghĩa engine](docs/scoring-engine.md).
 Chỉ dùng BCTC năm hợp nhất đã kiểm toán theo metadata, 3 năm để sàng lọc rút gọn;
-DCF là proxy CFO−Capex với giả định, chưa phải Owner Earnings được chứng nhận.
+DCF proxy CFO−Capex chỉ là kịch bản riêng, không dùng chấm điểm. DCF công ty mẹ
+và biên an toàn Buffett trả “không đủ dữ liệu” đến khi xác minh dòng tiền mẹ.
 Nguồn chưa đối chiếu PDF gốc: confidence bị giới hạn, kết luận giữ Quan sát.
 
 ## Phần 4: Top 10, Auth, Watchlist

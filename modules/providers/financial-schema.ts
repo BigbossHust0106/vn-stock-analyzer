@@ -133,18 +133,18 @@ export function parseVciFinancialRatios(
       if (seen.has(key)) throw new Error('Vietcap: ratios trùng kỳ');
       seen.add(key);
       if (
-        r.numberOfSharesMktCap !== null &&
+        r.numberOfSharesMktCap != null &&
         (!Number.isSafeInteger(r.numberOfSharesMktCap) ||
           Number(r.numberOfSharesMktCap) <= 0)
       )
         throw new Error('Vietcap: số cổ phiếu sai kiểu');
-      if (r.roic !== null && !finite(r.roic))
+      if (r.roic != null && !finite(r.roic))
         throw new Error('Vietcap: ROIC sai kiểu');
       return {
         year: Number(r.yearReport),
         quarter: Number(r.quarter),
-        shares: r.numberOfSharesMktCap as number | null,
-        roic: r.roic as number | null,
+        shares: (r.numberOfSharesMktCap ?? null) as number | null,
+        roic: (r.roic ?? null) as number | null,
       };
     })
     .filter(
@@ -174,26 +174,34 @@ export function financialData(
     cf = periodMap('LCTT'),
     ratiosKbs = periodMap('CSTC');
   const annual: AnnualFinancials[] = [];
-  const businessType = reports.KQKD.at(0)?.businessType ?? -1;
-  for (const income of reports.KQKD) {
-    const b = bs.get(income.year),
-      cash = cf.get(income.year),
-      rk = ratiosKbs.get(income.year);
-    if (!b || !cash || !rk) continue;
-    if (
-      ![income, b, cash].every(
-        (r) => r.businessType === businessType && r.consolidated && r.audited,
-      )
-    )
-      continue;
+  const businessType =
+    [...reports.KQKD, ...reports.CDKT, ...reports.LCTT].at(0)?.businessType ??
+    -1;
+  const incomes = periodMap('KQKD');
+  const years = [
+    ...new Set([...incomes.keys(), ...bs.keys(), ...cf.keys()]),
+  ].sort((a, b) => a - b);
+  for (const year of years) {
+    const accepted = (r: ReportPeriod | undefined) =>
+      r?.businessType === businessType && r.consolidated && r.audited
+        ? r
+        : undefined;
+    const income = accepted(incomes.get(year)),
+      b = accepted(bs.get(year)),
+      cash = accepted(cf.get(year)),
+      rk = ratiosKbs.get(year);
+    const evidence = [income, b, cash].filter(
+      (r): r is ReportPeriod => r !== undefined,
+    );
+    if (!evidence.length) continue;
     const read = (
-      r: ReportPeriod,
+      r: ReportPeriod | undefined,
       id: number,
       expected: RegExp,
       unit: string | null,
       scale = 1000,
     ): number | null => {
-      const row = r.rows.get(id);
+      const row = r?.rows.get(id);
       if (!row) return null;
       if (!expected.test(row.name) || row.unit !== unit)
         throw new Error(`KBS: chỉ tiêu ${id} đã thay đổi nhãn/đơn vị`);
@@ -203,13 +211,12 @@ export function financialData(
         throw new Error(`KBS: chỉ tiêu ${id} vượt giới hạn sau đổi đơn vị`);
       return value;
     };
-    const money = (r: ReportPeriod, id: number, label: RegExp) =>
+    const money = (r: ReportPeriod | undefined, id: number, label: RegExp) =>
       read(r, id, label, null);
     const percent = (id: number, label: RegExp) =>
       read(rk, id, label, '%', 0.01);
     const shares =
-      ratios.find((r) => r.year === income.year && r.quarter === 5)?.shares ??
-      null;
+      ratios.find((r) => r.year === year && r.quarter === 5)?.shares ?? null;
     const equity = money(b, 2998, /VỐN CHỦ SỞ HỮU/),
       minority = money(b, 5320, /không kiểm soát/);
     const operating = money(cash, 2234, /thuần từ hoạt động kinh doanh/),
@@ -220,9 +227,9 @@ export function financialData(
     if (dividends !== null && dividends > 0)
       throw new Error('KBS: cổ tức đảo dấu');
     annual.push({
-      year: income.year,
-      periodEnd: `${income.year}-12-31`,
-      publishedAt: [income, b, cash, rk]
+      year,
+      periodEnd: `${year}-12-31`,
+      publishedAt: [...evidence, ...(rk ? [rk] : [])]
         .map((r) => r.publishedAt)
         .sort()
         .at(-1)!,
@@ -242,8 +249,7 @@ export function financialData(
       roe: percent(45, /ROEA/),
       roa: percent(47, /ROAA/),
       roic:
-        ratios.find((r) => r.year === income.year && r.quarter === 5)?.roic ??
-        null,
+        ratios.find((r) => r.year === year && r.quarter === 5)?.roic ?? null,
       grossMargin: percent(41, /lợi nhuận gộp/),
       netMargin: percent(44, /doanh thu thuần/),
       debtToEquity: percent(11, /Nợ vay trên Vốn chủ sở hữu/),

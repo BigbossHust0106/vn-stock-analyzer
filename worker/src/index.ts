@@ -195,10 +195,12 @@ export default {
       );
       return;
     }
-    if (controller.cron !== '30 8 * * 1-5') {
+    if (controller.cron === '0 9 * * 1-5') {
       context.waitUntil(
-        syncMarket(env)
-          .then(() => syncRankings(env))
+        syncMarket(env, controller.scheduledTime)
+          .then((synced) =>
+            synced ? syncRankings(env, controller.scheduledTime) : undefined,
+          )
           .catch(() => {
             console.error(
               'Đồng bộ thị trường thất bại; kiểm tra cấu hình và nguồn',
@@ -208,6 +210,7 @@ export default {
       );
       return;
     }
+    if (controller.cron !== '30 8 * * 1-5') return;
     context.waitUntil(
       ingest(env, controller.scheduledTime).catch(() => {
         console.error(

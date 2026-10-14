@@ -38,7 +38,7 @@ export interface FinancialData {
   notices: string[];
 }
 
-const numericFields = [
+export const numericFields = [
   'revenueVnd',
   'netProfitVnd',
   'parentProfitVnd',
@@ -112,4 +112,23 @@ export function isFinancialData(value: unknown): value is FinancialData {
     previous = a.year;
   }
   return true;
+}
+
+// Reject regression rather than combining stale, provenance-incompatible values.
+export function financialRegression(
+  previous: FinancialData | null,
+  incoming: FinancialData,
+): boolean {
+  if (!previous?.annual.length) return false;
+  if (
+    !incoming.annual.length ||
+    incoming.annual.at(-1)!.year < previous.annual.at(-1)!.year
+  )
+    return true;
+  return previous.annual.some((old) => {
+    const next = incoming.annual.find((r) => r.year === old.year);
+    return (
+      !!next && numericFields.some((k) => old[k] !== null && next[k] === null)
+    );
+  });
 }

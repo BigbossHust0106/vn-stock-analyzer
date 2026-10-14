@@ -89,3 +89,89 @@ it('RPC lỗi không ghi success, không suy ra lịch sử', async () => {
   );
   expect(calls.some((c) => c.url.includes('system_status'))).toBe(false);
 });
+
+it.each([
+  ['closed', false, '2026-10-12T08:00:00Z'],
+  ['missing', null, null],
+  ['before-close', true, '2026-10-12T10:00:00Z'],
+])(
+  'Review4/8 cron16:00 %s không gọi catalog/quotes/BCTC',
+  async (_label, isOpen, close) => {
+    const { default: worker } = await import('../../worker/src/index');
+    const calls: string[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn<typeof fetch>(async (input) => {
+        const url = String(input);
+        calls.push(url);
+        if (url.includes('/trading_sessions'))
+          return Response.json(
+            isOpen === null
+              ? null
+              : {
+                  session_date: '2026-10-12',
+                  is_open: isOpen,
+                  closes_at: close,
+                },
+          );
+        throw new Error('Cron should not call provider');
+      }),
+    );
+    const jobs: Promise<unknown>[] = [];
+    worker.scheduled(
+      {
+        cron: '0 9 * * 1-5',
+        scheduledTime: Date.parse('2026-10-12T09:00:00Z'),
+      } as ScheduledController,
+      env,
+      {
+        waitUntil: (p) => {
+          jobs.push(p);
+        },
+      },
+    );
+    await Promise.all(jobs);
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toContain('/trading_sessions');
+  },
+);
+it('Review4 cron chưa khai báo không đồng bộ ngoài ý muốn', async () => {
+  const { default: worker } = await import('../../worker/src/index');
+  const waitUntil = vi.fn();
+  worker.scheduled(
+    {
+      cron: '* * * * *',
+      scheduledTime: Date.parse('2026-10-12T09:00:00Z'),
+    } as ScheduledController,
+    env,
+    { waitUntil },
+  );
+  expect(waitUntil).not.toHaveBeenCalled();
+});
+it.each(['*/5 2-8 * * 1-5', '15 8 * * 1-5'])(
+  'Review4/8: cron Phase4 %s bỏ toàn bộ tải khi ngày nghỉ',
+  async (cron) => {
+    const { default: worker } = await import('../../worker/src/index');
+    const fetcher = vi.fn<typeof fetch>(async () =>
+      Response.json({
+        session_date: '2026-10-12',
+        is_open: false,
+        closes_at: null,
+      }),
+    );
+    vi.stubGlobal('fetch', fetcher);
+    const jobs: Promise<unknown>[] = [];
+    worker.scheduled(
+      { cron, scheduledTime: timestamp } as ScheduledController,
+      env,
+      {
+        waitUntil: (p) => {
+          jobs.push(p);
+        },
+      },
+    );
+    await Promise.all(jobs);
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(String(fetcher.mock.calls[0]![0])).toContain('/trading_sessions');
+  },
+);

@@ -19,6 +19,12 @@ export interface StrategyScore {
   intrinsicVnd: Result<number>;
   marginOfSafety: Result<number>;
   valuationLabel: string;
+  scenario?: {
+    label: string;
+    valueVnd: Result<number>;
+    marginOfSafety: Result<number>;
+    usableForScoring: false;
+  };
 }
 export function criterion(
   id: string,

@@ -5,6 +5,7 @@ import deployment from '../../../config/public-deployment.json';
 import { marketProviders } from './market';
 import { symbolValue } from '../../../modules/providers/market-schema';
 import {
+  financialRegression,
   isFinancialData,
   type FinancialData,
 } from '../../../modules/providers/financial-types';
@@ -60,8 +61,13 @@ export async function financialResponse(
     const notices: string[] = [];
     if (!stored || Date.now() - Date.parse(stored.fetched_at) > 86400000) {
       try {
-        financials =
+        const candidate =
           await marketProviders(env).fundamentals.fetchFinancials(symbol);
+        if (financialRegression(financials, candidate))
+          notices.push(
+            'BCTC mới thiếu dữ liệu so với bản đã lưu; giữ snapshot tốt, không ghi đè.',
+          );
+        else financials = candidate;
       } catch {
         notices.push(
           financials
@@ -70,11 +76,12 @@ export async function financialResponse(
         );
       }
     }
-    const { data: quote } = await db
+    const { data: quote, error: quoteError } = await db
       .from('prices_current')
-      .select('last_price_vnd,fetched_at')
+      .select('last_price_vnd,fetched_at,version')
       .eq('stock_id', stock.id)
       .maybeSingle();
+    if (quoteError) throw new Error('Quote read unavailable');
     const asOf = new Date().toISOString();
     const report = scoreStock(
       financials,
@@ -90,7 +97,13 @@ export async function financialResponse(
         { auth: { persistSession: false, autoRefreshToken: false } },
       );
       context.waitUntil(
-        persistFinancials(writer, stock.id, financials, report).catch(() => {
+        persistFinancials(
+          writer,
+          stock.id,
+          financials,
+          report,
+          quote?.version ?? null,
+        ).catch(() => {
           console.error(
             'Không lưu được BCTC/điểm mặc định; kiểm tra migration/quyền.',
           );

@@ -6,8 +6,7 @@ import {
   isFinancialData,
   type FinancialData,
 } from '../../modules/providers/financial-types';
-import { defaultSettings } from '../../modules/settings/scoring-settings';
-import { readSettings } from '../lib/scoring-settings';
+import { useScoringSettings } from '../lib/scoring-settings';
 import { marketJson } from '../lib/market-client';
 const money = (n: number) =>
   n.toLocaleString('vi-VN', { maximumFractionDigits: 0 });
@@ -23,18 +22,8 @@ export function ScoringPanel({
   const [financials, setFinancials] = useState<FinancialData | null>(null),
     [notices, setNotices] = useState<string[]>([]),
     [loading, setLoading] = useState(true),
-    [settings, setSettings] = useState(defaultSettings),
     [asOf, setAsOf] = useState('');
-  useEffect(() => {
-    const update = () => setSettings(readSettings());
-    update();
-    window.addEventListener('scoring-settings-changed', update);
-    window.addEventListener('storage', update);
-    return () => {
-      window.removeEventListener('scoring-settings-changed', update);
-      window.removeEventListener('storage', update);
-    };
-  }, []);
+  const settings = useScoringSettings();
   useEffect(() => {
     const controller = new AbortController();
     marketJson(
@@ -135,7 +124,7 @@ export function ScoringPanel({
             </div>
             <p>
               Giá trị nội tại:{' '}
-              <b>
+              <b data-testid={`intrinsic-${s.id}`}>
                 {s.intrinsicVnd.ok
                   ? money(s.intrinsicVnd.value) + ' VND'
                   : 'Không đủ dữ liệu'}
@@ -143,16 +132,41 @@ export function ScoringPanel({
             </p>
             <p>
               Biên an toàn:{' '}
-              <b>
+              <b data-testid={`mos-${s.id}`}>
                 {s.marginOfSafety.ok
                   ? (s.marginOfSafety.value * 100).toFixed(1) + '%'
                   : 'Không đủ dữ liệu'}
               </b>
             </p>
             <small>{s.valuationLabel}</small>
+            {s.scenario && (
+              <div className="data-warning">
+                <p>{s.scenario.label}</p>
+                <p>
+                  Giá trị kịch bản:{' '}
+                  <b data-testid="dcf-scenario-value">
+                    {s.scenario.valueVnd.ok
+                      ? money(s.scenario.valueVnd.value) + ' VND'
+                      : 'Không đủ dữ liệu'}
+                  </b>
+                </p>
+                <p>
+                  Biên kịch bản:{' '}
+                  <b data-testid="dcf-scenario-mos">
+                    {s.scenario.marginOfSafety.ok
+                      ? (s.scenario.marginOfSafety.value * 100).toFixed(1) + '%'
+                      : 'Không đủ dữ liệu'}
+                  </b>
+                </p>
+              </div>
+            )}
             <ul className="criteria-list">
               {s.criteria.map((c) => (
-                <li key={c.id}>
+                <li
+                  key={c.id}
+                  data-testid={`criterion-${s.id}-${c.id}`}
+                  data-status={c.status}
+                >
                   <div>
                     <span className={'criterion-status ' + c.status}>
                       {c.status === 'pass'
@@ -206,7 +220,7 @@ export function ScoringPanel({
                     ],
                   ] as const
                 ).map(([label, key, scale]) => (
-                  <tr key={key}>
+                  <tr key={key} data-testid={`financial-${key}`}>
                     <th>{label}</th>
                     {financials!.annual.map((a) => (
                       <td key={a.year}>

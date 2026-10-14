@@ -7,22 +7,15 @@ import {
   type ReactNode,
 } from 'react';
 import type { User } from '@supabase/supabase-js';
-import {
-  settingsClient,
-  setSettingsOwner,
-  writeSettings,
-  readSettings,
-} from '../lib/scoring-settings';
-import {
-  defaultSettings,
-  validateSettings,
-} from '../../modules/settings/scoring-settings';
+import { settingsClient, useSettingsAuth } from '../lib/scoring-settings';
 const AuthContext = createContext<{
   user: User | null;
   ready: boolean;
   error: string;
 }>({ user: null, ready: false, error: '' });
 export function AuthProvider({ children }: { children: ReactNode }) {
+  // The shared store follows Auth expiry/signout/storage events and loads preferences.
+  useSettingsAuth();
   const [state, setState] = useState<{
     user: User | null;
     ready: boolean;
@@ -39,20 +32,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data, error } = await db.auth.getUser();
         const user = error ? null : data.user;
         if (disposed || current !== version) return;
-        setSettingsOwner(user?.id ?? null);
-        if (user) {
-          const { data: row, error: readError } = await db
-            .from('user_settings')
-            .select('scoring_preferences')
-            .eq('owner_id', user.id)
-            .maybeSingle();
-          if (disposed || current !== version) return;
-          writeSettings(
-            !readError && validateSettings(row?.scoring_preferences)
-              ? row.scoring_preferences
-              : { ...defaultSettings },
-          );
-        } else writeSettings(readSettings());
         setState({ user, ready: true, error: '' });
       } catch {
         if (!disposed && current === version)
@@ -67,7 +46,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then((db) => {
         if (disposed) return;
         // Không await Supabase trong callback: tránh deadlock khóa refresh token.
-        const { data } = db.auth.onAuthStateChange(() => {
+        const { data } = db.auth.onAuthStateChange((_event, session) => {
+          if (!session) {
+            version++;
+            setState({ user: null, ready: true, error: '' });
+          }
           window.setTimeout(() => void update(), 0);
         });
         unsub = () => data.subscription.unsubscribe();

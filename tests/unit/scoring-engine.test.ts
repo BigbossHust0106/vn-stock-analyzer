@@ -81,10 +81,14 @@ it('Graham all pass, EPS4 BVPS25 => sqrt2250=47.4341649025; MOS giá20 = 57.8363
 it('DCF Owner Earnings100, g10%, r10%, terminal0, shares10: PV100+100 + terminal1000 =>120', () => {
   expect(ownerEarningsDcf(100, 10, settings)).toEqual({ ok: true, value: 120 });
   const r = buffett(fixture(), 20, now, settings);
-  expect(r.score).toBe(100);
-  expect(r.intrinsicVnd).toEqual({ ok: true, value: 120 });
+  // 6 tiêu chí khác đạt tổng90; DCF proxy chưa xác minh là unknown10 điểm.
+  expect(r.score).toBe(90);
+  expect(r.scenario.valueVnd).toEqual({ ok: true, value: 120 });
+  expect(r.intrinsicVnd).toEqual(missing);
   // MOS120,price20 = 1−20/120 = 5/6.
-  expect(r.marginOfSafety.ok && r.marginOfSafety.value).toBeCloseTo(5 / 6, 12);
+  expect(
+    r.scenario.marginOfSafety.ok && r.scenario.marginOfSafety.value,
+  ).toBeCloseTo(5 / 6, 12);
 });
 it('Không đủ EPS, EPS âm, BVPS0, thiếu năm/chuỗi đứt: unknown và không NaN', () => {
   for (const d of [
@@ -236,6 +240,11 @@ it('Không dùng BCTC tương lai/chưa kiểm toán, duplicate và giá cũ đ�
       now,
       { ...defaultSettings, grahamWeight: 100, buffettWeight: 0 },
       now,
+      {
+        sourceTimestamp: now,
+        sessionDate: '2026-10-13',
+        verification: 'verified',
+      },
     ).confidence,
   ).toBe(65);
 });

@@ -85,14 +85,18 @@ it('Đơn vị VND: 22000/20000−1=10%; 35%×100+15%×100=50, thiếu kỹ thu�
   expect(day!.explanation.marketCapVnd).toBe(220e9);
   expect(day!.explanation.strategies.shortTechnical).toBeNull();
 });
-it('Graham sqrt(22.5×4000×25000)=47434.1649025; MOS57.8362978644%, trọng số40%=23.1345191458', () => {
+it('Graham giữ MOS57.8362978644%; review1: DCF unknown chỉ cho đóng góp20%, không nhận phần Buffett', () => {
   const [, month, quarter] = rankStock(input());
-  expect(month!.value).toBe(23.134); // MOS điểm57.836 (3 chữ số), ×.4=23.1344; làm tròn =>23.134.
+  // The original arithmetic answer is unchanged: MOS57.836 × .4 =23.1344.
+  // Policy splits valuation equally; unknown parent DCF contributes zero.
+  expect(Number((57.836 * 0.4).toFixed(3))).toBe(23.134);
+  expect(month!.value).toBe(11.567); // 57.836 × .2 =11.5672, rounded to three places.
+  expect(month!.explanation.buffettMargin).toBeNull();
   expect(month!.explanation.grahamMargin).toBeCloseTo(
     Number('0.5783629786442161'),
     10,
   );
-  expect(month!.explanation.coverage).toBe(0.4);
+  expect(month!.explanation.coverage).toBe(0.2);
   expect(quarter!.value).not.toBeNull();
   expect(quarter!.explanation.strategies.graham).toBe(100);
 });
@@ -124,7 +128,8 @@ it('Sự kiện 31 ngày có nguồn/known_at, không coi không có dữ liệu
   const [, month] = rankStock(i);
   expect(month!.explanation.events).toHaveLength(1);
   expect(month!.explanation.strategies.events).toBe(100);
-  expect(month!.explanation.coverage).toBe(0.6);
+  // Graham valuation .2 + known event .2; unknown DCF/technical add zero.
+  expect(month!.explanation.coverage).toBe(0.4);
   expect(month!.explanation.reasons).toHaveLength(3);
 });
 it('Lọc rác, EPS âm, giá nghìn đồng nhầm VND, thiếu BCTC/quote, tương lai hoặc cũ không có điểm', () => {

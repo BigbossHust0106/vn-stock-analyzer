@@ -1,0 +1,61 @@
+
+> vn-stock-analyzer@0.1.0 verify:scoring:browser
+> PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-scoring.ts
+
+SCORING BROWSER PASS: VNM, score 52.5 / 100, Quan sát, annual EPS numeric/unit; Graham and scenarioDCF/MOS arithmetic or missing-data guard; parent DCF unknown
+SCORING BROWSER PASS: FPT, score 52.5 / 100, Quan sát, annual EPS numeric/unit; Graham and scenarioDCF/MOS arithmetic or missing-data guard; parent DCF unknown
+SCORING BROWSER PASS: HPG, score 12.5 / 100, Quan sát, annual EPS numeric/unit; Graham and scenarioDCF/MOS arithmetic or missing-data guard; parent DCF unknown
+SCORING BROWSER PASS: settings100/0 persists across reload; actual combined score equals Graham
+SCORING BROWSER PASS: 390px, financial table scroll, no JS errors; defaults restored
+
+> vn-stock-analyzer@0.1.0 verify:browser:live
+> PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-market.ts
+
+BROWSER LIVE PASS: VNM, 57.700 VND, search → detail, canvas and timeframe controls; daily MA20/50/200 arithmetic and latest daily volume asserted
+BROWSER LIVE PASS: FPT, 57.000 VND, search → detail, canvas and timeframe controls; daily MA20/50/200 arithmetic and latest daily volume asserted
+BROWSER LIVE PASS: HPG, 20.450 VND, search → detail, canvas and timeframe controls; daily MA20/50/200 arithmetic and latest daily volume asserted
+BROWSER LIVE PASS: Enter mở đúng VNM
+BROWSER LIVE PASS: Sữa Việt Nam + Enter mở đúng VNM
+BROWSER LIVE PASS: 390px responsive, theme toggle/reload, no JS errors
+LOCAL MARKET: port 8878, real Worker handler + Supabase/provider, no fixture fallback
+AUTH LIVE PASS: 2 user tạm đăng nhập email/password qua Supabase Auth, nhận JWT thật
+RLS HOSTED PASS: JWT A/B isolation; own notes/target CRUD; forged owner/parent and anon denied
+TOP10 HOSTED PASS: day, 10 rows từ rankings/scores thật
+TOP10 HOSTED PASS: month, 10 rows từ rankings/scores thật
+TOP10 HOSTED PASS: quarter, 10 rows từ rankings/scores thật
+AUTH SETTINGS BROWSER PASS: two tabs A70/30 → signout guest50/50 → B30/70 → guest50/50, peer never reloaded
+BROWSER PHASE4 PASS: route guard, email login/logout, multiple lists, note/target persistence, add/remove, Top10 real, 390px, no JS errors
+CLEANUP PASS: users tạm và dữ liệu riêng cascade đã xóa
+
+> vn-stock-analyzer@0.1.0 sync:rankings
+> node --use-env-proxy --import tsx scripts/sync-rankings.ts --migrate
+
+HOSTED MIGRATION SKIP: 202610120001_initial.sql
+HOSTED MIGRATION SKIP: 202610120002_current_quotes.sql
+HOSTED MIGRATION SKIP: 202610130001_market_history.sql
+HOSTED MIGRATION SKIP: 202610130002_financial_engine.sql
+HOSTED MIGRATION SKIP: 202610140001_review_integrity.sql
+HOSTED MIGRATION SKIP: 20261014012828_phase4_rankings_watchlists.sql
+HOSTED MIGRATION SKIP: 20261014015654_ranking_reference_prices.sql
+HOSTED MIGRATION PASS: 20261014070000_ranking_input_provenance.sql
+RANKINGS SYNC PASS: [
+  { horizon: 'day', count: 16 },
+  { horizon: 'month', count: 8 },
+  { horizon: 'quarter', count: 16 }
+]
+
+> vn-stock-analyzer@0.1.0 verify:phase4:live
+> PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/verify-phase4-live.ts
+
+AUTH LIVE PASS: 2 user tạm đăng nhập email/password qua Supabase Auth, nhận JWT thật
+RLS HOSTED PASS: JWT A/B isolation; own notes/target CRUD; forged owner/parent and anon denied
+TOP10 HOSTED PASS: day, 10 rows từ rankings/scores thật
+CLEANUP PASS: users tạm và dữ liệu riêng cascade đã xóa
+Chưa đủ 10 cổ phiếu thật: month
+
+> vn-stock-analyzer@0.1.0 smoke
+> node scripts/smoke.mjs
+
+SMOKE PASS: web, HTTP 200, nội dung hello world đúng
+SMOKE PASS: worker, HTTP 200, nội dung hello world đúng
+SMOKE PASS: API input 400, thiếu Supabase 503

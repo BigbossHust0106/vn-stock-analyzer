@@ -5,6 +5,7 @@ import deployment from '../config/public-deployment.json';
 import worker from '../worker/src/index';
 import { chromium, type Browser, type Page } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
+import { defaultSettings } from '../modules/settings/scoring-settings';
 function assert(value: unknown, message: string): asserts value {
   if (!value) throw new Error(message);
 }
@@ -327,8 +328,62 @@ async function main() {
     await page.getByTestId('watch-VNM').waitFor();
     await page.getByRole('button', { name: 'Xóa VNM', exact: true }).click();
     await page.getByTestId('watch-VNM').waitFor({ state: 'detached' });
+    const aPreferences = await a.db.from('user_settings').upsert({
+      owner_id: a.id,
+      scoring_preferences: {
+        ...defaultSettings,
+        grahamWeight: 70,
+        buffettWeight: 30,
+      },
+    });
+    const bPreferences = await b.db.from('user_settings').upsert({
+      owner_id: b.id,
+      scoring_preferences: {
+        ...defaultSettings,
+        grahamWeight: 30,
+        buffettWeight: 70,
+      },
+    });
+    assert(
+      !aPreferences.error && !bPreferences.error,
+      'Không tạo được preferences A/B',
+    );
+    const peer = await context.newPage();
+    peer.on('pageerror', (e) => errors.push(e.message));
+    await peer.goto(base + '/settings');
+    await peer.waitForFunction(
+      () =>
+        document.querySelector<HTMLInputElement>('input[type=number]')
+          ?.value === '70',
+    );
     await page.getByRole('button', { name: 'Đăng xuất', exact: true }).click();
     await page.waitForURL('**/login?next=%2Fwatchlists', { timeout: 30000 });
+    // No reload in the second tab: SIGNED_OUT/storage must reset A to guest50/50.
+    await peer.waitForFunction(
+      () =>
+        document.querySelector<HTMLInputElement>('input[type=number]')
+          ?.value === '50',
+    );
+    await page.getByLabel('Email', { exact: true }).fill(b.email);
+    await page.getByLabel('Mật khẩu', { exact: true }).fill(b.password);
+    await page.getByRole('button', { name: 'Đăng nhập', exact: true }).click();
+    await page.waitForURL('**/watchlists', { timeout: 30000 });
+    await peer.waitForFunction(
+      () =>
+        document.querySelector<HTMLInputElement>('input[type=number]')
+          ?.value === '30',
+    );
+    await page.getByRole('button', { name: 'Đăng xuất', exact: true }).click();
+    await page.waitForURL('**/login?next=%2Fwatchlists', { timeout: 30000 });
+    await peer.waitForFunction(
+      () =>
+        document.querySelector<HTMLInputElement>('input[type=number]')
+          ?.value === '50',
+    );
+    await peer.close();
+    console.log(
+      'AUTH SETTINGS BROWSER PASS: two tabs A70/30 → signout guest50/50 → B30/70 → guest50/50, peer never reloaded',
+    );
     await page.goto(base + '/watchlists');
     await page.waitForURL('**/login?next=%2Fwatchlists');
     assert(errors.length === 0, 'Browser JS errors: ' + errors.join(';'));
@@ -338,18 +393,24 @@ async function main() {
     );
   } finally {
     if (debugPage && browserFailed) {
-      await mkdir('.cache/screenshots', { recursive: true });
-      await debugPage.screenshot({
-        path: '.cache/screenshots/phase4-failure.png',
-        fullPage: true,
-      });
-      console.log(
-        'BROWSER DIAG:',
-        new URL(debugPage.url()).pathname,
-        await debugPage.locator('[role=status]').allInnerTexts(),
-      );
+      // Diagnostics must not mask the original failure or prevent Auth-user cleanup.
+      try {
+        console.log('BROWSER DIAG PATH:', new URL(debugPage.url()).pathname);
+        await mkdir('.cache/screenshots', { recursive: true });
+        await debugPage.screenshot({
+          path: '.cache/screenshots/phase4-failure.png',
+          fullPage: true,
+          timeout: 5000,
+        });
+      } catch {
+        console.error('BROWSER DIAG unavailable; continuing cleanup.');
+      }
     }
-    await browser?.close();
+    await browser
+      ?.close()
+      .catch(() =>
+        console.error('Browser cleanup failed; continuing Auth cleanup.'),
+      );
     let failures = 0;
     for (const id of created) {
       const { error } = await admin.auth.admin.deleteUser(id);

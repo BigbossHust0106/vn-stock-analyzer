@@ -150,7 +150,8 @@ export function parseVpsHistory(
         priceBasis: 'unverified' as const,
         source: 'VPS' as const,
         fetchedAt,
-        isFinal: sessionDate < vietnamDate(Date.parse(fetchedAt)),
+        isFinal: false,
+        finality: 'unverified' as const,
       };
     })
     .sort((a, b) => a.sessionDate.localeCompare(b.sessionDate));

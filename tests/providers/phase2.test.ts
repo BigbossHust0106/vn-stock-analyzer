@@ -29,7 +29,9 @@ describe('Phần 2: payload VPS/KBS gọi thật, không sửa đáp án theo pa
       expect(day.closeVnd).toBe(close);
       expect(day.volumeReported).toBe(volume);
       expect(day.priceBasis).toBe('unverified');
-      expect(day.isFinal).toBe(true);
+      // Ngày đã qua không xác nhận dữ liệu đã chốt tại nguồn.
+      expect(day.isFinal).toBe(false);
+      expect(day.finality).toBe('unverified');
       expect(bars.at(-1)!.isFinal).toBe(false);
     },
   );

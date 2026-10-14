@@ -42,12 +42,14 @@ timeout 25s, retry có backoff/Retry-After, không retry 401/403/schema lỗi.
 History giá VND, volume cổ phiếu đã đối soát VNM/FPT/HPG một phiên; giữ
 price_basis=unverified, tách bảng prices_history khỏi prices_daily và scoring.
 Không tạo bar cuối tuần/ngày nghỉ, không điền ngày thiếu, không biến snapshot thành
-OHLCV. Ngày phiên dùng Asia/Ho_Chi_Minh; bar hôm nay không final vì chưa có lịch
-đóng phiên có nguồn. MA20/50/200 tính trên close cùng nguồn, chỉ xuất khi đủ nến.
+OHLCV. Ngày phiên dùng Asia/Ho_Chi_Minh; mọi bar đều chưa xác minh finality,
+không suy ra `is_final` từ việc ngày đã qua. MA20/50/200 tính trên close cùng nguồn,
+chỉ xuất khi đủ nến; history KBS được sắp xếp ngày tăng dần trước khi trả về.
 
 Cron mới `0 9 * * 1-5` chạy 16:00 VN để cập nhật catalog và SYNC_SYMBOLS (mặc định
-VNM/FPT/HPG). Đây là lịch lấy dữ liệu, không khẳng định giờ đóng cửa; ngày nghỉ có
-thể đọc lại history mà không tạo phiên. Ghi success chỉ sau toàn bộ dữ liệu hợp lệ
+VNM/FPT/HPG, hoặc nhóm cấu hình). Cron đọc `trading_sessions`; ngày nghỉ, thiếu lịch
+hoặc chưa qua `closes_at` thì bỏ tải. Đây là lịch lấy dữ liệu, không khẳng định giờ
+đóng cửa. Ghi success chỉ sau toàn bộ dữ liệu hợp lệ
 và ghi DB thành công. Ingest nhiều mã chưa phải transaction toàn thị trường.
 Cron cũ `30 8 * * 1-5` chỉ lưu snapshot sau khi trading_sessions/closes_at đã
 xác minh cho ngày đó; thiếu lịch thì bỏ tải. Không tự tạo lịch nghỉ lễ hoặc phiên.

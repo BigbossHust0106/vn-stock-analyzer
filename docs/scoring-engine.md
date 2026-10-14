@@ -1,4 +1,4 @@
-# Engine Graham / Buffett — phiên bản 1
+# Engine Graham / Buffett — phiên bản 2 (review 14/10/2026)
 
 Đây là bộ sàng lọc minh bạch 0–100, không phải bản sao đầy đủ tiêu chuẩn của hai nhà
 đầu tư. Dùng nguồn BCTC năm hợp nhất đã kiểm toán theo metadata KBS, ROIC/số CP
@@ -47,6 +47,11 @@ Mặc định maintenance=100%, growth=5%, equity discount=12%, terminal growth=
 5 năm. CFO đã bao gồm biến động vốn lưu động và lãi vay trả theo báo cáo; không
 cộng lại khấu hao hoặc trừ lại vốn lưu động. **Không gọi proxy là FCFE/Owner Earnings
 đã xác minh**, chưa tách phần tiền thuộc NCI, chưa cộng tiền dư hay điều chỉnh nợ.
+Kết quả chỉ hiển thị trong **kịch bản proxy riêng**, không dùng cho điểm hay kết luận.
+Tiêu chí DCF luôn `unknown`, giá trị nội tại và biên an toàn Buffett trả “không đủ
+dữ liệu” đến khi có bằng chứng dòng tiền thuộc cổ đông công ty mẹ. Không phân bổ
+dòng tiền theo tỷ lệ vốn của cổ đông thiểu số. Đáp án kịch bản fixture VNM vẫn là
+38.079,86 VND/CP; số này không phải định giá công ty mẹ đã xác minh.
 DCF vốn chủ proxy không trừ nợ lần thứ hai. Không áp dụng mô hình cho ngân hàng,
 chứng khoán/bảo hiểm hoặc CFO/Owner Earnings không dương.
 
@@ -64,7 +69,8 @@ và cộng 100%; mặc định 50/50. Cài đặt DCF và trọng số lưu riê
 mặc định, horizon=month là nhãn lưu trữ, không phải dự báo lợi nhuận một tháng.
 
 Confidence là **mức hoàn thiện bằng chứng**, không phải xác suất lời: weighted coverage
-× hệ số giá mới (1 nếu snapshot ≤24h, khác là0,4) × BCTC mới (1 nếu cuối kỳ ≤550 ngày,
+× hệ số giá mới (1 nếu timestamp nguồn đã xác minh ≤24h và khớp ngày phiên Việt Nam,
+khác là0,4; `fetchedAt` chỉ là thời điểm tải) × BCTC mới (1 nếu cuối kỳ ≤550 ngày,
 khác là0,5) ×0,65 (chưa chứng nhận PDF) ×0,8 nếu Buffett có trọng số (proxy DCF).
 Làm tròn phần trăm. Cấu hình nguồn hiện tại tối đa65%; do đó **kết luận hiện tại
 luôn Quan sát**, dù điểm cao. Không cho phép nâng confidence bằng form.
@@ -79,15 +85,20 @@ không có cờ vận hành để bỏ trần65%; cần phiên bản mô hình m
 
 `npm run sync:financials -- --migrate`: áp dụng migration thiếu bằng Management API,
 fetch **live** VNM/FPT/HPG (hoặc SYNC_SYMBOLS), lưu fundamentals, snapshot, scores.
-Không lấy fixture làm dữ liệu production. RPC ghi chỉ service_role, public read,
-khóa theo stock chống concurrent writer và payload cũ. Score trigger chặn computation
-cũ hoặc financial inputs cũ ghi đè. Dùng transaction cho script đồng bộ.
+Không lấy fixture làm dữ liệu production. RPC `persist_financial_score` ghi BCTC và
+điểm trong cùng transaction, chỉ service_role được gọi. Điểm lưu UUID phiên bản
+BCTC/quote và toàn bộ input JSON. Nếu quote đã đổi hoặc ghi điểm lỗi, transaction
+từ chối/rollback, giữ cả BCTC và điểm cũ. Thiếu riêng CSTC không xóa các trường báo
+cáo khác; ratio thiếu là null. Snapshot rỗng/mất trường số đã biết không thay bản
+tốt; không ghép số liệu cũ vào dữ liệu mới để che nguồn lỗi.
 
 Worker `GET /v1/financials/{symbol}` chỉ chấp nhận mã đang active trong catalog,
 đọc DB với publishable key, snapshot24h, fetch provider khi cần; nguồn lỗi dùng snapshot
 với thông báo. Chỉ service-role secret Worker được ghi background. Job16:00 Việt Nam
-ngày thường sau đồng bộ thị trường cũng đồng bộ BCTC/điểm nhóm SYNC_SYMBOLS. Chưa xác
-minh cron thực sự chạy theo lịch trên production; giờ này không thay thế lịch phiên/nghỉ lễ.
+ngày thường chỉ đồng bộ khi `trading_sessions` xác nhận mở phiên và đã qua `closes_at`.
+Thiếu lịch/ngày nghỉ/chưa đóng phiên thì không gọi nguồn và không ghi success.
+Chưa xác minh cron thực sự chạy theo lịch trên production; giờ này không thay thế
+lịch phiên/nghỉ lễ.
 BCTC không suy ra phiên giao dịch hay OHLC và không điền ngày giá không có phiên.
 
 `npm run verify` chạy toàn bộ test offline, migration và RLS. `npm run verify:financials:live`
@@ -95,4 +106,8 @@ chỉ đọc provider thực, tách CI. `npm run verify:scoring:browser` cần a
 kiểm tra VNM/FPT/HPG, trọng số100/0, reload và mobile390px. `npm run verify:settings:live` đã kiểm thử 2 user Auth hosted tạm thời bằng password/JWT,
 A không đọc/sửa/giả mạo preferences B; sau đó xóa users và rows cascade. Lệnh cần
 Management token qua Environment Secrets, tạo/xóa dữ liệu kiểm thử, tách khỏi CI.
-Kiểm tra browser hiện xác minh cài đặt khách; UI login cá nhân vẫn cần tài khoản riêng.
+Owner cài đặt lấy từ Supabase Auth trong bộ nhớ, không tin owner ID trong localStorage.
+`onAuthStateChange`, expiry và sự kiện storage cập nhật giao diện giữa các tab;
+request cũ của A không được áp dụng sau khi đã chuyển sang B/khách. Quyền server vẫn
+do RLS/JWT quyết định. Kết quả review và giới hạn:
+[review-fixes-2026-10-14.md](review-fixes-2026-10-14.md).

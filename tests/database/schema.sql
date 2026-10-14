@@ -20,8 +20,8 @@ end $$;
 reset role;
 update public.stocks set search_text='tst synthetic db' where symbol='TST';
 set local role service_role;
-select public.ingest_price_history('[{"stock_id":"20000000-0000-4000-8000-000000000009","session_date":"2020-01-02","source":"VPS","open_vnd":10,"high_vnd":12,"low_vnd":9,"close_vnd":11,"volume_reported":100,"is_final":true,"fetched_at":"2020-01-02T08:00:00Z"}]');
-select public.ingest_price_history('[{"stock_id":"20000000-0000-4000-8000-000000000009","session_date":"2020-01-02","source":"VPS","open_vnd":10,"high_vnd":12,"low_vnd":9,"close_vnd":10,"volume_reported":100,"is_final":true,"fetched_at":"2020-01-02T07:00:00Z"}]');
+select public.ingest_price_history('[{"stock_id":"20000000-0000-4000-8000-000000000009","session_date":"2020-01-02","source":"VPS","open_vnd":10,"high_vnd":12,"low_vnd":9,"close_vnd":11,"volume_reported":100,"is_final":false,"fetched_at":"2020-01-02T08:00:00Z"}]');
+select public.ingest_price_history('[{"stock_id":"20000000-0000-4000-8000-000000000009","session_date":"2020-01-02","source":"VPS","open_vnd":10,"high_vnd":12,"low_vnd":9,"close_vnd":10,"volume_reported":100,"is_final":false,"fetched_at":"2020-01-02T07:00:00Z"}]');
 do $$ begin
   if (select close_vnd from public.prices_history) <> 11 then raise exception 'Stale history overwrote new'; end if;
   begin perform public.ingest_price_history('[]');raise exception 'Empty history accepted';exception when raise_exception then if sqlerrm <> 'No history' then raise;end if;end;

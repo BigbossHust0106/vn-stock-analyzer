@@ -1,70 +1,46 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   defaultSettings,
   validateSettings,
   type ScoringSettings,
 } from '../../modules/settings/scoring-settings';
 import {
-  readSettings,
-  setSettingsOwner,
   writeSettings,
   settingsClient,
+  useSettingsAuth,
+  useScoringSettings,
 } from '../lib/scoring-settings';
 export function ScoringSettingsForm() {
-  const [initialized, setInitialized] = useState(false);
-  const [settings, setSettings] = useState(defaultSettings),
-    [message, setMessage] = useState(''),
+  const auth = useSettingsAuth();
+  return (
+    <SettingsEditor
+      key={auth.ownerId ?? 'guest'}
+      userId={auth.ownerId}
+      initialized={auth.ready}
+      authMessage={auth.message}
+    />
+  );
+}
+function SettingsEditor({
+  userId,
+  initialized,
+  authMessage,
+}: {
+  userId: string | null;
+  initialized: boolean;
+  authMessage: string;
+}) {
+  const persisted = useScoringSettings();
+  const [draft, setDraft] = useState<ScoringSettings | null>(null);
+  const settings = draft ?? persisted;
+  const [message, setMessage] = useState(''),
     [email, setEmail] = useState(''),
     [password, setPassword] = useState(''),
-    [userId, setUserId] = useState<string | null>(null),
     [busy, setBusy] = useState(false);
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      const local = readSettings();
-      if (!cancelled) setSettings(local);
-      try {
-        const db = await settingsClient();
-        const { data } = await db.auth.getUser();
-        if (cancelled) return;
-        setSettingsOwner(data.user?.id ?? null);
-        if (!data.user) {
-          const guest = readSettings();
-          setSettings(guest);
-          writeSettings(guest);
-        }
-        if (data.user) {
-          const { data: row, error } = await db
-            .from('user_settings')
-            .select('scoring_preferences')
-            .eq('owner_id', data.user.id)
-            .maybeSingle();
-          if (cancelled) return;
-          setUserId(data.user.id);
-          if (error) setMessage('Chưa đọc được cài đặt từ Supabase.');
-          else if (validateSettings(row?.scoring_preferences)) {
-            setSettings(row.scoring_preferences);
-            writeSettings(row.scoring_preferences);
-          } else {
-            setSettings({ ...defaultSettings });
-            writeSettings({ ...defaultSettings });
-          }
-        }
-      } catch {
-        if (!cancelled)
-          setMessage(
-            'Cài đặt trình duyệt vẫn dùng được; chưa kết nối Supabase Auth.',
-          );
-      } finally {
-        if (!cancelled) setInitialized(true);
-      }
-    }
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  function setSettings(value: ScoringSettings) {
+    setDraft(value);
+  }
   async function save() {
     if (!initialized) return;
     if (!validateSettings(settings)) {
@@ -85,7 +61,7 @@ export function ScoringSettingsForm() {
             'Không lưu được Supabase; kiểm tra đăng nhập và migration.',
           );
       }
-      writeSettings(settings);
+      writeSettings(settings, userId);
       setMessage(
         userId
           ? 'Đã lưu Supabase cho tài khoản của bạn và áp dụng trên trình duyệt này.'
@@ -110,20 +86,6 @@ export function ScoringSettingsForm() {
         throw new Error(
           'Không đăng nhập được; kiểm tra tài khoản Supabase Auth đã xác nhận email.',
         );
-      const { data: row, error: readError } = await db
-        .from('user_settings')
-        .select('scoring_preferences')
-        .eq('owner_id', data.user.id)
-        .maybeSingle();
-      if (readError)
-        throw new Error('Đã đăng nhập nhưng chưa đọc được cài đặt.');
-      const prefs = validateSettings(row?.scoring_preferences)
-        ? row.scoring_preferences
-        : { ...defaultSettings };
-      setSettingsOwner(data.user.id);
-      setUserId(data.user.id);
-      setSettings(prefs);
-      writeSettings(prefs);
       setMessage('Đã đăng nhập và áp dụng cài đặt của tài khoản.');
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Không đăng nhập được.');
@@ -137,10 +99,7 @@ export function ScoringSettingsForm() {
       const db = await settingsClient();
       const { error } = await db.auth.signOut();
       if (error) throw new Error('Không đăng xuất được.');
-      setSettingsOwner(null);
-      setUserId(null);
-      setSettings({ ...defaultSettings });
-      writeSettings({ ...defaultSettings });
+      setDraft(null);
       setMessage('Đã đăng xuất, khôi phục mặc định trên trình duyệt.');
     } catch {
       setMessage('Không đăng xuất được; thử lại.');
@@ -167,7 +126,11 @@ export function ScoringSettingsForm() {
           max={max}
           step={step}
           value={
-            percent ? Number((settings[key] * 100).toFixed(8)) : settings[key]
+            Number.isFinite(settings[key])
+              ? percent
+                ? Number((settings[key] * 100).toFixed(8))
+                : settings[key]
+              : ''
           }
           onChange={(e) => {
             const value = e.target.valueAsNumber;
@@ -235,7 +198,7 @@ export function ScoringSettingsForm() {
           Khôi phục mặc định
         </button>
       </form>
-      <p role="status">{message}</p>
+      <p role="status">{message || authMessage}</p>
       <hr />
       <h2>Lưu cài đặt theo tài khoản</h2>
       {userId ? (

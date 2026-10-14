@@ -154,9 +154,18 @@ export function PriceChart({ bars }: { bars: DailyBar[] }) {
       </div>
       <div className="chart-tools">
         <div className="ma-legend">
-          <span>● MA20{data.length < 20 ? ' (chưa đủ nến)' : ''}</span>
-          <span>● MA50{data.length < 50 ? ' (chưa đủ nến)' : ''}</span>
-          <span>● MA200{data.length < 200 ? ' (chưa đủ nến)' : ''}</span>
+          {[20, 50, 200].map((period) => (
+            <span key={period}>
+              ● MA{period}{' '}
+              <b data-testid={`ma-${period}`}>
+                {movingAverage(data, period)
+                  .at(-1)
+                  ?.value.toLocaleString('vi-VN', {
+                    maximumFractionDigits: 2,
+                  }) ?? 'chưa đủ nến'}
+              </b>
+            </span>
+          ))}
         </div>
         <div className="chart-controls">
           {[
@@ -177,6 +186,13 @@ export function PriceChart({ bars }: { bars: DailyBar[] }) {
         </div>
       </div>
       <p className="chart-readout">{hover}</p>
+      <p>
+        Phiên biểu đồ gần nhất {data.at(-1)?.sessionDate ?? '—'} · Khối lượng{' '}
+        <b data-testid="chart-last-volume">
+          {data.at(-1)?.volumeReported.toLocaleString('vi-VN') ?? '—'}
+        </b>{' '}
+        CP · Chưa xác minh trạng thái chốt của nguồn.
+      </p>
       {bars.length ? (
         <div ref={target} data-testid="price-chart" className="chart-canvas" />
       ) : (

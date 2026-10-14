@@ -14,7 +14,6 @@ import type {
 import { ProviderHttp, defaultHttpOptions, type HttpOptions } from './http';
 import { parseKbsStocks, symbolValue, historyRange } from './market-schema';
 import { parseKbsDailyEvidence } from './source-evidence';
-import { vietnamDate } from '../market/calendar';
 
 export class KbsProvider implements DataProvider {
   private http: ProviderHttp;
@@ -34,6 +33,7 @@ export class KbsProvider implements DataProvider {
         LCTT: [],
         CSTC: [],
       };
+      const missing: string[] = [];
       for (const type of Object.keys(reports) as ReportType[]) {
         for (const page of [1, 2]) {
           const url = new URL(
@@ -48,11 +48,16 @@ export class KbsProvider implements DataProvider {
             languageid: '1',
           }))
             url.searchParams.set(key, value);
-          const parsed = parseKbsReport(
-            await this.http.request(url.href),
-            type,
-            now,
-          );
+          let payload: unknown;
+          try {
+            payload = await this.http.request(url.href);
+          } catch {
+            missing.push(
+              `Nguồn ${type} không khả dụng; các trường còn thiếu giữ null.`,
+            );
+            break;
+          }
+          const parsed = parseKbsReport(payload, type, now);
           reports[type].push(...parsed);
           if (parsed.length < 4) break;
         }
@@ -65,7 +70,9 @@ export class KbsProvider implements DataProvider {
       } catch {
         /* Source capability unavailable; no invented values. */
       }
-      return financialData(symbol, reports, ratios, now);
+      const data = financialData(symbol, reports, ratios, now);
+      data.notices.push(...missing);
+      return data;
     });
   }
   async fetchStocks(exchange?: Exchange): Promise<StockInfo[]> {
@@ -112,8 +119,10 @@ export class KbsProvider implements DataProvider {
           source: 'KBS' as const,
           volumeUnit: 'shares' as const,
           fetchedAt,
-          isFinal: b.sessionDate < vietnamDate(Date.parse(fetchedAt)),
-        }));
+          isFinal: false,
+          finality: 'unverified' as const,
+        }))
+        .sort((a, b) => a.sessionDate.localeCompare(b.sessionDate));
     });
   }
 }

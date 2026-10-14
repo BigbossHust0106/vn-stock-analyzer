@@ -52,4 +52,5 @@ export interface DailyBar {
   priceBasis: 'unverified';
   fetchedAt: string;
   isFinal: boolean;
+  finality?: 'unverified';
 }

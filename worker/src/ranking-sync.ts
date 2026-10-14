@@ -15,7 +15,7 @@ export async function rankingRows(db: SupabaseClient, timestamp: number) {
     const { data: stocks, error } = await db
       .from('stocks')
       .select(
-        'id,financial_snapshots(payload),prices_current(last_price_vnd,reference_vnd,fetched_at),ranking_reference_prices(reference_vnd,fetched_at,source_url)',
+        'id,financial_snapshots(payload,version),prices_current(*),ranking_reference_prices(*)',
       )
       .eq('active', true)
       .order('id')
@@ -24,10 +24,14 @@ export async function rankingRows(db: SupabaseClient, timestamp: number) {
     for (const s of stocks) {
       const relation = <T>(v: T | T[] | null): T | null =>
         Array.isArray(v) ? (v[0] ?? null) : v;
-      const f = relation(s.financial_snapshots)?.payload;
+      const financialSnapshot = relation(s.financial_snapshots);
+      const f = financialSnapshot?.payload;
       if (!isFinancialData(f)) continue;
       const current = relation(s.prices_current),
         reference = relation(s.ranking_reference_prices);
+      const useCurrent = !!(
+        current && Date.parse(current.fetched_at) >= timestamp - 86400000
+      );
       const quote =
         current && Date.parse(current.fetched_at) >= timestamp - 86400000
           ? current
@@ -72,7 +76,19 @@ export async function rankingRows(db: SupabaseClient, timestamp: number) {
           bars: (bars ?? []) as RankingBar[],
           events: (events ?? []) as RankingEvent[],
           asOf,
-        }),
+        }).map((row) => ({
+          ...row,
+          financial_version: financialSnapshot!.version,
+          quote_version:
+            useCurrent || !reference ? (current?.version ?? null) : null,
+          financial_inputs: f,
+          quote_inputs: {
+            source: useCurrent || !reference ? 'VPS' : 'KBS reference',
+            raw: useCurrent || !reference ? current : reference,
+            sourceTimestamp: null,
+            sessionVerification: 'unverified',
+          },
+        })),
       );
     }
     if (stocks.length < 200) break;

@@ -72,16 +72,10 @@ export async function tradingSync(
   }
   if (!imported) throw new Error('Danh mục giao dịch rỗng; không ghi success');
   if (closing) {
-    await syncMarket(env);
-    // prices_history vẫn giữ basis unverified; không nâng dữ liệu chưa xác minh thành prices_daily.
-    const { error: finalError } = await db
-      .from('prices_history')
-      .update({ is_final: true })
-      .eq('session_date', session!.session_date)
-      .gte('fetched_at', session!.closes_at!)
-      .lte('fetched_at', new Date().toISOString());
-    if (finalError) throw new Error('Không chốt được lịch sử cuối phiên');
-    await syncRankings(env);
+    await syncMarket(env, timestamp);
+    // Downloading after the close does not prove source finality or price basis.
+    // Keep provider bars unverified; never promote fetchedAt to source evidence.
+    await syncRankings(env, timestamp);
   }
   const { error: statusError } = await db.from('system_status').upsert({
     component: 'prices',

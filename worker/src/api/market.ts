@@ -114,7 +114,8 @@ export async function marketResponse(
       source: historySource,
       priceBasis: 'unverified',
       fetchedAt: r.fetched_at,
-      isFinal: r.is_final,
+      isFinal: false,
+      finality: 'unverified',
     }));
     const notices: string[] = [];
     if (

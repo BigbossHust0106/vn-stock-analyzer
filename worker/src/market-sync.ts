@@ -6,10 +6,17 @@ import type { Env } from './index';
 import deployment from '../../config/public-deployment.json';
 import { marketProviders } from './api/market';
 import { normalizeSearch } from '../../modules/market/search';
-import { vietnamDate, yearsBefore } from '../../modules/market/calendar';
+import {
+  canIngest,
+  vietnamDate,
+  yearsBefore,
+} from '../../modules/market/calendar';
 import { validatedSymbols } from '../../modules/providers/vps-provider';
 
-export async function syncMarket(env: Env): Promise<void> {
+export async function syncMarket(
+  env: Env,
+  timestamp?: number,
+): Promise<boolean> {
   if (!env.SUPABASE_SERVICE_ROLE_KEY)
     throw new Error('Thiếu quyền đồng bộ thị trường');
   const db = createClient(
@@ -17,23 +24,30 @@ export async function syncMarket(env: Env): Promise<void> {
     env.SUPABASE_SERVICE_ROLE_KEY,
     { auth: { persistSession: false, autoRefreshToken: false } },
   );
+  if (timestamp !== undefined) {
+    const { data: session, error: sessionError } = await db
+      .from('trading_sessions')
+      .select('session_date,is_open,closes_at')
+      .eq('session_date', vietnamDate(timestamp))
+      .maybeSingle();
+    if (sessionError) throw new Error('Không đọc được lịch phiên');
+    if (!canIngest(session, timestamp)) return false;
+  }
   const provider = marketProviders(env);
   const stocks = await provider.catalog.fetchStocks();
   if (stocks.length < 100) throw new Error('Catalog không đầy đủ');
-  for (let offset = 0; offset < stocks.length; offset += 300) {
-    const { error } = await db.from('stocks').upsert(
-      stocks.slice(offset, offset + 300).map((s) => ({
-        symbol: s.symbol,
-        name: s.name,
-        exchange: s.exchange,
-        source: s.source,
-        source_verified_at: s.fetchedAt,
-        search_text: normalizeSearch(s.symbol + ' ' + s.name),
-      })),
-      { onConflict: 'symbol' },
+  const { error: catalogError } = await db.rpc('reconcile_stock_catalog', {
+    rows: stocks.map((s) => ({
+      ...s,
+      search_text: normalizeSearch(s.symbol + ' ' + s.name),
+    })),
+    complete: true,
+    observed_at: stocks[0]!.fetchedAt,
+  });
+  if (catalogError)
+    throw new Error(
+      'Danh mục không đủ bằng chứng đối soát; không vô hiệu hóa mã',
     );
-    if (error) throw new Error('Không ghi được catalog');
-  }
   const symbols = validatedSymbols(
     (env.SYNC_SYMBOLS || rankingUniverse).split(','),
   );
@@ -105,4 +119,5 @@ export async function syncMarket(env: Env): Promise<void> {
     updated_at: new Date().toISOString(),
   });
   if (statusError) throw new Error('Không cập nhật trạng thái');
+  return true;
 }

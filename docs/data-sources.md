@@ -313,3 +313,29 @@ Phần 3 không giả định các phần này đã được xác minh.
 - Endpoint nguồn được tìm trong snapshot tham khảo đã dẫn ở Phần 2, gọi trực tiếp
   bằng TypeScript viết riêng; không cài/copy/chạy thư viện. Fixture Phần 4 là phản hồi
   HTTP200 thật, có manifest; chỉ dùng kiểm tra parser, không seed production.
+
+## Hiệu chỉnh bằng chứng sau review 14/10/2026
+
+- CFO/Capex trong fixture VNM là **hợp nhất**. DCF proxy 38.079,86 VND/CP chỉ là
+  kịch bản giả định, không phải dòng tiền thuộc cổ đông công ty mẹ. Chưa có nguồn
+  xác minh Owner Earnings công ty mẹ; tiêu chí DCF là unknown, không cấp điểm,
+  không dùng MOS proxy cho kết luận. Không phân bổ theo tỷ lệ vốn NCI.
+- KQKD, CDKT, LCTT được ghép theo năm **độc lập**; thiếu CSTC chỉ làm các ratio
+  thiếu thành null. Snapshot rỗng/mất trường số đã có không thay snapshot tốt.
+- `fetchedAt` không chứng minh giá thuộc phiên hiện tại. VPS không có timestamp
+  nguồn được xác nhận; số thứ tự bản tin không được chuyển thành thời gian.
+  Nguồn history VPS/KBS chưa xác nhận chốt phiên: `isFinal=false`,
+  `finality=unverified`, kể cả ngày đã qua hoặc tải sau giờ đóng cửa.
+- Catalog KBS chỉ đối soát mã vắng sau batch đủ ba sàn, ít nhất100 mã và không
+  giảm bất thường (toàn bộ hơn2%, từng sàn hơn5%). Ngưỡng này là **guard vận hành**,
+  không phải quota/tuyên bố nguồn luôn đầy đủ. HTTP/schema lỗi hoặc batch bị guard
+  từ chối không được vô hiệu hóa mã. Thay đổi lớn cần đối chiếu nguồn trước.
+- Đã đọc trang chính thức VSDC qua URL
+  <https://vsdc.vn/lich-giao-dich?tab=LICH_NGHI_GIAODICH&date=14/10/2026>
+  (URL `www.vsd.vn` trả trang chuyển sang VSDC). Trang ghi rõ **lịch nghỉ thanh toán**,
+  có thông báo điều chỉnh trong năm; chưa đủ chứng minh lịch mở phiên/đóng phiên
+  hiện hành của cả HOSE/HNX/UPCOM. Không nhập lịch mở phiên từ suy đoán ngày thường.
+  Production thiếu lịch đã xác minh thì cron intraday/EOD/16:00 bỏ tải.
+- API Google Auth của project `aszceahzutkhqfpyclev` vẫn trả provider tắt khi kiểm
+  tra lại ngày14/10/2026; Management API không có Client ID/Secret. Chưa xác minh
+  Google OAuth end-to-end dù người dùng cho biết đã cấu hình OAuth.
