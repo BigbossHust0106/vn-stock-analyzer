@@ -40,9 +40,16 @@ const assets = {
 };
 const server = createServer(async (req, res) => {
   try {
+    const incomingHeaders = new Headers();
+    for (const [name, value] of Object.entries(req.headers)) {
+      if (Array.isArray(value))
+        value.forEach((item) => incomingHeaders.append(name, item));
+      else if (typeof value === 'string') incomingHeaders.set(name, value);
+    }
     const response = await worker.fetch(
       new Request('http://127.0.0.1:8878' + req.url, {
         method: req.method ?? 'GET',
+        headers: incomingHeaders,
       }),
       {
         SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',

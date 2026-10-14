@@ -69,3 +69,11 @@ Hai migration mới được chạy thật: `20261014012828_phase4_rankings_watc
 5. Rerun verifier hosted hai user: A không đọc/sửa/xóa B, không giả owner/gắn mã vào parent B; anon bị từ chối. User tạm được cleanup.
 
 Chi tiết cấu hình, nguồn, trọng số và lệnh vận hành: [phase4.md](phase4.md).
+
+## Trạng thái phát hành sau push
+
+Commit Phần4 `2804dc9` đã push main, GitHub Actions verify thành công; Actions deploy SKIPPED vì đang dùng Workers Builds. Build `0612d357-d030-401e-ad7a-9b64804b5460` của Cloudflare thất bại trước khi chạy mã:
+
+> The build token selected for this build has been deleted or rolled and cannot be used for this build.
+
+Kết nối Cloudflare quản lý Worker có quyền đọc build/logs đúng account9a0d6d0 nhưng không có quyền quản lý API token (`9109: Unauthorized`). Cần chủ tài khoản cập nhật `vnstock build token` ở Workers Builds settings rồi retry main. Tại thời điểm kiểm tra `/top10`, `/login` và `/v1/rankings` production vẫn404; không tuyên bố đã phát hành thành công.
