@@ -67,8 +67,10 @@ Phần4 chưa đạt tiêu chí ba bảng đủ10 ở snapshot này.
 - Google Auth thực tế vẫn tắt ở project đã cho; chưa chạy consent/callback Google.
 - Lịch nghỉ thanh toán VSDC không tự chứng minh lịch giao dịch từng sàn; cron
   thiếu lịch có nguồn thì dừng. Chưa có chứng cứ scheduler chạy production đúng giờ.
-- Browser production từng FAIL timeout30s rồi300s ở endpoint thị trường của bản
-  đang phát hành. Không gán các PASS local của bản mới cho URL production.
+- Browser production từng FAIL timeout30s rồi300s trước push. Sau push `84578f0`,
+  đã chạy lại **trực tiếp URL cũ**: cả browser-scoring và browser-market PASS
+  VNM/FPT/HPG, số EPS/Graham/DCF/MOS/MA/volume, guest preferences reload và mobile.
+  Đây là phép thử production riêng, không lấy kết quả local làm bằng chứng deploy.
 
 ## LỖI TỰ TÌM THẤY VÀ ĐÃ SỬA
 
@@ -94,10 +96,18 @@ Cloudflare Workers Builds từng báo token build đã bị xóa/rolled trước
 source (`docs/handover-phase4.md`). Push GitHub, build local và deploy Cloudflare
 là ba kết quả riêng; không tuyên bố production cập nhật nếu chưa xác nhận.
 Read-only Workers namespace với credential hiện có trả HTTP401 ngày14/10/2026.
-Chưa có quyền deploy sử dụng được cho URL cũ; cần chủ tài khoản sửa build token
-hoặc cấp credential đúng account qua Environment Secrets. Google vẫn tắt, cần
-lưu Client ID/Secret và Enable provider ở đúng Supabase project, không gửi secret
-trong chat.
+Credential deploy trực tiếp chưa dùng được, nhưng đường phát hành GitHub đã đưa
+code ra URL cũ: `/top10` HTTP200, API ranking tháng trả8 mã; API tài chính VNM trả
+`graham-buffett-v2-review`, DCF unknown, sourceTimestamp=null; VNM746 bar chưa final.
+Frontend có guard owner mới, và các assertion số trên browser production PASS.
+Chưa đọc được Cloudflare deployment ID để gắn commit chính xác bằng metadata;
+không cần đổi URL hay tự tạo Worker ở tài khoản khác.
+
+Commit sửa code `84578f0` đã push main; GitHub Actions
+[38526175761](https://github.com/BigbossHust0106/vn-stock-analyzer/actions/runs/38526175761)
+verify SUCCESS, Actions deploy SKIPPED (đường Git integration độc lập). Google vẫn
+tắt; cần lưu Client ID/Secret và Enable provider ở đúng Supabase project,
+không gửi secret trong chat. Phần4 vẫn chưa đạt đủ10 mã tháng/lịch phiên/OAuth Google.
 
 ## CÁCH ĐỂ TÔI TỰ KIỂM TRA
 

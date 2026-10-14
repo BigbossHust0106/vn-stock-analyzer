@@ -59,3 +59,14 @@ Chưa đủ 10 cổ phiếu thật: month
 SMOKE PASS: web, HTTP 200, nội dung hello world đúng
 SMOKE PASS: worker, HTTP 200, nội dung hello world đúng
 SMOKE PASS: API input 400, thiếu Supabase 503
+SCORING BROWSER PASS: VNM, score 52.5 / 100, Quan sát, annual EPS numeric/unit; Graham and scenarioDCF/MOS arithmetic or missing-data guard; parent DCF unknown
+SCORING BROWSER PASS: FPT, score 52.5 / 100, Quan sát, annual EPS numeric/unit; Graham and scenarioDCF/MOS arithmetic or missing-data guard; parent DCF unknown
+SCORING BROWSER PASS: HPG, score 12.5 / 100, Quan sát, annual EPS numeric/unit; Graham and scenarioDCF/MOS arithmetic or missing-data guard; parent DCF unknown
+SCORING BROWSER PASS: settings100/0 persists across reload; actual combined score equals Graham
+SCORING BROWSER PASS: 390px, financial table scroll, no JS errors; defaults restored
+BROWSER LIVE PASS: VNM, 57.700 VND, search → detail, canvas and timeframe controls; daily MA20/50/200 arithmetic and latest daily volume asserted
+BROWSER LIVE PASS: FPT, 57.500 VND, search → detail, canvas and timeframe controls; daily MA20/50/200 arithmetic and latest daily volume asserted
+BROWSER LIVE PASS: HPG, 20.700 VND, search → detail, canvas and timeframe controls; daily MA20/50/200 arithmetic and latest daily volume asserted
+BROWSER LIVE PASS: Enter mở đúng VNM
+BROWSER LIVE PASS: Sữa Việt Nam + Enter mở đúng VNM
+BROWSER LIVE PASS: 390px responsive, theme toggle/reload, no JS errors
