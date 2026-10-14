@@ -354,9 +354,9 @@ Không mô tả deploy, CI hosted hay kiểm thử Auth JWT thành công nếu c
 
 Trang chi tiết `/stocks?symbol=VNM` có điểm Graham/Buffett, từng tiêu chí, định giá,
 biên an toàn, mức tin cậy/rủi ro và bảng BCTC năm. `/settings` chỉnh trọng số và giả
-định DCF; cài đặt trình duyệt khi chưa đăng nhập, lưu theo tài khoản Supabase khi đăng
-nhập bằng email/password tài khoản Auth đã xác nhận. Tạo tài khoản tại Supabase
-Authentication → Users nếu muốn dùng lưu cài đặt theo tài khoản. Không đặt mật khẩu
+định DCF; từ bản giao diện đăng nhập mới, các trang tính năng đều yêu cầu đăng nhập.
+Cài đặt được lưu theo tài khoản Supabase và áp dụng trên trình duyệt. Đăng ký tại
+`/login` và xác nhận email. Không đặt mật khẩu
 hoặc service-role key vào frontend.
 
 ```bash
@@ -379,6 +379,9 @@ Nguồn chưa đối chiếu PDF gốc: confidence bị giới hạn, kết lu�
 
 `/top10` hiển thị ba horizon với lọc sàn/ngành/vốn hóa, mức bao phủ dữ liệu và nút
 thêm vào danh sách. `/login` có email/password, đăng ký/reset và Google PKCE;
+`/login` có bố cục hai cột với minh họa chứng khoán, mobile một cột, không hiện menu tính năng.
+Toàn bộ trang tra cứu, chi tiết, Top 10, theo dõi và cài đặt chỉ hiển thị sau đăng nhập;
+truy cập trực tiếp được chuyển về login rồi quay lại đúng trang/mã.
 `/watchlists` bảo vệ bằng getUser + RLS, nhiều danh sách, ghi chú/giá mục tiêu và
 điểm so với ngày xếp hạng trước. [Hành vi, trọng số, nguồn và các điều kiện còn thiếu](docs/phase4.md).
 
@@ -387,7 +390,13 @@ npm run verify
 npm run configure:auth
 npm run sync:rankings -- --migrate --refresh --metadata
 npm run verify:phase4:live -- --browser
+npm run verify:login:browser # route guard, login/logout thật, desktop/mobile
 ```
+
+Các browser verifier đăng nhập bằng tài khoản xác nhận tạm, cần `SUPABASE_PROJECT_REF`
+và `SUPABASE_ACCESS_TOKEN` trong môi trường quản trị; tự xóa user/dữ liệu riêng trong
+`finally`, không ghi mật khẩu ra file/log. Không dùng account người dùng để kiểm thử.
+`MARKET_APP_URL` mặc định localhost:8878. SMTP và luồng chấp thuận Google kiểm tra riêng.
 
 Google provider chưa được cấu hình. Lịch phiên/price basis chưa có nguồn xác minh:
 Cron intraday/EOD được bảo vệ và chưa tự chạy; điểm kỹ thuật/volume thiếu được ghi

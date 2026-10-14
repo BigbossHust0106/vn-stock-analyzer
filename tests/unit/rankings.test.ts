@@ -258,9 +258,19 @@ it('OAuth next chỉ chấp nhận route nội bộ, chặn open redirect', () =
     '/\\evil.example',
     null,
     '/auth/callback',
+    '/stocks?symbol=VNM&next=https://evil.example',
+    '/stocks?symbol=%2F%2Fevil.example',
+    '/login',
   ])
     expect(safeNext(next)).toBe('/watchlists');
-  for (const next of ['/settings', '/top10', '/watchlists'])
+  for (const next of [
+    '/',
+    '/stocks',
+    '/stocks?symbol=VNM',
+    '/settings',
+    '/top10',
+    '/watchlists',
+  ])
     expect(safeNext(next)).toBe(next);
 });
 

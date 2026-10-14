@@ -6,16 +6,25 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (ready && !user && !error)
       window.location.replace(
-        '/login?next=' + encodeURIComponent(window.location.pathname),
+        '/login?next=' +
+          encodeURIComponent(window.location.pathname + window.location.search),
       );
   }, [ready, user, error]);
   if (error)
     return (
-      <p role="alert">
+      <div className="session-gate" role="alert">
         {error} <a href="/login">Đăng nhập lại</a>
-      </p>
+      </div>
     );
-  if (!ready || !user) return <p role="status">Đang kiểm tra đăng nhập…</p>;
+  if (!ready || !user)
+    return (
+      <div className="session-gate" role="status">
+        <span className="session-mark" aria-hidden="true">
+          ↗
+        </span>
+        Đang kiểm tra đăng nhập…
+      </div>
+    );
   // Dữ liệu cá nhân chỉ tải sau getUser; RLS là bảo vệ tại database.
   return <div key={user.id}>{children}</div>;
 }

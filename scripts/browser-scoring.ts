@@ -1,7 +1,9 @@
 import { chromium } from '@playwright/test';
+import { authenticateBrowser } from './browser-auth';
 import { mkdir } from 'node:fs/promises';
 const base = process.env.MARKET_APP_URL || 'http://127.0.0.1:8878';
 const browser = await chromium.launch({ headless: true });
+let cleanupAuth: (() => Promise<void>) | undefined;
 try {
   await mkdir('.cache/screenshots', { recursive: true });
   const page = await browser.newPage({
@@ -12,6 +14,7 @@ try {
   // Financials are requested only after that response, not on initial navigation.
   page.setDefaultTimeout(300000);
   page.on('pageerror', (e) => errors.push(e.message));
+  cleanupAuth = await authenticateBrowser(page, base);
   for (const symbol of ['VNM', 'FPT', 'HPG']) {
     const financialResponse = page.waitForResponse(
       (r) =>
@@ -149,7 +152,7 @@ try {
   await page.getByRole('button', { name: 'Lưu cài đặt', exact: true }).click();
   await page
     .getByRole('status')
-    .filter({ hasText: 'Đã lưu trên trình duyệt này' })
+    .filter({ hasText: /Đã lưu (trên trình duyệt này|Supabase)/ })
     .waitFor();
   await page.reload();
   await page.waitForFunction(
@@ -190,12 +193,16 @@ try {
   await page.getByRole('button', { name: 'Lưu cài đặt', exact: true }).click();
   await page
     .getByRole('status')
-    .filter({ hasText: 'Đã lưu trên trình duyệt này' })
+    .filter({ hasText: /Đã lưu (trên trình duyệt này|Supabase)/ })
     .waitFor();
   if (errors.length) throw new Error('Browser JS errors: ' + errors.join(';'));
   console.log(
     'SCORING BROWSER PASS: 390px, financial table scroll, no JS errors; defaults restored',
   );
 } finally {
-  await browser.close();
+  try {
+    await browser.close();
+  } finally {
+    await cleanupAuth?.();
+  }
 }

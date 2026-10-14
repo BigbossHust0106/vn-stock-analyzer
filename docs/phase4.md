@@ -4,9 +4,9 @@ Chỉ mang tính tham khảo, không phải lời khuyên đầu tư.
 
 ## Hành vi
 
-- `/login`: email/password, đăng ký xác nhận email, quên mật khẩu, Google OAuth PKCE.
-- `/auth/callback`: đổi code một lần, xóa code khỏi URL; `next` chỉ được phép là `/watchlists`, `/settings`, `/top10`.
-- `/watchlists`, `/auth/password`: chỉ dựng nội dung sau `getUser()`. Ứng dụng là Next static export; HTML shell công khai không chứa dữ liệu riêng. RLS và `getUser` tại `/v1/watchlists` là lớp bảo vệ dữ liệu. Private API không cache và dùng public key + JWT người dùng, không dùng service_role.
+- `/login`: giao diện hai cột nền sáng, minh họa bò/biểu đồ chứng khoán; mobile một cột. Email/password, đăng ký xác nhận email, quên mật khẩu, hiện/ẩn mật khẩu, Google OAuth PKCE. Không có menu hoặc nội dung tính năng. Tài khoản đã đăng nhập được chuyển về trang đích.
+- `/auth/callback`: đổi code một lần, xóa code khỏi URL; `next` chỉ được phép là `/`, `/stocks` (có thể kèm `?symbol=VNM` với mã hợp lệ), `/watchlists`, `/settings`, `/top10`.
+- Toàn bộ trang tính năng `/`, `/stocks`, `/top10`, `/watchlists`, `/settings` chỉ dựng giao diện và tải dữ liệu sau `getUser()`. Truy cập trực tiếp khi chưa đăng nhập chuyển về `/login?next=...`; giữ mã cổ phiếu khi quay lại. `/auth/password` cũng yêu cầu đăng nhập; callback/khôi phục không có menu tính năng. Ứng dụng là Next static export: cổng giao diện nằm ở client, không phải phân quyền HTML tại server. Dữ liệu thị trường/API đọc công khai tiếp tục dùng public RLS. Dữ liệu riêng được bảo vệ bằng RLS và `getUser` tại `/v1/watchlists`. Private API không cache và dùng public key + JWT người dùng, không dùng service_role.
 - `/top10`: ba bảng cùng trang; sàn, phân ngành KBS, vốn hóa; lọc **trước** lấy 10 dòng. Hiển thị điểm thành phần, mức bao phủ, độ tin cậy, 3 dòng giải thích, thời gian nhận giá và thêm vào danh sách được chọn.
 - Watchlist: tạo/đổi tên/xóa nhiều danh sách; thêm/xóa mã, ghi chú tối đa 2.000 ký tự, giá mục tiêu VND. Xóa danh sách cascade mã. Thêm mã trùng không ghi đè ghi chú/giá đã lưu. Giá refresh 30 giây khi tab hiển thị; điểm so với ngày xếp hạng trước, không giả điểm cũ khi chưa có.
 

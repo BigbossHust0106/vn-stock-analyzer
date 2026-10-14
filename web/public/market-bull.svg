@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="530" viewBox="0 0 680 530" fill="none">
+  <defs>
+    <pattern id="grid" width="46" height="46" patternUnits="userSpaceOnUse"><path d="M46 0H0V46" stroke="#cfc9bd" stroke-opacity=".45"/></pattern>
+    <linearGradient id="bar" x1="490" y1="160" x2="490" y2="450" gradientUnits="userSpaceOnUse"><stop stop-color="#ef5d50"/><stop offset="1" stop-color="#f4b2a4"/></linearGradient>
+  </defs>
+  <path fill="url(#grid)" d="M24 40h632v444H24z"/>
+  <circle cx="367" cy="274" r="180" fill="#e8e3d7"/>
+  <circle cx="367" cy="274" r="145" stroke="#d6d0c2" stroke-dasharray="3 7"/>
+  <path d="M54 450h577" stroke="#b9b3a6"/>
+  <g stroke="#b7b0a3" stroke-width="2"><path d="M118 287v128m58-173v138m58-171v127m58-130v123"/></g>
+  <g fill="#d1cbbf"><rect x="106" y="324" width="24" height="58" rx="3"/><rect x="164" y="269" width="24" height="67" rx="3"/><rect x="222" y="252" width="24" height="46" rx="3"/><rect x="280" y="236" width="24" height="52" rx="3"/></g>
+  <g fill="url(#bar)"><rect x="431" y="293" width="44" height="157" rx="4"/><rect x="493" y="232" width="44" height="218" rx="4"/><rect x="555" y="157" width="44" height="293" rx="4"/></g>
+  <path d="m413 226 70-66 37 16 76-94" stroke="#e75f50" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="m570 86 28-7-1 29" stroke="#e75f50" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <ellipse cx="284" cy="454" rx="182" ry="13" fill="#c8c0b1" fill-opacity=".45"/>
+  <!-- Stylized bull: a decorative symbol of the market, not price data. -->
+  <path d="M179 281c-35-29-73-12-65 29 4 23 29 26 37 11" stroke="#252a29" stroke-width="13" stroke-linecap="round"/>
+  <path d="m165 290 29-55 80-22 66 10 42 43-12 72-35 31-13 62h-35l7-76-47 1-26 75h-37l15-98Z" fill="#252a29"/>
+  <path d="m197 337 26 18-17 59h-31l22-77Zm101 17 28-7-12 67h-28l12-60Z" fill="#454b46"/>
+  <path d="m184 417 31 1-7 18h-38l14-19Zm101 0h34l-3 19h-40l9-19Z" fill="#171d1b"/>
+  <path d="m318 254 4-55 32-29 41 16 22 49-15 57-42 20-36-28Z" fill="#252a29"/>
+  <path d="m357 186-32-35-29-3 21 27 18 39 22-28Z" fill="#252a29"/>
+  <path d="m387 190 33-30 22-23-1 33-31 50-23-30Z" fill="#252a29"/>
+  <path d="m337 208-33-11 20 32 17 3m57-20 28-1-16 23-10-4" fill="#454b46"/>
+  <path d="m344 251 7 23 29 7 18-21-54-9Z" fill="#484f49"/>
+  <path d="m346 235 10 4m27-2 9-4" stroke="#f37864" stroke-width="4" stroke-linecap="round"/>
+  <path d="m348 286 10 10 23-5" stroke="#111916" stroke-width="3" stroke-linecap="round"/>
+  <path d="m318 254-13 42 19 23 37-7-27-21-16-37Z" fill="#151d1a"/>
+  <path d="m203 255 53-18 38 9-22 17-69-8Z" fill="#454b46"/>
+  <path d="m248 270 27 14-22 38-28-3 23-49Z" fill="#363e38"/>
+  <path d="M338 316c16 9 33 7 49-2l9 22-37 13-29-14 8-19Z" fill="#ec6857"/>
+  <path d="m352 321 7 13 22-8" stroke="#ffb49e" stroke-width="2"/>
+  <circle cx="91" cy="183" r="24" fill="#f9f6ef" stroke="#d6d0c2"/>
+  <path d="M81 188v-8m10 13v-20m10 13v-7" stroke="#656d5e" stroke-width="3" stroke-linecap="round"/>
+  <path d="m453 383 9-9m-9 0 9 9M167 159l8-8m-8 0 8 8" stroke="#948f81" stroke-width="2"/>
+  <circle cx="531" cy="110" r="4" fill="#e75f50"/><circle cx="133" cy="401" r="3" fill="#948f81"/>
+</svg>

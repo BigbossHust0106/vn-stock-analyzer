@@ -1,7 +1,9 @@
 import { chromium } from '@playwright/test';
+import { authenticateBrowser } from './browser-auth';
 import { mkdir } from 'node:fs/promises';
 const base = process.env.MARKET_APP_URL || 'http://127.0.0.1:8878';
 const browser = await chromium.launch({ headless: true });
+let cleanupAuth: (() => Promise<void>) | undefined;
 try {
   await mkdir('.cache/screenshots', { recursive: true });
   const page = await browser.newPage({
@@ -11,6 +13,7 @@ try {
   // Three upstream providers may each exhaust retries before cached fallback.
   page.setDefaultTimeout(300000);
   page.on('pageerror', (e) => errors.push(e.message));
+  cleanupAuth = await authenticateBrowser(page, base);
   for (const symbol of ['VNM', 'FPT', 'HPG']) {
     await page.goto(base);
     await page.getByLabel('Tìm mã hoặc tên công ty').fill(symbol);
@@ -106,5 +109,9 @@ try {
     'BROWSER LIVE PASS: 390px responsive, theme toggle/reload, no JS errors',
   );
 } finally {
-  await browser.close();
+  try {
+    await browser.close();
+  } finally {
+    await cleanupAuth?.();
+  }
 }
