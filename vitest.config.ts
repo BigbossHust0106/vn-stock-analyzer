@@ -10,6 +10,7 @@ export default defineConfig({
         'modules/strategies/**/*.ts',
         'modules/scoring/**/*.ts',
         'modules/trading/**/*.ts',
+        'modules/news/**/*.ts',
       ],
       thresholds: {
         'modules/strategies/**': {
@@ -19,6 +20,12 @@ export default defineConfig({
           lines: 80,
         },
         'modules/scoring/**': {
+          statements: 80,
+          branches: 80,
+          functions: 80,
+          lines: 80,
+        },
+        'modules/news/**': {
           statements: 80,
           branches: 80,
           functions: 80,

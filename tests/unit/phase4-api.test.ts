@@ -1,3 +1,4 @@
+import { rankStock } from '../../modules/scoring/rankings';
 import { afterEach, expect, it, vi } from 'vitest';
 import worker from '../../worker/src/index';
 const env = {
@@ -74,6 +75,9 @@ it('Bộ lọc ranking sai bị từ chối trước DB; cấu hình thiếu 503
   vi.stubGlobal('fetch', vi.fn());
   for (const query of [
     'horizon=year',
+    'newsWeight=NaN',
+    'newsWeight=0.31',
+    'newsWeight=-0.1',
     'exchange=NYSE',
     'minCap=-1',
     'minCap=NaN',
@@ -103,8 +107,26 @@ it('Ranking public dùng RPC nhận bộ lọc trước limit và trả run/sect
         url,
         body: init?.body ? JSON.parse(String(init.body)) : null,
       });
-      if (url.includes('top_rankings'))
-        return Response.json([{ symbol: 'VNM', score: 55 }]);
+      if (url.includes('ranking_news_inputs')) {
+        const row = rankStock({
+          stockId: 'stock',
+          financials: null,
+          priceVnd: null,
+          referenceVnd: null,
+          quoteFetchedAt: null,
+          bars: [],
+          events: [],
+          asOf: '2026-10-14T00:00:00Z',
+        })[0]!;
+        return Response.json([
+          {
+            stock_id: 'stock',
+            symbol: 'VNM',
+            score: null,
+            explanation: row.explanation,
+          },
+        ]);
+      }
       if (url.includes('ranking_runs'))
         return Response.json([{ as_of: '2026-10-14', universe_count: 20 }]);
       return Response.json([{ sector: 'Thực phẩm' }, { sector: 'Thực phẩm' }]);
@@ -117,7 +139,9 @@ it('Ranking public dùng RPC nhận bộ lọc trước limit và trả run/sect
     env,
   );
   expect(response.status).toBe(200);
-  expect(calls.find((c) => c.url.includes('top_rankings'))?.body).toEqual({
+  expect(
+    calls.find((c) => c.url.includes('ranking_news_inputs'))?.body,
+  ).toEqual({
     period: 'quarter',
     market: 'HOSE',
     industry: 'Thực phẩm',
@@ -126,7 +150,8 @@ it('Ranking public dùng RPC nhận bộ lọc trước limit và trả run/sect
   });
   expect(await response.json()).toMatchObject({
     sectors: ['Thực phẩm'],
-    data: [{ symbol: 'VNM' }],
+    data: [],
+    excluded: [{ symbol: 'VNM', position: null }],
   });
 });
 it('Giờ cron mới được phân luồng, thiếu key báo lỗi thay vì success', async () => {

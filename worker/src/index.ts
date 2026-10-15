@@ -1,3 +1,7 @@
+import { newsJobResponse } from './api/news-job';
+import { newsResponse } from './api/news';
+import { syncNews } from './news/sync';
+import type { NewsConfig } from '../../modules/news/analysis';
 import { rankingsResponse } from './api/rankings';
 import { watchlistsResponse } from './api/watchlists';
 import { tradingSync } from './trading-sync';
@@ -14,7 +18,7 @@ import {
   validatedSymbols,
   VpsProvider,
 } from '../../modules/providers/vps-provider';
-export interface Env extends ProviderConfig {
+export interface Env extends ProviderConfig, NewsConfig {
   SYNC_SYMBOLS?: string;
   ASSETS?: Pick<WorkerBindings['ASSETS'], 'fetch'>;
   SUPABASE_URL?: string;
@@ -90,6 +94,8 @@ export default {
       'Access-Control-Allow-Origin': '*',
       'X-Content-Type-Options': 'nosniff',
     };
+    const job = await newsJobResponse(request, env);
+    if (job) return job;
     if (request.method !== 'GET')
       return Response.json(
         { error: 'Phương thức không được hỗ trợ' },
@@ -118,6 +124,8 @@ export default {
     }
     const privateResponse = await watchlistsResponse(request, env);
     if (privateResponse) return privateResponse;
+    const news = await newsResponse(request, env);
+    if (news) return news;
     const ranking = await rankingsResponse(request, env);
     if (ranking) return ranking;
     const financial = await financialResponse(request, env, context);
@@ -179,6 +187,23 @@ export default {
     env: Env,
     context: Pick<ExecutionContext, 'waitUntil'>,
   ): void {
+    if (controller.cron === '*/30 * * * *') {
+      context.waitUntil(
+        syncNews(env, controller.scheduledTime)
+          .then((result) =>
+            result?.skipped
+              ? undefined
+              : syncRankings(env, controller.scheduledTime),
+          )
+          .catch(() => {
+            console.error(
+              'Cron tin tức thất bại; không ghi log credential hay phản hồi LLM',
+            );
+            throw new Error('Cron tin tức thất bại');
+          }),
+      );
+      return;
+    }
     if (
       controller.cron === '*/5 2-8 * * 1-5' ||
       controller.cron === '15 8 * * 1-5'

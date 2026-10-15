@@ -1,3 +1,6 @@
+import { integrateNews } from '../../modules/news/ranking';
+import { validNewsWeight } from '../../modules/news/ranking';
+import type { NewsScore } from '../../modules/news/sentiment';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Env } from './index';
 import deployment from '../../config/public-deployment.json';
@@ -8,9 +11,27 @@ import {
   type RankingEvent,
 } from '../../modules/scoring/rankings';
 import { vietnamDate } from '../../modules/market/calendar';
-export async function rankingRows(db: SupabaseClient, timestamp: number) {
+export async function rankingRows(
+  db: SupabaseClient,
+  timestamp: number,
+  newsWeight = 0.1,
+) {
+  if (!validNewsWeight(newsWeight))
+    throw Error('Trọng số tin tức không hợp lệ');
   const asOf = new Date(timestamp).toISOString();
-  const rows: ReturnType<typeof rankStock> = [];
+  const newsByStock = new Map<string, NewsScore>();
+  for (let offset = 0; ; offset += 1000) {
+    const { data, error } = await db
+      .from('news_scores')
+      .select('stock_id,payload,updated_at')
+      .gte('updated_at', new Date(timestamp - 3600000).toISOString())
+      .order('stock_id')
+      .range(offset, offset + 999);
+    if (error || !data) throw Error('Không đọc được điểm tin tức');
+    for (const n of data) newsByStock.set(n.stock_id, n.payload as NewsScore);
+    if (data.length < 1000) break;
+  }
+  const rows: ReturnType<typeof integrateNews>[] = [];
   for (let start = 0; ; start += 200) {
     const { data: stocks, error } = await db
       .from('stocks')
@@ -76,8 +97,20 @@ export async function rankingRows(db: SupabaseClient, timestamp: number) {
           bars: (bars ?? []) as RankingBar[],
           events: (events ?? []) as RankingEvent[],
           asOf,
-        }).map((row) => ({
-          ...row,
+        }).map((base) => ({
+          ...integrateNews(
+            base,
+            newsByStock.get(s.id) ?? {
+              score: null,
+              count: 0,
+              sourceCount: 0,
+              asOf,
+              newestAt: null,
+              links: [],
+              reason: 'không đủ dữ liệu',
+            },
+            newsWeight,
+          ),
           financial_version: financialSnapshot!.version,
           quote_version:
             useCurrent || !reference ? (current?.version ?? null) : null,
@@ -105,7 +138,7 @@ export async function syncRankings(env: Env, timestamp = Date.now()) {
     env.SUPABASE_SERVICE_ROLE_KEY,
     { auth: { persistSession: false, autoRefreshToken: false } },
   );
-  const rows = await rankingRows(db, timestamp);
+  const rows = await rankingRows(db, timestamp, Number(env.NEWS_WEIGHT ?? 0.1));
   const { error } = await db.rpc('publish_rankings', {
     day: vietnamDate(timestamp),
     stamp: new Date(timestamp).toISOString(),

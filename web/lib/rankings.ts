@@ -1,3 +1,4 @@
+import type { NewsScore } from '../../modules/news/sentiment';
 import deployment from '../../config/public-deployment.json';
 export const horizonLabels = {
   day: 'Trong ngày',
@@ -5,6 +6,7 @@ export const horizonLabels = {
   quarter: 'Trong quý',
 };
 export interface RankingExplanation {
+  newsIntegration?: { news: NewsScore };
   rankingEligibility?: {
     eligible: boolean;
     policy: string;
@@ -46,12 +48,18 @@ export async function fetchRankings(
   sector: string,
   cap: string,
   signal: AbortSignal,
+  newsWeight = 0.1,
 ): Promise<RankingsResult> {
   const url = new URL(
     '/v1/rankings',
-    process.env.NEXT_PUBLIC_WORKER_URL || deployment.workerUrl,
+    process.env.NEXT_PUBLIC_WORKER_URL ||
+      (typeof window !== 'undefined' &&
+      ['localhost', '127.0.0.1'].includes(window.location.hostname)
+        ? window.location.origin
+        : deployment.workerUrl),
   );
   url.searchParams.set('horizon', horizon);
+  url.searchParams.set('newsWeight', String(newsWeight));
   if (exchange) url.searchParams.set('exchange', exchange);
   if (sector) url.searchParams.set('sector', sector);
   if (cap === 'small') {

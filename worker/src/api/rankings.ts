@@ -1,3 +1,8 @@
+import {
+  reweightNewsRow,
+  validNewsWeight,
+} from '../../../modules/news/ranking';
+import type { rankStock } from '../../../modules/scoring/rankings';
 import { createClient } from '@supabase/supabase-js';
 import type { Env } from '../index';
 import deployment from '../../../config/public-deployment.json';
@@ -15,6 +20,9 @@ export async function rankingsResponse(
   const horizon = url.searchParams.get('horizon') ?? 'day',
     market = url.searchParams.get('exchange'),
     industry = url.searchParams.get('sector');
+  const newsWeight = Number(
+    url.searchParams.get('newsWeight') ?? env.NEWS_WEIGHT ?? 0.1,
+  );
   const min = url.searchParams.get('minCap'),
     max = url.searchParams.get('maxCap');
   const numeric = (v: string | null) =>
@@ -23,6 +31,9 @@ export async function rankingsResponse(
       Number.isFinite(Number(v)) &&
       Number(v) <= 1e18);
   if (
+    (url.searchParams.has('newsWeight') &&
+      !url.searchParams.get('newsWeight')?.trim()) ||
+    !validNewsWeight(newsWeight) ||
     !['day', 'month', 'quarter'].includes(horizon) ||
     (market !== null && !['HOSE', 'HNX', 'UPCOM'].includes(market)) ||
     (industry !== null && (!industry.trim() || industry.length > 120)) ||
@@ -46,19 +57,11 @@ export async function rankingsResponse(
       { auth: { persistSession: false, autoRefreshToken: false } },
     );
     const [
-      { data, error },
-      { data: excluded, error: excludedError },
+      { data: inputs, error },
       { data: runs, error: runError },
       { data: sectors, error: sectorError },
     ] = await Promise.all([
-      db.rpc('top_rankings', {
-        period: horizon,
-        market,
-        industry,
-        min_cap: min === null ? null : Number(min),
-        max_cap: max === null ? null : Number(max),
-      }),
-      db.rpc('ranking_candidates', {
+      db.rpc('ranking_news_inputs', {
         period: horizon,
         market,
         industry,
@@ -73,10 +76,39 @@ export async function rankingsResponse(
         .limit(1),
       db.from('stocks').select('sector').not('sector', 'is', null).limit(1000),
     ]);
-    if (error || excludedError || runError || sectorError)
-      throw new Error('Read failed');
+    if (error || runError || sectorError) throw new Error('Read failed');
+    if (!Array.isArray(inputs) || inputs.length > 2000)
+      throw Error('Phạm vi xếp hạng vượt giới hạn kiểm tra');
+    type InputRow = {
+      stock_id: string;
+      symbol: string;
+      score: number | null;
+      explanation: ReturnType<typeof rankStock>[number]['explanation'];
+    };
+    const mixed = (inputs as InputRow[]).map((row) =>
+      reweightNewsRow(row, newsWeight, new Date().toISOString()),
+    );
+    const eligible = (row: (typeof mixed)[number]) =>
+      row.score !== null &&
+      row.explanation.coverage === 1 &&
+      row.explanation.rankingEligibility.policy === 'complete-v1' &&
+      row.explanation.rankingEligibility.eligible &&
+      row.explanation.rankingEligibility.quoteVerified &&
+      row.explanation.rankingEligibility.financialCoverage === 1 &&
+      row.explanation.rankingEligibility.blockers.length === 0;
+    const data = mixed
+      .filter(eligible)
+      .sort((a, b) => b.score! - a.score! || a.symbol.localeCompare(b.symbol))
+      .slice(0, 10)
+      .map((row, i) => ({ ...row, position: i + 1 }));
+    const excluded = mixed
+      .filter((row) => !eligible(row))
+      .sort((a, b) => a.symbol.localeCompare(b.symbol))
+      .slice(0, 100)
+      .map((row) => ({ ...row, position: null }));
     return Response.json(
       {
+        newsWeight,
         data,
         excluded,
         qualityPolicy: 'complete-v1',

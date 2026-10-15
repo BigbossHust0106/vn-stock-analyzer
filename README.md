@@ -414,3 +414,7 @@ khi xác minh; không suy ngày nghỉ/KQKD hay đưa fixture vào production.
 ### Phần 5: vùng giá và quản lý rủi ro
 
 Trang chi tiết mã có vùng mua, TP1–TP3 đủ R:R ≥2, SL theo ATR/đáy/% và trailing stop; mỗi mức có lý do, bước giá và trạng thái so với biên độ phiên. Cảnh báo định giá/RSI/MACD/thanh khoản và giới hạn dữ liệu hiển thị ngay bên dưới. Cài đặt riêng mã/tài khoản lưu trên trình duyệt. Xem [phương pháp và kiểm thử Phần 5](docs/phase5.md); lịch sử chưa xác minh basis nên các vùng hiện là kịch bản tham khảo.
+
+### Phần 6: tin tức và yếu tố ảnh hưởng
+
+RSS bốn nguồn, Cron 30 phút, gắn mã/ngành/vĩ mô và loại trùng; trang chi tiết có tin, nguồn và bảng yếu tố ảnh hưởng. LLM tương thích OpenAI dùng secrets, tóm tắt trích xuất có bằng chứng; chưa cấu hình thì ghi không đủ dữ liệu. Top10 dùng trọng số tin mặc định10%, chỉnh0–30%, giữ nguyên bộ lọc dữ liệu đầy đủ. Xem [phương pháp, điều kiện nguồn và cấu hình Phần6](docs/phase6.md).

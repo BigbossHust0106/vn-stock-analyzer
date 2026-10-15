@@ -21,6 +21,7 @@ const strategyLabels: Record<string, string> = {
   valuation: 'Định giá',
   safety: 'Biên an toàn',
   events: 'Sự kiện',
+  news: 'Tâm lý tin tức',
 };
 function RankingTable({
   horizon,
@@ -28,7 +29,9 @@ function RankingTable({
   sector,
   cap,
   onSectors,
+  newsWeight,
 }: {
+  newsWeight: number;
   horizon: Horizon;
   exchange: string;
   sector: string;
@@ -52,6 +55,7 @@ function RankingTable({
           sector,
           cap,
           controller.signal,
+          newsWeight,
         );
         if (stopped) return;
         setResult(data);
@@ -77,7 +81,7 @@ function RankingTable({
       controller?.abort();
       window.clearInterval(timer);
     };
-  }, [horizon, exchange, sector, cap, onSectors]);
+  }, [horizon, exchange, sector, cap, onSectors, newsWeight]);
   return (
     <section className="ranking-section" data-testid={'ranking-' + horizon}>
       <div className="section-heading">
@@ -172,21 +176,25 @@ function RankingTable({
                     <td>
                       <div className="strategy-chips">
                         {Object.entries(row.explanation.strategies)
-                          .filter(([key]) =>
-                            horizon === 'day'
-                              ? [
-                                  'momentum',
-                                  'unusualVolume',
-                                  'shortTechnical',
-                                  'quality',
-                                ].includes(key)
-                              : horizon === 'month'
+                          .filter(
+                            ([key]) =>
+                              key === 'news' ||
+                              (horizon === 'day'
                                 ? [
-                                    'mediumTechnical',
-                                    'valuation',
-                                    'events',
+                                    'momentum',
+                                    'unusualVolume',
+                                    'shortTechnical',
+                                    'quality',
                                   ].includes(key)
-                                : ['graham', 'buffett', 'safety'].includes(key),
+                                : horizon === 'month'
+                                  ? [
+                                      'mediumTechnical',
+                                      'valuation',
+                                      'events',
+                                    ].includes(key)
+                                  : ['graham', 'buffett', 'safety'].includes(
+                                      key,
+                                    )),
                           )
                           .map(([key, value]) => (
                             <span key={key}>
@@ -199,6 +207,19 @@ function RankingTable({
                       </div>
                     </td>
                     <td>
+                      {row.explanation.newsIntegration?.news.links
+                        .slice(0, 3)
+                        .map((link) => (
+                          <p key={link.url}>
+                            <a
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Nguồn tin: {link.title}
+                            </a>
+                          </p>
+                        ))}
                       {row.explanation.reasons.map((reason) => (
                         <p key={reason}>{reason}</p>
                       ))}
@@ -251,6 +272,17 @@ function RankingTable({
                       </small>
                     </td>
                     <td>
+                      <p>
+                        Tâm lý tin tức:{' '}
+                        {row.explanation.strategies.news === null ||
+                        row.explanation.strategies.news === undefined
+                          ? 'không đủ dữ liệu'
+                          : formatNumber(
+                              row.explanation.strategies.news,
+                              1,
+                            )}{' '}
+                        · trọng số {Math.round(newsWeight * 100)}%
+                      </p>
                       {(
                         row.explanation.rankingEligibility?.blockers ?? [
                           'Chưa được kiểm tra theo điều kiện dữ liệu đầy đủ.',
@@ -282,6 +314,7 @@ function RankingTable({
   );
 }
 export function TopRankings() {
+  const [newsWeight, setNewsWeight] = useState(0.1);
   const [exchange, setExchange] = useState(''),
     [sector, setSector] = useState(''),
     [cap, setCap] = useState(''),
@@ -303,6 +336,31 @@ export function TopRankings() {
         Giá cập nhật mỗi 30 giây; điểm tính sau lượt đồng bộ.
       </p>
       <div className="ranking-filters">
+        <label>
+          Trọng số tâm lý tin tức (%)
+          <input
+            aria-label="Trọng số tâm lý tin tức (%)"
+            type="number"
+            min="0"
+            max="30"
+            step="1"
+            value={Math.round(newsWeight * 100)}
+            onChange={(e) => {
+              const n = Number(e.target.value);
+              if (
+                e.target.value !== '' &&
+                Number.isFinite(n) &&
+                n >= 0 &&
+                n <= 30
+              )
+                setNewsWeight(n / 100);
+            }}
+          />
+          <small>
+            0%: tắt thành phần tin; mặc định 10%. Thiếu tin không quy về trung
+            lập. Trọng số cơ sở giảm tương ứng.
+          </small>
+        </label>
         <label>
           Sàn
           <select
@@ -346,7 +404,8 @@ export function TopRankings() {
       </div>
       {(['day', 'month', 'quarter'] as const).map((horizon) => (
         <RankingTable
-          key={horizon + exchange + sector + cap}
+          key={horizon + exchange + sector + cap + newsWeight}
+          newsWeight={newsWeight}
           horizon={horizon}
           exchange={exchange}
           sector={sector}

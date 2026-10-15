@@ -10,6 +10,9 @@
     "binding": "ASSETS",
     "run_worker_first": ["/v1/*", "/health"],
   },
-  "triggers": { "crons": ["*/5 2-8 * * 1-5", "15 8 * * 1-5", "0 9 * * 1-5"] },
+  "vars": { "NEWS_RSS_PERMISSION": "personal-nonprofit", "NEWS_WEIGHT": "0.1" },
+  "triggers": {
+    "crons": ["*/30 * * * *", "*/5 2-8 * * 1-5", "15 8 * * 1-5", "0 9 * * 1-5"],
+  },
   "observability": { "enabled": true },
 }

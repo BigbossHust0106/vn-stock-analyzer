@@ -44,10 +44,13 @@
     "verify:phase4:live": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/verify-phase4-live.ts",
     "verify:login:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-login.ts",
     "verify:ranking-quality:live": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/verify-ranking-quality.ts",
-    "verify:trade-plan:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-trade-plan.ts"
+    "verify:trade-plan:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-trade-plan.ts",
+    "sync:news": "node --use-env-proxy --import tsx scripts/sync-news.ts",
+    "verify:news:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-news.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.3",
+    "fast-xml-parser": "5.11.2",
     "lightweight-charts": "5.2.1",
     "next": "16.4.0",
     "react": "19.2.4",

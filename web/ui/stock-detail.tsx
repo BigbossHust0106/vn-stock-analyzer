@@ -1,4 +1,5 @@
 'use client';
+import { StockNews } from './stock-news';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { stockDetail, type StockDetail as Detail } from '../lib/market-client';
@@ -141,6 +142,7 @@ function DetailContent({ symbol }: { symbol: string }) {
         </p>
       ))}
       <TradeWorkbench detail={data} financials={financials} />
+      <StockNews symbol={symbol} />
       <ScoringPanel
         symbol={symbol}
         onFinancials={setFinancials}
