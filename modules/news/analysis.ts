@@ -69,21 +69,25 @@ export function createArticleTagger(stocks: StockTag[]) {
   ]);
   const prepared = stocks.map((s) => {
     const escaped = s.symbol.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const ticker = new RegExp(
-      `(?:^|[^\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`,
-      'u',
-    );
-    const explicit = new RegExp(
-      `(?:mã|cổ phiếu|HOSE|HNX|UPCOM)\\s*[:(]?\\s*${escaped}(?![A-Z0-9])`,
-      'iu',
-    );
+    const canonical = /^[A-Z0-9]+$/.test(s.symbol);
+    // Listed tickers are ASCII tokens; one scan replaces thousands of cold
+    // Unicode regex compilations. Keep the original matcher for unusual input.
+    const ticker = canonical
+      ? null
+      : new RegExp(`(?:^|[^\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, 'u');
+    const explicit = canonical
+      ? null
+      : new RegExp(
+          `(?:mã|cổ phiếu|HOSE|HNX|UPCOM)\\s*[:(]?\\s*${escaped}(?![A-Z0-9])`,
+          'iu',
+        );
     const name = fold(s.name)
       .replace(
         /^(cong ty|ctcp|co phan|tong cong ty|tap doan|ngan hang|thuong mai|tnhh|mot thanh vien|\s)+/g,
         '',
       )
       .trim();
-    return { stock: s, ticker, explicit, name };
+    return { stock: s, ticker, explicit, name, canonical };
   });
   const sectorNames = [
     ...new Set(
@@ -103,12 +107,25 @@ export function createArticleTagger(stocks: StockTag[]) {
   return (a: Pick<RssArticle, 'title' | 'excerpt'>) => {
     const text = newsText(a),
       f = fold(text);
+    const tokens = new Set(text.match(/[\p{L}\p{N}]+/gu) ?? []);
+    const explicitTokens = new Set(
+      [
+        ...text.matchAll(
+          /(?=(?:mã|cổ phiếu|HOSE|HNX|UPCOM)\s*[:(]?\s*([A-Z0-9]+))/giu,
+        ),
+      ].map((m) =>
+        m[1]!.replaceAll('ſ', 'S').replaceAll('K', 'K').toUpperCase(),
+      ),
+    );
     const symbols = prepared
       .filter(
-        ({ stock, ticker, explicit, name }) =>
-          explicit.test(text) ||
+        ({ stock, ticker, explicit, name, canonical }) =>
+          (canonical
+            ? explicitTokens.has(stock.symbol)
+            : explicit!.test(text)) ||
           (name.length >= 10 && f.includes(name)) ||
-          (!ambiguous.has(stock.symbol) && ticker.test(text)),
+          (!ambiguous.has(stock.symbol) &&
+            (canonical ? tokens.has(stock.symbol) : ticker!.test(text))),
       )
       .map((s) => s.stock);
     const macro_topics = Object.entries(topics)

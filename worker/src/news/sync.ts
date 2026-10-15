@@ -90,6 +90,13 @@ export async function collectNews(
     let inserted = 0,
       failed = 0;
     for (const source of newsSources) {
+      console.log(
+        JSON.stringify({
+          component: 'news-ingestion',
+          stage: 'source-start',
+          source: source.id,
+        }),
+      );
       let state = 'ok',
         note = 'Chỉ RSS: tiêu đề, mô tả ngắn và link gốc; không tải toàn văn.',
         count = 0;
@@ -126,6 +133,14 @@ export async function collectNews(
               source,
               asOf,
             );
+            console.log(
+              JSON.stringify({
+                component: 'news-ingestion',
+                stage: 'feed-parsed',
+                source: source.id,
+                count: articles.length,
+              }),
+            );
             for (const a of articles) {
               if (isPromotional(a)) continue;
               if (observed.has(a.id)) continue;
@@ -161,6 +176,13 @@ export async function collectNews(
               inserted++;
               count++;
             }
+            console.log(
+              JSON.stringify({
+                component: 'news-ingestion',
+                stage: 'feed-complete',
+                source: source.id,
+              }),
+            );
           }
         } catch {
           state = 'failed';

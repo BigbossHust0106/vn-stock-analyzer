@@ -15,6 +15,7 @@ import {
   analyzeArticle,
   factorApplies,
   tagArticle,
+  createArticleTagger,
   validAnalysis,
   type ClassifiedArticle,
 } from '../../modules/news/analysis';
@@ -196,6 +197,22 @@ it('gắn mã/ngành và 6 chủ đề vĩ mô; VND không bị nhầm thành ti
   expect(
     tagArticle({ title: 'Cổ phiếu VND tăng', excerpt: '' }, stocks).symbols,
   ).toContain('VND');
+});
+it('gắn mã giữ ranh giới Unicode, tiền tố chồng nhau và không mang trạng thái giữa các tin', () => {
+  const tag = createArticleTagger(
+    ['DPR', 'VND', 'KBC', 'A+B'].map((symbol) => ({
+      symbol,
+      name: '',
+      sector: null,
+    })),
+  );
+  const symbols = (title: string) => tag({ title, excerpt: '' }).symbols;
+  expect(symbols('VDPR DPRX DPRđ dpr')).toEqual([]);
+  expect(symbols('mã DPRđ')).toEqual(['DPR']);
+  expect(symbols('mã HOSE VND')).toEqual(['VND']);
+  expect(symbols('cổ phiếu dpr, mã KBC, A+B')).toEqual(['DPR', 'KBC', 'A+B']);
+  expect(symbols('100 tỷ VND')).toEqual([]);
+  expect(symbols('DPR')).toEqual(['DPR']);
 });
 it('LLM tóm tắt có bằng chứng nguyên văn; từ chối số bịa, nhãn sai, prompt injection và lỗi API', async () => {
   const a = await article();
