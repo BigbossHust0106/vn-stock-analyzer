@@ -1,0 +1,15 @@
+LOCAL MARKET: port 8878, real Worker handler + Supabase/provider, no fixture fallback
+FOCUS UI PASS: real Auth; header search from settings without leaving route, suggestions/Escape/Enter; stock-specific factors, collapsed articles and explicit context opt-in; both coverage badges; five routes at390/768px without overflow/JS errors (market/news fixtures).
+BROWSER LIVE PASS: VNM, 57.300 VND, search → detail, canvas and timeframe controls; daily MA20/50/200 arithmetic and latest daily volume asserted
+BROWSER LIVE PASS: FPT, 57.100 VND, search → detail, canvas and timeframe controls; daily MA20/50/200 arithmetic and latest daily volume asserted
+BROWSER LIVE PASS: HPG, 20.750 VND, search → detail, canvas and timeframe controls; daily MA20/50/200 arithmetic and latest daily volume asserted
+BROWSER LIVE PASS: Enter mở đúng VNM
+BROWSER LIVE PASS: Sữa Việt Nam + Enter mở đúng VNM
+BROWSER LIVE PASS: 390px responsive, theme toggle/reload, no JS errors
+SCORING BROWSER PASS: VNM, score 52.5 / 100, Quan sát, annual EPS numeric/unit; Graham and scenarioDCF/MOS arithmetic or missing-data guard; parent DCF unknown
+SCORING BROWSER PASS: FPT, score 52.5 / 100, Quan sát, annual EPS numeric/unit; Graham and scenarioDCF/MOS arithmetic or missing-data guard; parent DCF unknown
+SCORING BROWSER PASS: HPG, score 12.5 / 100, Quan sát, annual EPS numeric/unit; Graham and scenarioDCF/MOS arithmetic or missing-data guard; parent DCF unknown
+SCORING BROWSER PASS: settings100/0 persists across reload; actual combined score equals Graham
+SCORING BROWSER PASS: 390px, financial table scroll, no JS errors; defaults restored
+LOCAL MARKET: port 8878, real Worker handler + Supabase/provider, no fixture fallback
+FOCUS UI PASS: real Auth; header search from settings without leaving route, suggestions/Escape/Enter; stock-specific factors, collapsed articles and explicit context opt-in; both coverage badges; five routes at390/768px without overflow/JS errors (market/news fixtures).

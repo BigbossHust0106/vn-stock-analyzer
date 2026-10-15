@@ -1,3 +1,4 @@
+import { syncFinancialBackup } from './financial-backup';
 import { rankingUniverse } from '../../modules/market/ranking-universe';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Env } from './index';
@@ -68,6 +69,10 @@ export async function syncFinancials(env: Env): Promise<void> {
         .eq('active', true)
         .maybeSingle();
       if (error || !stock) throw new Error('Mã BCTC không thuộc catalog');
+      // Independent source archive: errors never erase the good normalized snapshot.
+      await syncFinancialBackup(db, stock.id, symbol).catch(() =>
+        console.warn(`BCTC BACKUP FAIL: ${symbol}; giữ bản cũ`),
+      );
       const financials = await provider.fundamentals.fetchFinancials(symbol);
       const { data: previous, error: previousError } = await db
         .from('financial_snapshots')

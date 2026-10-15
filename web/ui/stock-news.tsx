@@ -51,12 +51,14 @@ export function StockNews({ symbol }: { symbol: string }) {
   const [result, setResult] = useState<NewsResult | null>(null),
     [error, setError] = useState(''),
     [refresh, setRefresh] = useState(0),
-    [filter, setFilter] = useState('all'),
+    [filter, setFilter] = useState('direct'),
     [limit, setLimit] = useState(6);
   useEffect(() => {
     const controller = new AbortController();
     marketJson(
-      '/v1/news?symbol=' + encodeURIComponent(symbol),
+      '/v1/news?symbol=' +
+        encodeURIComponent(symbol) +
+        (filter === 'context' ? '&scope=context' : ''),
       controller.signal,
     )
       .then((raw) => {
@@ -76,7 +78,7 @@ export function StockNews({ symbol }: { symbol: string }) {
           setError(e instanceof Error ? e.message : 'không đủ dữ liệu');
       });
     return () => controller.abort();
-  }, [symbol, refresh]);
+  }, [symbol, refresh, filter]);
   useEffect(() => {
     const timer = window.setInterval(() => {
       if (document.visibilityState === 'visible') setRefresh((n) => n + 1);
@@ -87,9 +89,8 @@ export function StockNews({ symbol }: { symbol: string }) {
     result?.sources.find((s) => s.id === id)?.name ?? id;
   const articles = (result?.articles ?? []).filter(
     (a) =>
-      filter === 'all' ||
       (filter === 'direct' && a.symbols.includes(symbol)) ||
-      (filter === 'macro' && a.factors.includes('macro')),
+      (filter === 'context' && !a.symbols.includes(symbol)),
   );
   return (
     <section className="news-panel" data-testid="stock-news">
@@ -130,15 +131,19 @@ export function StockNews({ symbol }: { symbol: string }) {
           </div>
           <h3>Yếu tố ảnh hưởng</h3>
           <p>
-            Nhóm tin để theo dõi, không mặc định tác động cùng chiều lên mọi
-            doanh nghiệp. Số mua/bán ròng hoặc thanh khoản chỉ có khi bản tin
-            dẫn nguồn cung cấp; chưa có chuỗi số liệu định lượng riêng.
+            Ưu tiên bản tin nhắc trực tiếp {symbol}. Không lấy tin của mã khác
+            làm bằng chứng tác động đến doanh nghiệp này. Bối cảnh chung có thể
+            xem thêm bên dưới.
           </p>
           <div className="news-factor-grid">
             {Object.entries(factorLabels).map(([key, label]) => {
               const rows = result.articles
-                .filter((a) => factorApplies(a, symbol, result.sector, key))
-                .slice(0, 3);
+                .filter(
+                  (a) =>
+                    a.symbols.includes(symbol) &&
+                    factorApplies(a, symbol, result.sector, key),
+                )
+                .slice(0, 1);
               return (
                 <article key={key} data-testid={'factor-' + key}>
                   <h4>{label}</h4>
@@ -161,115 +166,122 @@ export function StockNews({ symbol }: { symbol: string }) {
                       </p>
                     ))
                   ) : (
-                    <p>không đủ dữ liệu</p>
+                    <p>Chưa có tin trực tiếp cho {symbol}.</p>
                   )}
                 </article>
               );
             })}
           </div>
-          <div className="news-filters" role="group" aria-label="Lọc tin">
-            {[
-              ['all', 'Tất cả tin liên quan'],
-              ['direct', 'Trực tiếp mã'],
-              ['macro', 'Vĩ mô'],
-            ].map(([key, label]) => (
-              <button
-                key={key}
-                aria-pressed={filter === key}
-                onClick={() => {
-                  setFilter(key!);
-                  setLimit(6);
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          {articles.length === 0 && (
-            <p>
-              không đủ dữ liệu: chưa có tin phù hợp trong phạm vi RSS 7 ngày.
-            </p>
-          )}
-          <div className="news-list">
-            {articles.slice(0, limit).map((a) => (
-              <article key={a.id} data-testid="news-article">
-                <div className="news-meta">
-                  {source(a.source_id)} · {formatTime(a.published_at)}
-                  {!a.symbols.includes(symbol) && (
-                    <span>
-                      {' '}
-                      · Tin bối cảnh, chưa xác nhận tác động riêng {symbol}
-                    </span>
-                  )}
-                </div>
-                <h3>
-                  <a
-                    href={a.source_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {a.title} ↗
-                  </a>
-                </h3>
-                <div className="news-badges">
-                  {a.analysis ? (
-                    <>
-                      <span data-sentiment={a.analysis.sentiment}>
-                        {sentimentLabels[a.analysis.sentiment]}
+          <details className="news-expanded" data-testid="news-expanded">
+            <summary>Xem thêm tin và chi tiết về {symbol}</summary>
+            <div className="news-filters" role="group" aria-label="Lọc tin">
+              {[
+                ['direct', 'Trực tiếp mã'],
+                ['context', 'Bối cảnh ngành / thị trường'],
+              ].map(([key, label]) => (
+                <button
+                  key={key}
+                  aria-pressed={filter === key}
+                  onClick={() => {
+                    setFilter(key!);
+                    setLimit(6);
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {articles.length === 0 && (
+              <p>
+                không đủ dữ liệu: chưa có tin phù hợp trong phạm vi RSS 7 ngày.
+              </p>
+            )}
+            <div className="news-list">
+              {articles.slice(0, limit).map((a) => (
+                <article key={a.id} data-testid="news-article">
+                  <div className="news-meta">
+                    {source(a.source_id)} · {formatTime(a.published_at)}
+                    {!a.symbols.includes(symbol) && (
+                      <span>
+                        {' '}
+                        · Tin bối cảnh, chưa xác nhận tác động riêng {symbol}
                       </span>
-                      <span>Ảnh hưởng {impactLabels[a.analysis.impact]}</span>
-                      <span>{horizonLabels[a.analysis.horizon]}</span>
-                    </>
-                  ) : (
-                    <span data-sentiment="unknown">
-                      Cảm xúc / ảnh hưởng / thời hạn: không đủ dữ liệu
-                    </span>
-                  )}
-                  {a.symbols.length > 1 && (
-                    <span>
-                      Nhiều mã: không dùng cảm xúc chung để chấm từng mã
-                    </span>
-                  )}
-                  {a.macro_topics.map((t) => (
-                    <span key={t}>{macroLabels[t]}</span>
-                  ))}
-                  {a.symbols.map((t) => (
-                    <span key={t}>{t}</span>
-                  ))}
-                  {a.sectors.map((t) => (
-                    <span key={t}>{t}</span>
-                  ))}
-                </div>
-                <p>{a.analysis?.summary ?? a.excerpt}</p>
-                {a.analysis ? (
+                    )}
+                  </div>
+                  <h3>
+                    <a
+                      href={a.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {a.title} ↗
+                    </a>
+                  </h3>
+                  <div className="news-badges">
+                    {a.analysis ? (
+                      <>
+                        <span data-sentiment={a.analysis.sentiment}>
+                          {sentimentLabels[a.analysis.sentiment]}
+                        </span>
+                        <span>Ảnh hưởng {impactLabels[a.analysis.impact]}</span>
+                        <span>{horizonLabels[a.analysis.horizon]}</span>
+                      </>
+                    ) : (
+                      <span data-sentiment="unknown">
+                        Cảm xúc / ảnh hưởng / thời hạn: không đủ dữ liệu
+                      </span>
+                    )}
+                    {a.symbols.length > 1 && (
+                      <span>
+                        Nhiều mã: không dùng cảm xúc chung để chấm từng mã
+                      </span>
+                    )}
+                    {a.macro_topics.map((t) => (
+                      <span key={t}>{macroLabels[t]}</span>
+                    ))}
+                    {a.symbols.map((t) => (
+                      <span key={t}>{t}</span>
+                    ))}
+                    {a.sectors.map((t) => (
+                      <span key={t}>{t}</span>
+                    ))}
+                  </div>
                   <details>
-                    <summary>Bằng chứng và mô hình</summary>
-                    <blockquote>{a.analysis.evidence}</blockquote>
-                    <small>
-                      Tóm tắt trích xuất RSS · {a.model} ·{' '}
-                      {formatTime(a.analyzed_at)}. Cảm xúc mô tả sắc thái tin,
-                      không dự báo giá.{' '}
-                      <a
-                        href={a.source_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Đọc nguồn gốc
-                      </a>
-                    </small>
+                    <summary>Tóm tắt và nội dung liên quan</summary>
+                    <p>{a.analysis?.summary ?? a.excerpt}</p>
                   </details>
-                ) : (
-                  <small>
-                    Chưa có kết quả LLM hợp lệ. Đoạn trên là mô tả RSS của
-                    nguồn, không phải nhận định mô hình.
-                  </small>
-                )}
-              </article>
-            ))}
-          </div>
-          {articles.length > limit && (
-            <button onClick={() => setLimit((n) => n + 6)}>Xem thêm tin</button>
-          )}
+                  {a.analysis ? (
+                    <details>
+                      <summary>Bằng chứng và mô hình</summary>
+                      <blockquote>{a.analysis.evidence}</blockquote>
+                      <small>
+                        Tóm tắt trích xuất RSS · {a.model} ·{' '}
+                        {formatTime(a.analyzed_at)}. Cảm xúc mô tả sắc thái tin,
+                        không dự báo giá.{' '}
+                        <a
+                          href={a.source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Đọc nguồn gốc
+                        </a>
+                      </small>
+                    </details>
+                  ) : (
+                    <small>
+                      Chưa có kết quả LLM hợp lệ. Đoạn trên là mô tả RSS của
+                      nguồn, không phải nhận định mô hình.
+                    </small>
+                  )}
+                </article>
+              ))}
+            </div>
+            {articles.length > limit && (
+              <button onClick={() => setLimit((n) => n + 6)}>
+                Xem thêm tin
+              </button>
+            )}
+          </details>
           <details className="news-source-status">
             <summary>Trạng thái nguồn và phạm vi dữ liệu</summary>
             <p>{result.scope}</p>

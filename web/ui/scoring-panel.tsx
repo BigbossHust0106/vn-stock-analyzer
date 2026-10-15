@@ -22,6 +22,9 @@ export function ScoringPanel({
   quoteFetchedAt: string | null;
   onFinancials?: (data: FinancialData | null) => void;
 }) {
+  const [backups, setBackups] = useState<
+    { source: string; fetched_at: string; last_error: string | null }[]
+  >([]);
   const [financials, setFinancials] = useState<FinancialData | null>(null),
     [notices, setNotices] = useState<string[]>([]),
     [loading, setLoading] = useState(true),
@@ -36,6 +39,11 @@ export function ScoringPanel({
       .then((raw) => {
         const body = raw as {
           financials: FinancialData | null;
+          backups?: {
+            source: string;
+            fetched_at: string;
+            last_error: string | null;
+          }[];
           notices: string[];
         };
         if (controller.signal.aborted) return;
@@ -46,6 +54,7 @@ export function ScoringPanel({
         )
           throw new Error('BCTC trả về sai mã/kiểu.');
         setFinancials(body.financials);
+        setBackups(Array.isArray(body.backups) ? body.backups : []);
         onFinancials?.(body.financials);
         setNotices(body.notices);
         setAsOf(new Date().toISOString());
@@ -145,6 +154,40 @@ export function ScoringPanel({
           {n}
         </p>
       ))}
+      <details className="financial-backups" data-testid="financial-backups">
+        <summary>Nguồn BCTC chính và dự phòng</summary>
+        <p>
+          KBS: số liệu chuẩn hóa cho cả Graham và Buffett; Vietcap: ratios và
+          kho báo cáo dự phòng độc lập. Không tự coi số raw là đã kiểm toán/hợp
+          nhất.
+        </p>
+        {backups.length ? (
+          backups.map((b) => (
+            <p key={b.source}>
+              Vietcap · đã lưu 3 loại báo cáo · nhận{' '}
+              {formatBackupDate(b.fetched_at)}.{' '}
+              {b.last_error ??
+                'Chỉ lưu bản nguồn; chưa dùng thay đầu vào chấm điểm.'}{' '}
+              <a
+                href={
+                  'https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/' +
+                  symbol +
+                  '/financial-statement?section=INCOME_STATEMENT'
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Xem nguồn BCTC
+              </a>
+            </p>
+          ))
+        ) : (
+          <p>
+            Chưa lưu được báo cáo dự phòng cho mã này. Cron sẽ thử nguồn lại;
+            không tự điền phần thiếu.
+          </p>
+        )}
+      </details>
       <div className="strategy-grid">
         {report.strategies.map((s) => (
           <article
@@ -357,4 +400,11 @@ export function ScoringPanel({
       <p>Chỉ mang tính tham khảo, không phải lời khuyên đầu tư.</p>
     </section>
   );
+}
+
+function formatBackupDate(value: string) {
+  const t = Date.parse(value);
+  return Number.isFinite(t)
+    ? new Date(t).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
+    : 'chưa xác minh';
 }

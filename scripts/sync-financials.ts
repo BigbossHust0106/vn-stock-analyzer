@@ -1,3 +1,4 @@
+import { VietcapReportsProvider } from '../modules/providers/financial-backup';
 import { providers } from '../modules/providers/registry';
 import { validatedSymbols } from '../modules/providers/vps-provider';
 import { databaseQuery, sqlJson, migrateHosted } from './management';
@@ -9,6 +10,7 @@ async function main() {
   const provider = providers({
     FUNDAMENTALS_PROVIDER: process.env.FUNDAMENTALS_PROVIDER ?? 'kbs',
   });
+  const backupProvider = new VietcapReportsProvider();
   for (const symbol of validatedSymbols(
     (process.env.SYNC_SYMBOLS ?? 'VNM,FPT,HPG').split(','),
   )) {
@@ -18,6 +20,17 @@ async function main() {
     );
     if (!Array.isArray(existing) || existing.length !== 1)
       throw new Error('Mã không thuộc catalog');
+    try {
+      const backup = await backupProvider.fetchFinancialReports(symbol);
+      await databaseQuery(
+        `insert into public.financial_report_backups(stock_id,source,fetched_at,payload) values ('${existing[0].id}'::uuid,'VIETCAP_REPORTS',(${sqlJson(backup.fetchedAt)} #>> '{}')::timestamptz,${sqlJson(backup)}) on conflict(stock_id,source) do update set fetched_at=excluded.fetched_at,payload=excluded.payload,last_error=null;`,
+      );
+      console.log(
+        `FINANCIAL BACKUP PASS: ${symbol}, Vietcap 3 báo cáo; raw, không dùng chấm điểm`,
+      );
+    } catch {
+      console.warn(`FINANCIAL BACKUP FAIL: ${symbol}; giữ bản đã lưu`);
+    }
     const f = await provider.fundamentals.fetchFinancials(symbol);
     if (!f.annual.length)
       throw new Error('Nguồn không trả BCTC năm; không báo thành công');

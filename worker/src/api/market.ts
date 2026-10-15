@@ -61,7 +61,7 @@ export async function marketResponse(
           { error: 'Truy vấn không hợp lệ' },
           { status: 400, headers },
         );
-      const { data, error } = await db.rpc('search_stocks', {
+      const { data, error } = await db.rpc('search_stocks_by_coverage', {
         q: normalizeSearch(query),
         market: exchange,
       });

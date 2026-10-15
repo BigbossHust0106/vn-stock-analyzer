@@ -2,6 +2,7 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { HeaderSearch } from './header-search';
 import { AuthNav } from './auth-nav';
 import { RequireAuth } from './require-auth';
 import { NotificationBell } from './notification-bell';
@@ -20,14 +21,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <small>VIỆT NAM</small>
         </Link>
         <nav aria-label="Chức năng chính">
-          <Link
-            href="/"
-            aria-current={
-              pathname === '/' || pathname === '/stocks' ? 'page' : undefined
-            }
-          >
-            Tra cứu mã
-          </Link>
+          <HeaderSearch />
           <Link
             href="/top10"
             aria-current={pathname === '/top10' ? 'page' : undefined}
