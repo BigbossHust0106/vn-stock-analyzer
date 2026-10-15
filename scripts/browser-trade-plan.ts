@@ -1,6 +1,10 @@
 import { chromium, expect, type Page } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
-import { authenticateBrowser } from './browser-auth';
+import {
+  authenticateBrowser,
+  openAccountMenu,
+  enableChart,
+} from './browser-auth';
 import type { StockDetail } from '../web/lib/market-client';
 import type { FinancialData } from '../modules/providers/financial-types';
 import { buildTradePlan } from '../modules/trading/trade-plan';
@@ -32,13 +36,19 @@ try {
   let detail: StockDetail | undefined, financials: FinancialData | undefined;
   page.on('response', async (response) => {
     if (!response.ok()) return;
-    if (/\/v1\/stocks\/DPR$/.test(response.url()))
-      detail = (await response.json()) as StockDetail;
+    if (new URL(response.url()).pathname === '/v1/stocks/DPR') {
+      const incoming = (await response.json()) as StockDetail;
+      detail =
+        new URL(response.url()).searchParams.get('view') === 'history'
+          ? { ...(detail ?? incoming), bars: incoming.bars }
+          : { ...incoming, bars: detail?.bars ?? [] };
+    }
     if (/\/v1\/financials\/DPR$/.test(response.url()))
       financials = ((await response.json()) as { financials: FinancialData })
         .financials;
   });
   cleanups.push(await authenticateBrowser(page, base, '/stocks?symbol=DPR'));
+  await enableChart(page);
   await ready(page);
   await expect.poll(() => Boolean(detail && financials)).toBe(true);
   assert(detail && financials, 'Actual DPR responses missing');
@@ -107,6 +117,7 @@ try {
     await page.getByTestId('plan-trailing').getAttribute('data-price'),
   );
   await page.reload();
+  await enableChart(page);
   await ready(page);
   await expect(page.getByLabel('Lỗ tối đa (%)', { exact: true })).toHaveValue(
     '5',
@@ -146,11 +157,16 @@ try {
   console.log(
     'TRADE PLAN UI PASS: percent stop 40000*(1-5%)=38000; trailing persists without decreasing; chart frame/range and toggle; 390px without overflow',
   );
-  await page.getByRole('button', { name: 'Đăng xuất', exact: true }).click();
+  await openAccountMenu(page);
+  await page
+    .getByRole('navigation', { name: 'Quản lý tài khoản' })
+    .getByRole('button', { name: 'Đăng xuất', exact: true })
+    .click();
   await expect(
     page.getByRole('button', { name: 'Đăng nhập', exact: true }),
   ).toBeVisible();
   cleanups.push(await authenticateBrowser(page, base, '/stocks?symbol=DPR'));
+  await enableChart(page);
   await ready(page);
   await expect(page.getByLabel('Lỗ tối đa (%)', { exact: true })).toHaveValue(
     '8',

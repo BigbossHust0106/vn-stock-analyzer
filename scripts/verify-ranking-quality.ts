@@ -96,6 +96,9 @@ if (process.argv.includes('--browser')) {
     page.on('pageerror', (e) => errors.push(e.message));
     page.setDefaultTimeout(60000);
     cleanup = await authenticateBrowser(page, base, '/top10');
+    await page
+      .getByLabel('Kỳ xếp hạng', { exact: true })
+      .selectOption('quarter');
     await expect(page.getByTestId('unranked-quarter-DPR')).toBeVisible();
     await expect(page.getByTestId('unranked-quarter-DPR')).toContainText('DCF');
     await mkdir('.cache/screenshots', { recursive: true });

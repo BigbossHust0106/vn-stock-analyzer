@@ -1,5 +1,5 @@
 import { chromium } from '@playwright/test';
-import { authenticateBrowser } from './browser-auth';
+import { authenticateBrowser, enableChart } from './browser-auth';
 import { mkdir } from 'node:fs/promises';
 const base = process.env.MARKET_APP_URL || 'http://127.0.0.1:8878';
 const browser = await chromium.launch({ headless: true });
@@ -25,10 +25,12 @@ try {
     const detailResponse = page.waitForResponse(
       (r) =>
         new URL(r.url()).pathname === '/v1/stocks/' + symbol &&
+        new URL(r.url()).searchParams.get('view') === 'history' &&
         r.status() === 200,
       { timeout: 300000 },
     );
     await link.click();
+    await enableChart(page);
     const detail = (await (await detailResponse).json()) as {
       bars: { closeVnd: number; volumeReported: number }[];
     };

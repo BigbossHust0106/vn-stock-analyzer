@@ -34,7 +34,7 @@ function subscribe(changed: () => void) {
   };
 }
 export function ThemeSwitch() {
-  const theme = useSyncExternalStore(subscribe, snapshot, () => 'dark');
+  const theme = useSyncExternalStore(subscribe, snapshot, () => 'light');
   const dark = theme === 'dark';
   function toggle() {
     const next = dark ? 'light' : 'dark';

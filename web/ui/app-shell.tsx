@@ -19,10 +19,32 @@ export function AppShell({ children }: { children: ReactNode }) {
           <small>VIỆT NAM</small>
         </Link>
         <nav aria-label="Chức năng chính">
-          <Link href="/">Tra cứu mã</Link>
-          <Link href="/top10">Top 10</Link>
-          <Link href="/watchlists">Theo dõi</Link>
-          <Link href="/settings">Cài đặt</Link>
+          <Link
+            href="/"
+            aria-current={
+              pathname === '/' || pathname === '/stocks' ? 'page' : undefined
+            }
+          >
+            Tra cứu mã
+          </Link>
+          <Link
+            href="/top10"
+            aria-current={pathname === '/top10' ? 'page' : undefined}
+          >
+            Top 10
+          </Link>
+          <Link
+            href="/watchlists"
+            aria-current={pathname === '/watchlists' ? 'page' : undefined}
+          >
+            Theo dõi
+          </Link>
+          <Link
+            href="/settings"
+            aria-current={pathname === '/settings' ? 'page' : undefined}
+          >
+            Cài đặt
+          </Link>
           <AuthNav />
           <ThemeSwitch />
         </nav>

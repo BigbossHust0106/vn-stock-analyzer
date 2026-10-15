@@ -128,6 +128,7 @@ export async function migrations() {
     sqlFile(name, 'tests/database/schema.sql');
     sqlFile(name, 'tests/database/financials.sql');
     sqlFile(name, 'tests/database/review.sql');
+    sqlFile(name, 'tests/database/closing.sql');
     console.log(
       `MIGRATIONS PASS: ${files.length} file SQL trên PostgreSQL 17 (auth shim; không thay thế Supabase Auth integration)`,
     );

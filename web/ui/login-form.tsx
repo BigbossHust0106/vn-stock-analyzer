@@ -320,10 +320,10 @@ export function LoginForm() {
           </div>
           <Image
             className="login-illustration"
-            src="/market-bull.svg"
+            src="/market-bull.jpg"
             alt=""
-            width={680}
-            height={530}
+            width={1280}
+            height={960}
             priority
           />
           <div className="login-art-bottom">
@@ -332,6 +332,14 @@ export function LoginForm() {
             </span>
             <span>KIÊN NHẪN LÀ LỢI THẾ</span>
           </div>
+          <a
+            className="image-credit"
+            href="https://commons.wikimedia.org/wiki/File:Bulle_und_B%C3%A4r_Frankfurt_3.jpg"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Ảnh: Eva K. / Wikimedia Commons · CC BY-SA 2.5
+          </a>
         </aside>
       </section>
     </main>

@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi" data-theme="dark" suppressHydrationWarning>
+    <html lang="vi" data-theme="light" suppressHydrationWarning>
       <body>
         <AuthProvider>
           <AppShell>{children}</AppShell>

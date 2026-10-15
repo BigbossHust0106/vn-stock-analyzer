@@ -1,0 +1,18 @@
+LOCAL MARKET: port 8878, real Worker handler + Supabase/provider, no fixture fallback
+REFRESH UI PASS: previous close with date, no history/chart on initial load, lazy chart on/off and remembered opt-out
+REFRESH UI PASS: real Auth/avatar menu/Escape/logout; one selected ranking horizon/request at a time; five pages at390px without overflow or JS errors
+LOGIN GATE PASS: 5 direct routes redirect; no feature menu or feature API request before login
+LOGIN UI PASS: desktop, 360/390/768px; signup/reset modes; accessible password visibility control
+LOGIN AUTH PASS: real email/password; stock destination preserved; session survives reload; signed-in login redirects; logout hides workspace; no JS errors
+LOGIN CLEANUP PASS: temporary user and private data deleted
+BROWSER LIVE PASS: VNM, 57.700 VND, search → detail, canvas and timeframe controls; daily MA20/50/200 arithmetic and latest daily volume asserted
+BROWSER LIVE PASS: FPT, 57.300 VND, search → detail, canvas and timeframe controls; daily MA20/50/200 arithmetic and latest daily volume asserted
+BROWSER LIVE PASS: HPG, 20.700 VND, search → detail, canvas and timeframe controls; daily MA20/50/200 arithmetic and latest daily volume asserted
+BROWSER LIVE PASS: Enter mở đúng VNM
+BROWSER LIVE PASS: Sữa Việt Nam + Enter mở đúng VNM
+BROWSER LIVE PASS: 390px responsive, theme toggle/reload, no JS errors
+SCORING BROWSER PASS: VNM, score 52.5 / 100, Quan sát, annual EPS numeric/unit; Graham and scenarioDCF/MOS arithmetic or missing-data guard; parent DCF unknown
+SCORING BROWSER PASS: FPT, score 52.5 / 100, Quan sát, annual EPS numeric/unit; Graham and scenarioDCF/MOS arithmetic or missing-data guard; parent DCF unknown
+SCORING BROWSER PASS: HPG, score 12.5 / 100, Quan sát, annual EPS numeric/unit; Graham and scenarioDCF/MOS arithmetic or missing-data guard; parent DCF unknown
+SCORING BROWSER PASS: settings100/0 persists across reload; actual combined score equals Graham
+SCORING BROWSER PASS: 390px, financial table scroll, no JS errors; defaults restored
