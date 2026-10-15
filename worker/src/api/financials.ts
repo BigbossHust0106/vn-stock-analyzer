@@ -110,7 +110,14 @@ export async function financialResponse(
         }),
       );
     }
+    const { data: backups, error: backupError } = await db
+      .from('financial_report_backups')
+      .select('source,fetched_at,last_error')
+      .eq('stock_id', stock.id);
+    if (backupError)
+      notices.push('Chưa đọc được trạng thái nguồn BCTC dự phòng.');
     return reply({
+      backups: backups ?? [],
       financials,
       report,
       notices,

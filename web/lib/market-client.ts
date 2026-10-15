@@ -8,6 +8,11 @@ import type {
   Exchange,
 } from '../../modules/providers/data-provider';
 export interface MarketStock {
+  coverage?: number;
+  graham_coverage?: number;
+  buffett_coverage?: number;
+  annual_years?: number;
+  latest_year?: number | null;
   symbol: string;
   name: string;
   exchange: Exchange;
@@ -36,7 +41,23 @@ function stock(value: unknown): value is MarketStock {
     /^[A-Z0-9]{3,12}$/.test(value.symbol) &&
     typeof value.name === 'string' &&
     ['HOSE', 'HNX', 'UPCOM'].includes(String(value.exchange)) &&
-    typeof value.source === 'string'
+    typeof value.source === 'string' &&
+    ['coverage', 'graham_coverage', 'buffett_coverage'].every(
+      (k) =>
+        value[k] === undefined ||
+        (typeof value[k] === 'number' &&
+          Number.isFinite(value[k]) &&
+          value[k] >= 0 &&
+          value[k] <= 1),
+    ) &&
+    (value.annual_years === undefined ||
+      (typeof value.annual_years === 'number' &&
+        Number.isInteger(value.annual_years) &&
+        value.annual_years >= 0)) &&
+    (value.latest_year === undefined ||
+      value.latest_year === null ||
+      (typeof value.latest_year === 'number' &&
+        Number.isInteger(value.latest_year)))
   );
 }
 export async function marketJson(

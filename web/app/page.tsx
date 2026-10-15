@@ -1,4 +1,4 @@
-import { StockSearch } from '../ui/stock-search';
+import { DataPriority } from '../ui/data-priority';
 
 export default function Home() {
   return (
@@ -20,7 +20,7 @@ export default function Home() {
           <span>Giá VPS · Danh mục KBS</span>
         </div>
       </section>
-      <StockSearch />
+      <DataPriority />
     </>
   );
 }

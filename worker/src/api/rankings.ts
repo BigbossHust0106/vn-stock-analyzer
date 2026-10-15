@@ -103,7 +103,11 @@ export async function rankingsResponse(
       .map((row, i) => ({ ...row, position: i + 1 }));
     const excluded = mixed
       .filter((row) => !eligible(row))
-      .sort((a, b) => a.symbol.localeCompare(b.symbol))
+      .sort(
+        (a, b) =>
+          b.explanation.coverage - a.explanation.coverage ||
+          a.symbol.localeCompare(b.symbol),
+      )
       .slice(0, 100)
       .map((row) => ({ ...row, position: null }));
     return Response.json(

@@ -62,6 +62,11 @@ try {
   page.on('pageerror', (e) => errors.push(e.message));
   cleanup = await authenticateBrowser(page, base, '/stocks?symbol=' + symbol);
   await expect(page.getByTestId('stock-news')).toBeVisible({ timeout: 300000 });
+  await expect(page.getByTestId('news-expanded')).not.toHaveAttribute('open');
+  await page
+    .getByTestId('news-expanded')
+    .getByText('Xem thêm tin và chi tiết về ' + symbol, { exact: true })
+    .click();
   await expect(page.getByTestId('news-article').first()).toBeVisible({
     timeout: 60000,
   });

@@ -197,3 +197,49 @@ it('Cron intraday danh mục rỗng không gọi nguồn giá/ghi success', asyn
     ),
   ).toBe(false);
 });
+it('Danh sách chưa đủ bằng chứng ưu tiên coverage0.8 trước0.2, không biến thành Top10', async () => {
+  const explanation = rankStock({
+    stockId: 'synthetic',
+    financials: null,
+    priceVnd: null,
+    referenceVnd: null,
+    quoteFetchedAt: null,
+    bars: [],
+    events: [],
+    asOf: '2026-10-15T00:00:00Z',
+  })[0]!.explanation;
+  vi.stubGlobal(
+    'fetch',
+    vi.fn<typeof fetch>(async (input) => {
+      const u = String(input);
+      if (u.includes('ranking_news_inputs'))
+        return Response.json([
+          {
+            stock_id: 'low',
+            symbol: 'AA1',
+            score: 90,
+            explanation: { ...explanation, coverage: 0.2 },
+          },
+          {
+            stock_id: 'high',
+            symbol: 'ZZ1',
+            score: 10,
+            explanation: { ...explanation, coverage: 0.8 },
+          },
+        ]);
+      return Response.json([]);
+    }),
+  );
+  const r = await worker.fetch(
+    new Request('https://app.test/v1/rankings?horizon=day&newsWeight=0'),
+    env,
+  );
+  expect(r.status).toBe(200);
+  const d = (await r.json()) as {
+    data: unknown[];
+    excluded: { symbol: string; position: null }[];
+  };
+  expect(d.data).toEqual([]);
+  expect(d.excluded.map((s) => s.symbol)).toEqual(['ZZ1', 'AA1']);
+  expect(d.excluded.every((s) => s.position === null)).toBe(true);
+});

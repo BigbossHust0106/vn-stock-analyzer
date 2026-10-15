@@ -36,3 +36,32 @@ export function factorApplies(
     );
   return factor === 'macro';
 }
+
+// Explicit ticker matches first; generic market stories require deliberate opt-in.
+export function selectStockNews<
+  T extends Pick<
+    ClassifiedArticle,
+    'title' | 'symbols' | 'sectors' | 'published_at'
+  >,
+>(
+  rows: T[],
+  symbol: string,
+  sector: string | null,
+  includeContext = false,
+): T[] {
+  return rows
+    .filter(
+      (a) =>
+        !isPromotional(a) &&
+        (a.symbols.includes(symbol) ||
+          (includeContext &&
+            (a.symbols.length === 0 ||
+              (!!sector && a.sectors.includes(sector))))),
+    )
+    .sort(
+      (a, b) =>
+        Number(b.symbols.includes(symbol)) -
+          Number(a.symbols.includes(symbol)) ||
+        b.published_at.localeCompare(a.published_at),
+    );
+}

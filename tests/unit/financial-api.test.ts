@@ -77,6 +77,7 @@ it('Đọc BCTC public đã lưu, báo điểm thật theo cùng snapshot, khôn
       if (u.includes('/stocks?')) return Response.json({ id: 'id-vnm' });
       if (u.includes('/financial_snapshots?'))
         return Response.json({ payload: f, fetched_at: f.fetchedAt });
+      if (u.includes('/financial_report_backups?')) return Response.json([]);
       if (u.includes('/prices_current?'))
         return Response.json({
           last_price_vnd: 57700,
@@ -104,7 +105,7 @@ it('Đọc BCTC public đã lưu, báo điểm thật theo cùng snapshot, khôn
   ]);
   expect(body.report.conclusion).toBe('Quan sát');
   expect(JSON.stringify(body)).not.toContain('local-test-public');
-  expect(calls).toHaveLength(3);
+  expect(calls).toHaveLength(4);
 });
 it('Không đọc được migration: trả lỗi rõ, không fabricate report', async () => {
   vi.stubGlobal(

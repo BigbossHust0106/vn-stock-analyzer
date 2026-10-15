@@ -244,7 +244,8 @@ function RankingTable({
           </summary>
           <p>
             Các mã dưới đây vẫn có thể tra cứu và theo dõi. Không gán thứ hạng
-            khi thiếu đầu vào quan trọng; danh sách sắp theo mã.
+            khi thiếu đầu vào quan trọng; ưu tiên mã có nhiều dữ liệu hơn, không
+            coi đó là thứ hạng đầu tư.
           </p>
           <div className="table-scroll">
             <table className="ranking-table">

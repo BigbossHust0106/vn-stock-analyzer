@@ -339,3 +339,12 @@ Phần 3 không giả định các phần này đã được xác minh.
 - API Google Auth của project `aszceahzutkhqfpyclev` vẫn trả provider tắt khi kiểm
   tra lại ngày14/10/2026; Management API không có Client ID/Secret. Chưa xác minh
   Google OAuth end-to-end dù người dùng cho biết đã cấu hình OAuth.
+
+## Cập nhật 15/10/2026 — BCTC dự phòng và ưu tiên dữ liệu
+
+Xem [khảo sát nguồn BCTC, endpoint thực, độ trễ và giới hạn](financial-sources-2026-10-15.md).
+Giữ cả Graham và Buffett; ưu tiên tra cứu theo trung bình coverage hai chiến lược,
+kỳ báo cáo mới và số năm. Coverage là tỷ lệ tiêu chí có dữ liệu, không phải điểm
+đầu tư, mức kiểm toán hoặc xác suất lợi nhuận. Không nới điều kiện Top10 để lấp chỗ trống.
+Tin theo mã chỉ nhận bài nhắc trực tiếp mã trong chế độ mặc định; tin ngành/thị
+trường phải mở thêm, không coi cảm xúc vĩ mô là nhận định riêng từng doanh nghiệp.

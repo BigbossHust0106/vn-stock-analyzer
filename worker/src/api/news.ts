@@ -3,6 +3,7 @@ import type { Env } from '../index';
 import deployment from '../../../config/public-deployment.json';
 import type { NewsScore } from '../../../modules/news/sentiment';
 import { newsSentiment } from '../../../modules/news/sentiment';
+import { selectStockNews } from '../../../modules/news/relevance';
 import { isPromotional } from '../../../modules/news/analysis';
 import type { ClassifiedArticle } from '../../../modules/news/analysis';
 export async function newsResponse(
@@ -17,6 +18,12 @@ export async function newsResponse(
     'X-Content-Type-Options': 'nosniff',
   };
   const symbol = url.searchParams.get('symbol') ?? '';
+  const scope = url.searchParams.get('scope') ?? 'stock';
+  if (!['stock', 'context'].includes(scope))
+    return Response.json(
+      { error: 'Phạm vi tin không hợp lệ' },
+      { status: 400, headers },
+    );
   if (!/^[A-Z0-9]{3,12}$/.test(symbol))
     return Response.json(
       { error: 'Mã tin tức không hợp lệ' },
@@ -61,13 +68,15 @@ export async function newsResponse(
         .gte('published_at', since)
         .order('published_at', { ascending: false })
         .limit(100),
-      db
-        .from('news_feed_articles')
-        .select('*')
-        .overlaps('factors', ['macro', 'sector', 'foreign', 'liquidity'])
-        .gte('published_at', since)
-        .order('published_at', { ascending: false })
-        .limit(150),
+      scope === 'context'
+        ? db
+            .from('news_feed_articles')
+            .select('*')
+            .overlaps('factors', ['macro', 'sector', 'foreign', 'liquidity'])
+            .gte('published_at', since)
+            .order('published_at', { ascending: false })
+            .limit(150)
+        : Promise.resolve({ data: [], error: null }),
       db.from('news_sources').select('*').order('id'),
       db
         .from('system_status')
@@ -82,24 +91,19 @@ export async function newsResponse(
     ]);
     if (dErr || cErr || sErr || stErr || snapshotErr)
       throw Error('Đọc tin lỗi');
-    const articles = [
-      ...new Map(
-        [...(direct ?? []), ...(context ?? [])].map((a) => [
-          a.id,
-          a as ClassifiedArticle,
-        ]),
-      ).values(),
-    ]
-      .filter(
-        (a) =>
-          !isPromotional(a) &&
-          (a.symbols.includes(symbol) ||
-            a.factors.some((f) =>
-              ['macro', 'foreign', 'liquidity'].includes(f),
-            ) ||
-            (stock.sector && a.sectors.includes(stock.sector))),
-      )
-      .sort((a, b) => b.published_at.localeCompare(a.published_at));
+    const articles = selectStockNews(
+      [
+        ...new Map(
+          [...(direct ?? []), ...(context ?? [])].map((a) => [
+            a.id,
+            a as ClassifiedArticle,
+          ]),
+        ).values(),
+      ].filter((a) => !isPromotional(a)),
+      symbol,
+      stock.sector,
+      scope === 'context',
+    );
     const fresh =
       snapshot &&
       Date.parse(snapshot.updated_at) <= Date.parse(asOf) &&
@@ -117,7 +121,7 @@ export async function newsResponse(
         score,
         asOf,
         scope:
-          'Tin RSS 7 ngày, tối đa 100 tin trực tiếp và 150 tin bối cảnh gần nhất; không bao phủ toàn bộ báo chí. Tin vĩ mô không tự coi là tác động cùng chiều cho mọi mã.',
+          'Tin RSS 7 ngày; ưu tiên mã được nhắc trực tiếp. Tin bối cảnh ngành/thị trường chỉ mở theo yêu cầu; không dùng cảm xúc chung để chấm riêng từng mã.',
         disclaimer: 'Chỉ mang tính tham khảo, không phải lời khuyên đầu tư.',
       },
       { headers },
