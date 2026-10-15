@@ -225,7 +225,17 @@ export async function collectNews(
       payload: newsSentiment(rows, s.symbol, asOf),
       updated_at: asOf,
     }));
-    for (const row of scoreRows) row.score = row.payload.score;
+    for (const row of scoreRows) {
+      if (failed) {
+        row.payload.score = null;
+        row.payload.coverage = 0;
+        row.payload.reason =
+          'không đủ dữ liệu: ' +
+          failed +
+          ' nguồn RSS chưa đồng bộ thành công; giữ tin cũ để đọc, không chấm điểm đầy đủ.';
+      }
+      row.score = row.payload.score;
+    }
     for (let i = 0; i < scoreRows.length; i += 500) {
       const { error } = await db
         .from('news_scores')
@@ -237,17 +247,19 @@ export async function collectNews(
       .delete()
       .lt('published_at', new Date(timestamp - 30 * 86400000).toISOString());
     if (pruneError) throw Error('Không dọn được cache tin hết hạn');
-    const { error: statusError } = await db.from('system_status').upsert({
-      component: 'news',
-      state:
-        failed ||
-        !llmConfigured(env) ||
-        rows.some((a) => !isPromotional(a) && a.analysis_status !== 'ok')
-          ? 'degraded'
-          : 'ok',
-      last_success_at: asOf,
-      updated_at: asOf,
-    });
+    const { error: statusError } = await db
+      .from('system_status')
+      .update({
+        state:
+          failed ||
+          !llmConfigured(env) ||
+          rows.some((a) => !isPromotional(a) && a.analysis_status !== 'ok')
+            ? 'degraded'
+            : 'ok',
+        ...(!failed ? { last_success_at: asOf } : {}),
+        updated_at: asOf,
+      })
+      .eq('component', 'news');
     if (statusError) throw Error('Không cập nhật trạng thái tin tức');
     return {
       inserted,

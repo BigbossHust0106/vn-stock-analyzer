@@ -27,7 +27,8 @@ export function integrateNews(row: BaseRow, news: NewsScore, weight = 0.1) {
     Number.isFinite(news.score) &&
     news.score >= 0 &&
     news.score <= 100 &&
-    news.count > 0;
+    news.count > 0 &&
+    news.coverage === 1;
   const coverage =
     Math.round(
       (base.coverage * (1 - weight) + (available ? weight : 0)) * 1000,

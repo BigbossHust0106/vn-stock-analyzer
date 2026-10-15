@@ -121,8 +121,9 @@ export function StockNews({ symbol }: { symbol: string }) {
                 : formatNumber(result.score.score, 1) + '/100'}
             </strong>
             <span>
-              {result.score.count} tin trực tiếp đã phân tích ·{' '}
-              {result.score.sourceCount} nguồn ·{' '}
+              {result.score.count}/
+              {result.score.candidateCount ?? result.score.count} tin trực tiếp
+              đã phân tích · {result.score.sourceCount} nguồn ·{' '}
               {formatTime(result.status?.last_success_at)}
             </span>
             <p>{result.score.reason}</p>

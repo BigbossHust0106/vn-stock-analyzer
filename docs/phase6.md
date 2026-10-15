@@ -52,7 +52,7 @@ Với sắc thái `s = +1 / 0 / −1`, mức ảnh hưởng `w = 3 / 2 / 1`, tu�
 
 `Điểm = 50 + 50 × Σ[s × w × 2^(−d/3)] / Σ[w × 2^(−d/3)]`.
 
-Không có tin hợp lệ → null, **không** phải 50. Một tin được gộp chỉ tính một lần. Hiển thị số tin, số nguồn và link; ít tin là bằng chứng mỏng, không phải mức tin cậy cao.
+Chỉ có điểm khi phân tích hợp lệ đủ các tin trực tiếp một mã trong cửa sổ RSS; còn tin pending/failed hoặc nguồn lỗi thì null, không dùng phần đã phân tích để tạo điểm đầy đủ. Không có tin hợp lệ → null, **không** phải 50. Một tin được gộp chỉ tính một lần. Hiển thị số tin, số nguồn và link; ít tin là bằng chứng mỏng, không phải mức tin cậy cao.
 
 Điểm kỳ = `(1−trọng số tin) × điểm cơ sở + trọng số tin × điểm tin`. Mặc định 10%; trên Top10 chỉnh 0–30% theo lượt xem. Thiếu tin thì phần trọng số đó không đóng góp và không được phân bổ lại; bao phủ dưới 100% bị loại theo chính sách Phần 4. Trọng số 0 tắt thành phần tin nhưng vẫn giữ bộ lọc giá/BCTC. Ví dụ đáp án tay: điểm cơ sở80, tin100, trọng số10% →82; tin thiếu → đóng góp72, bao phủ90%, không đủ điều kiện xếp hạng.
 

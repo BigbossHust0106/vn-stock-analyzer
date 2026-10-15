@@ -546,3 +546,35 @@ it('tác vụ HMAC chấp nhận chữ ký mới, từ chối chữ ký hết h�
   ).toBe(401);
   expect(f).toHaveBeenCalledTimes(1);
 });
+
+it('không tạo điểm đầy đủ từ một phần tin đã phân tích', async () => {
+  const a = await article(),
+    pending = await article({
+      id: 'pending',
+      title: 'DPR công bố kế hoạch năm mới',
+      source_url: 'https://cafef.vn/pending.chn',
+      analysis_status: 'pending',
+      analysis: null,
+      analyzed_at: null,
+    });
+  const result = newsSentiment([a, pending], 'DPR', asOf);
+  expect(result.score).toBeNull();
+  expect(result.coverage).toBe(0.5);
+  expect(result.candidateCount).toBe(2);
+  expect(
+    newsSentiment(
+      [
+        a,
+        {
+          ...a,
+          id: 'duplicate',
+          source_url: 'https://vietstock.vn/duplicate',
+          analysis_status: 'pending',
+          analysis: null,
+        },
+      ],
+      'DPR',
+      asOf,
+    ).score,
+  ).toBe(100);
+});

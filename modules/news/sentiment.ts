@@ -6,6 +6,8 @@ import {
 import { duplicateTitle } from './rss';
 export interface NewsScore {
   score: number | null;
+  candidateCount?: number;
+  coverage?: number;
   count: number;
   sourceCount: number;
   asOf: string;
@@ -48,6 +50,30 @@ export function newsSentiment(
         continue;
       seen.push(a);
     }
+  const relevant: ClassifiedArticle[] = [];
+  for (const a of articles) {
+    const time = Date.parse(a.published_at);
+    if (
+      !Number.isFinite(now) ||
+      !Number.isFinite(time) ||
+      time > now ||
+      now - time > 7 * 86400000 ||
+      isPromotional(a) ||
+      a.symbols.length !== 1 ||
+      !a.symbols.includes(symbol)
+    )
+      continue;
+    if (
+      !relevant.some(
+        (x) =>
+          x.id === a.id ||
+          x.source_url === a.source_url ||
+          duplicateTitle(x.title, a.title),
+      )
+    )
+      relevant.push(a);
+  }
+  const coverage = relevant.length ? seen.length / relevant.length : 0;
   let sum = 0,
     total = 0;
   for (const a of seen) {
@@ -60,8 +86,12 @@ export function newsSentiment(
   }
   return {
     score:
-      total > 0 ? Math.round((50 + (50 * sum) / total) * 1000) / 1000 : null,
+      total > 0 && coverage === 1
+        ? Math.round((50 + (50 * sum) / total) * 1000) / 1000
+        : null,
     count: seen.length,
+    candidateCount: relevant.length,
+    coverage,
     sourceCount: new Set(seen.map((a) => a.source_id)).size,
     asOf,
     newestAt:
@@ -75,8 +105,8 @@ export function newsSentiment(
       publishedAt: a.published_at,
     })),
     reason:
-      total > 0
+      total > 0 && coverage === 1
         ? 'Sắc thái tin chỉ gắn một mã, 7 ngày; ảnh hưởng 3/2/1, trọng số giảm một nửa mỗi 3 ngày. Đây là mô hình, không dự báo lợi suất.'
-        : 'không đủ dữ liệu: chưa có tin trực tiếp mã được LLM phân tích hợp lệ trong 7 ngày.',
+        : `không đủ dữ liệu: đã phân tích ${seen.length}/${relevant.length} tin trực tiếp một mã trong 7 ngày; không dùng tập phân tích còn thiếu để chấm điểm.`,
   };
 }
