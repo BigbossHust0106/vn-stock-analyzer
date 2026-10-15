@@ -221,10 +221,24 @@ export async function collectNews(
         .upsert(changed.slice(offset, offset + 500), { onConflict: 'id' });
       if (error) throw Error('Không ghi được tin RSS');
     }
+    // newsSentiment excludes multi-issuer/context articles. Partition once instead
+    // of sorting and validating the complete feed again for every listed stock.
+    const issuerArticles = new Map<string, ClassifiedArticle[]>();
+    for (const a of rows) {
+      if (a.symbols.length !== 1) continue;
+      const symbol = a.symbols[0]!;
+      const group = issuerArticles.get(symbol) ?? [];
+      group.push(a);
+      issuerArticles.set(symbol, group);
+    }
     const scoreRows = stocks.map((s) => ({
       stock_id: s.id,
       score: null as number | null,
-      payload: newsSentiment(rows, s.symbol, asOf),
+      payload: newsSentiment(
+        issuerArticles.get(s.symbol) ?? [],
+        s.symbol,
+        asOf,
+      ),
       updated_at: asOf,
     }));
     for (const row of scoreRows) {
