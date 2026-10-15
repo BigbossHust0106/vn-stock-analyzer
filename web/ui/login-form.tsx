@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useAuth } from './auth-provider';
 import { settingsClient, googleAuthEnabled } from '../lib/scoring-settings';
 import { safeNext } from '../lib/auth';
@@ -291,6 +292,9 @@ export function LoginForm() {
               {message}
             </p>
           </div>
+          <Link className="login-install-link" href="/install">
+            Cài VN Stock trên điện thoại
+          </Link>
           <p className="login-disclaimer">
             Chỉ mang tính tham khảo, không phải lời khuyên đầu tư.
           </p>

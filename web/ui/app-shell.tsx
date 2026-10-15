@@ -2,6 +2,7 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { MobileNav } from './mobile-nav';
 import { HeaderSearch } from './header-search';
 import { AuthNav } from './auth-nav';
 import { RequireAuth } from './require-auth';
@@ -10,7 +11,7 @@ import { ThemeSwitch } from './theme-switch';
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   if (pathname === '/login') return children;
-  if (pathname.startsWith('/auth/'))
+  if (pathname === '/install' || pathname.startsWith('/auth/'))
     return <main className="auth-utility">{children}</main>;
   return (
     <RequireAuth>
@@ -48,6 +49,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <span>VN Stock · HOSE / HNX / UPCOM</span>
         <p>Chỉ mang tính tham khảo, không phải lời khuyên đầu tư.</p>
       </footer>
+      <MobileNav />
     </RequireAuth>
   );
 }

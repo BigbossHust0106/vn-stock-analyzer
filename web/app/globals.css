@@ -2185,3 +2185,203 @@ button:disabled {
     width: 100%;
   }
 }
+
+/* Installable mobile workspace. Safe areas keep controls clear of device cutouts. */
+.mobile-nav {
+  display: none;
+}
+.connection-banner,
+.update-banner {
+  padding: 12px max(18px, env(safe-area-inset-left));
+  background: var(--soft);
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  text-align: center;
+}
+.update-banner button {
+  margin-left: 8px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  background: var(--panel);
+}
+.install-app {
+  width: min(860px, 100%);
+  margin: auto;
+  background: #fffefa;
+  padding: clamp(24px, 5vw, 56px);
+  border: 1px solid #dce6df;
+  border-radius: 26px;
+}
+.install-app > img {
+  border-radius: 22px;
+  display: block;
+  margin-bottom: 24px;
+}
+.install-app h1 {
+  font-size: clamp(28px, 5vw, 46px);
+  line-height: 1.12;
+  margin: 12px 0 20px;
+}
+.install-app p,
+.install-app li {
+  color: #657771;
+  line-height: 1.7;
+}
+.install-app .install-primary,
+.install-open {
+  display: inline-block;
+  margin: 10px 0 20px;
+  padding: 14px 22px;
+  border: 0;
+  border-radius: 14px;
+  background: #376f5c;
+  color: #fff;
+  font-size: 16px;
+  text-decoration: none;
+}
+.install-guides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin: 24px 0;
+}
+.install-guides article {
+  border: 1px solid #dce6df;
+  background: #f3f7f3;
+  border-radius: 18px;
+  padding: 20px;
+}
+.install-guides h2 {
+  font-size: 18px;
+  margin: 0 0 16px;
+}
+.install-guides ol {
+  margin: 0;
+  padding-left: 20px;
+}
+.install-guides li {
+  margin: 10px 0;
+}
+.install-app .install-success {
+  padding: 14px;
+  background: #e7f3eb;
+  border-radius: 12px;
+}
+.login-install-link {
+  display: block;
+  text-align: center;
+  margin-top: 16px;
+  font-size: 13px;
+  color: #376f5c;
+}
+@media (max-width: 650px) {
+  .site-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    padding-top: max(14px, env(safe-area-inset-top));
+    gap: 12px;
+  }
+  .site-header > .brand {
+    width: auto;
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 21px;
+  }
+  .site-header > nav {
+    display: contents;
+  }
+  .site-header > nav > a {
+    display: none;
+  }
+  .site-header .account-menu {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+  }
+  .site-header .theme-button {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .site-header .header-search {
+    grid-column: 1/-1;
+    grid-row: 2;
+    margin: 0;
+    min-width: 0;
+  }
+  .mobile-nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 45;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 8px max(8px, env(safe-area-inset-right))
+      calc(8px + env(safe-area-inset-bottom))
+      max(8px, env(safe-area-inset-left));
+    box-shadow: 0 -6px 30px #203c3910;
+  }
+  .mobile-nav a,
+  .mobile-nav button {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+    padding: 8px 4px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 11px;
+  }
+  .mobile-nav a[aria-current='page'] {
+    color: var(--accent);
+    background: var(--soft);
+  }
+  .mobile-nav svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .site-footer {
+    padding-bottom: calc(110px + env(safe-area-inset-bottom));
+  }
+  .install-guides {
+    grid-template-columns: 1fr;
+  }
+  .auth-utility:has(.install-app) {
+    padding: 18px;
+  }
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+@media (display-mode: standalone) {
+  body {
+    overscroll-behavior-y: contain;
+  }
+  .site-header {
+    margin-top: env(safe-area-inset-top, 12px);
+  }
+}
+@media (max-width: 650px) {
+  .header-search > input,
+  .login-form-wrap input {
+    font-size: 16px;
+  }
+}
+.dialog-backdrop {
+  z-index: 100;
+}

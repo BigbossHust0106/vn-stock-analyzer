@@ -17,6 +17,18 @@ export default tseslint.config(
       'web/next-env.d.ts',
     ],
   },
+  {
+    files: ['web/public/sw.js'],
+    languageOptions: {
+      globals: {
+        self: 'readonly',
+        caches: 'readonly',
+        fetch: 'readonly',
+        URL: 'readonly',
+        Response: 'readonly',
+      },
+    },
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

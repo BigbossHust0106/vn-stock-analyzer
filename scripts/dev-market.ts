@@ -8,6 +8,7 @@ const types: Record<string, string> = {
   '.js': 'application/javascript',
   '.css': 'text/css',
   '.json': 'application/json',
+  '.webmanifest': 'application/manifest+json',
   '.txt': 'text/plain',
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
@@ -32,6 +33,9 @@ const assets = {
       return new Response(new Uint8Array(data), {
         headers: {
           'Content-Type': types[extname(file)] ?? 'application/octet-stream',
+          ...(path === '/sw.js'
+            ? { 'Cache-Control': 'no-cache', 'Service-Worker-Allowed': '/' }
+            : {}),
         },
       });
     } catch {

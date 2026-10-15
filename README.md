@@ -418,3 +418,11 @@ Trang chi tiết mã có vùng mua, TP1–TP3 đủ R:R ≥2, SL theo ATR/đáy/
 ### Phần 6: tin tức và yếu tố ảnh hưởng
 
 RSS bốn nguồn, Cron 30 phút, gắn mã/ngành/vĩ mô và loại trùng; trang chi tiết có tin, nguồn và bảng yếu tố ảnh hưởng. LLM tương thích OpenAI dùng secrets, tóm tắt trích xuất có bằng chứng; chưa cấu hình thì ghi không đủ dữ liệu. Top10 dùng trọng số tin mặc định10%, chỉnh0–30%, giữ nguyên bộ lọc dữ liệu đầy đủ. Xem [phương pháp, điều kiện nguồn và cấu hình Phần6](docs/phase6.md).
+
+## Ứng dụng điện thoại (PWA)
+
+Mở [Cài VN Stock](https://vn-stock-analyzer.manhhuong.workers.dev/install) trên điện thoại.
+Android dùng Chrome → Cài đặt ứng dụng; iPhone dùng Safari → Chia sẻ → Thêm vào
+Màn hình chính. Dùng chung tài khoản/dữ liệu với website, có điều hướng dưới và
+trang báo mất mạng; cần mạng để cập nhật giá và dữ liệu cá nhân.
+Xem [hướng dẫn và chính sách offline](docs/pwa.md).
