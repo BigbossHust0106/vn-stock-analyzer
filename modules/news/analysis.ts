@@ -173,7 +173,7 @@ export async function analyzeArticle(
   url.pathname = url.pathname.replace(/\/$/, '') + '/chat/completions';
   const response = await fetcher(url, {
     method: 'POST',
-    redirect: 'error',
+    redirect: 'manual',
     headers: {
       Authorization: 'Bearer ' + env.NEWS_LLM_API_KEY,
       'Content-Type': 'application/json',

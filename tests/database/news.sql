@@ -7,6 +7,7 @@ values(repeat('a',64),'unit','https://cafef.vn/test-only','DPR thông báo cổ 
 do $$ begin
  begin update public.news_feed_articles set analysis_status='ok',analysis='{}',model='test',analyzed_at=now() where id=repeat('a',64);raise exception 'Empty LLM accepted';exception when check_violation then null;end;
  begin update public.news_feed_articles set analysis_status='ok',analysis='{"summary":"Lợi nhuận tăng 999 tỷ","evidence":"Lợi nhuận tăng 999 tỷ","sentiment":"positive","impact":"high","horizon":"short"}',model='test',analyzed_at=now() where id=repeat('a',64);raise exception 'Invented evidence accepted';exception when check_violation then null;end;
+ begin perform public.ranking_batch_inputs(now(),0,101);raise exception 'Unbounded ranking page allowed';exception when raise_exception then if sqlerrm<>'Invalid ranking page' then raise;end if;end;
  if not public.claim_news_ingestion() then raise exception 'First lease refused';end if;
  if public.claim_news_ingestion() then raise exception 'Concurrent cron acquired lease';end if;
  perform public.release_news_ingestion();
@@ -18,6 +19,7 @@ do $$ begin
  if not exists(select 1 from public.news_feed_articles where id=repeat('a',64) and analysis_status='ok') then raise exception 'News public read failed';end if;
  begin update public.news_feed_articles set title='Tampered' where id=repeat('a',64);raise exception 'Anon news write allowed';exception when insufficient_privilege then null;end;
  begin perform public.claim_news_ingestion();raise exception 'Anon lease allowed';exception when insufficient_privilege then null;end;
+ begin perform public.ranking_batch_inputs(now());raise exception 'Anon batch input allowed';exception when insufficient_privilege then null;end;
  begin insert into public.news_scores(stock_id,payload,updated_at) values(gen_random_uuid(),'{}',now());raise exception 'Anon score forge allowed';exception when insufficient_privilege then null;end;
 end $$;
 set local role authenticated;

@@ -1,3 +1,4 @@
+import { createHmac } from 'node:crypto';
 import { managementClient } from './sync-rankings';
 import { collectNews } from '../worker/src/news/sync';
 import { syncRankings } from '../worker/src/ranking-sync';
@@ -6,11 +7,15 @@ import deployment from '../config/public-deployment.json';
 if (process.argv.includes('--migrate')) await migrateHosted();
 const { db, key, url } = await managementClient();
 if (process.argv.includes('--production')) {
+  const stamp = String(Date.now()),
+    signature = createHmac('sha256', key)
+      .update(stamp + ':POST:/v1/internal/news-sync')
+      .digest('hex');
   const response = await fetch(
     deployment.workerUrl + '/v1/internal/news-sync',
     {
       method: 'POST',
-      headers: { Authorization: 'Bearer ' + key },
+      headers: { 'X-News-Timestamp': stamp, 'X-News-Signature': signature },
       signal: AbortSignal.timeout(600000),
     },
   );

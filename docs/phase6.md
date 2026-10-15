@@ -42,7 +42,7 @@ Cấu hình **Production Worker gốc** `vn-stock-analyzer.manhhuong.workers.dev
 - `NEWS_WEIGHT=0.1`, `NEWS_RSS_PERMISSION=personal-nonprofit` đã có trong Wrangler. Không đặt khóa vào JSONC.
 - Nếu chưa cấu hình đủ, vẫn thu RSS và link nhưng nhãn/điểm LLM là “không đủ dữ liệu”; `system_status.news` degraded. Không gọi nhà cung cấp bằng khóa giả.
 
-Endpoint bảo trì `POST /v1/internal/news-sync` chỉ nhận credential service role từ script server, so sánh hash bằng timing-safe comparison; browser/anon bị từ chối. Không nhận credential qua query, không log credential hoặc phản hồi thô. Dùng `npm run sync:news -- --production` để chạy trong Worker với secrets đã cấu hình; script lấy quyền quản trị trong bộ nhớ, không in key.
+Endpoint bảo trì `POST /v1/internal/news-sync` chỉ nhận chữ ký HMAC một phút do script server tạo, so sánh bằng timing-safe comparison; khóa service role không được gửi đến endpoint hoặc vào log HTTP; browser/anon bị từ chối. Không nhận credential qua query, không log credential hoặc phản hồi thô. Dùng `npm run sync:news -- --production` để chạy trong Worker với secrets đã cấu hình; script lấy quyền quản trị trong bộ nhớ, không in key.
 
 ## Điểm tin và Top 10
 
@@ -62,9 +62,11 @@ Bảng yếu tố ảnh hưởng là nhóm tin có link, không phải chuỗi �
 
 ## Kiểm tra
 
-- `npm run verify`: typecheck/lint/format, unit và coverage≥80% cho module news, build, gitleaks, 10 migration PostgreSQL và RLS, provider tests.
+- `npm run verify`: typecheck/lint/format, unit và coverage≥80% cho module news, build, gitleaks, 11 migration PostgreSQL và RLS, provider tests.
 - `npm run sync:news -- --migrate`: áp dụng migration và thu RSS bằng script server; chỉ dùng LLM nếu môi trường script có cấu hình.
 - `npm run sync:news -- --production`: chạy Worker thật với secrets của Worker, cập nhật tin và ba kỳ điểm.
 - `npm run verify:news:browser`: API và trình duyệt với dữ liệu thật, tài khoản tạm; nguồn/link, trạng thái thiếu hoặc nhãn thật, trọng số Top10, 390px; tự xóa tài khoản thử.
 - `MARKET_APP_URL=https://vn-stock-analyzer.manhhuong.workers.dev npm run verify:news:browser`: kiểm tra bản production.
 - `NEWS_REQUIRE_LLM=1` cho kiểm tra live nghiêm ngặt: phải có ít nhất một phân tích LLM thật, có bằng chứng nguyên văn. Không bật fixture để vượt kiểm tra này.
+
+Kiểm thử workerd bắt lỗi riêng runtime Cloudflare: dùng `redirect: manual` và từ chối 3xx (Workers không hỗ trợ `error`). Đầu vào xếp hạng đọc qua RPC service-only theo lô100, giữ bộ lọc dữ liệu cũ và tránh N+1 HTTP trong Cron.

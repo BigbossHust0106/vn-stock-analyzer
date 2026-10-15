@@ -100,7 +100,7 @@ export async function collectNews(
           const robots = await boundedText(
             await fetcher(source.origin + '/robots.txt', {
               headers: { 'User-Agent': newsUserAgent },
-              redirect: 'error',
+              redirect: 'manual',
               signal: AbortSignal.timeout(12000),
             }),
             100000,
@@ -117,7 +117,7 @@ export async function collectNews(
               await boundedText(
                 await fetcher(source.origin + path, {
                   headers: { 'User-Agent': newsUserAgent },
-                  redirect: 'error',
+                  redirect: 'manual',
                   signal: AbortSignal.timeout(15000),
                 }),
               ),
@@ -213,10 +213,10 @@ export async function collectNews(
     const changed = rows.filter(
       (a) => a.fetched_at === asOf || pending.includes(a) || dirty.has(a.id),
     );
-    for (let offset = 0; offset < changed.length; offset += 100) {
+    for (let offset = 0; offset < changed.length; offset += 500) {
       const { error } = await db
         .from('news_feed_articles')
-        .upsert(changed.slice(offset, offset + 100), { onConflict: 'id' });
+        .upsert(changed.slice(offset, offset + 500), { onConflict: 'id' });
       if (error) throw Error('Không ghi được tin RSS');
     }
     const scoreRows = stocks.map((s) => ({
@@ -226,10 +226,10 @@ export async function collectNews(
       updated_at: asOf,
     }));
     for (const row of scoreRows) row.score = row.payload.score;
-    for (let i = 0; i < scoreRows.length; i += 200) {
+    for (let i = 0; i < scoreRows.length; i += 500) {
       const { error } = await db
         .from('news_scores')
-        .upsert(scoreRows.slice(i, i + 200));
+        .upsert(scoreRows.slice(i, i + 500));
       if (error) throw Error('Không ghi được điểm tin tức');
     }
     const { error: pruneError } = await db

@@ -1,3 +1,4 @@
+import { createHmac } from 'node:crypto';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import {
@@ -502,4 +503,46 @@ it('RSS mã hóa HTML không hiện thẻ ảnh; bảng ngành không lẫn ngà
   };
   expect(factorApplies(promo, 'DPR', 'Chứng khoán', 'sector')).toBe(false);
   expect(newsSentiment([promo], 'DPR', asOf).score).toBeNull();
+});
+
+it('tác vụ HMAC chấp nhận chữ ký mới, từ chối chữ ký hết hạn và không gửi service key đến Worker', async () => {
+  const key = 'unit-test-server-key-long-enough-32-chars',
+    stamp = String(Date.now()),
+    signature = createHmac('sha256', key)
+      .update(stamp + ':POST:/v1/internal/news-sync')
+      .digest('hex');
+  const f = vi.fn<typeof fetch>().mockResolvedValue(Response.json(false));
+  vi.stubGlobal('fetch', f);
+  const request = new Request('https://app.test/v1/internal/news-sync', {
+    method: 'POST',
+    headers: { 'X-News-Timestamp': stamp, 'X-News-Signature': signature },
+  });
+  expect(request.headers.has('Authorization')).toBe(false);
+  expect(
+    (
+      await worker.fetch(request, {
+        SUPABASE_URL: 'https://db.example.test',
+        SUPABASE_SERVICE_ROLE_KEY: key,
+      })
+    ).status,
+  ).toBe(200);
+  const old = String(Date.now() - 120000),
+    oldSignature = createHmac('sha256', key)
+      .update(old + ':POST:/v1/internal/news-sync')
+      .digest('hex');
+  expect(
+    (
+      await worker.fetch(
+        new Request('https://app.test/v1/internal/news-sync', {
+          method: 'POST',
+          headers: {
+            'X-News-Timestamp': old,
+            'X-News-Signature': oldSignature,
+          },
+        }),
+        { SUPABASE_SERVICE_ROLE_KEY: key },
+      )
+    ).status,
+  ).toBe(401);
+  expect(f).toHaveBeenCalledTimes(1);
 });
