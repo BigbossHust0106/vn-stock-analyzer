@@ -1,1 +1,5 @@
-export default { output: 'export', poweredByHeader: false };
+export default {
+  output: 'export',
+  poweredByHeader: false,
+  images: { unoptimized: true },
+};

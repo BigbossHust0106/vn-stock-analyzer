@@ -1,4 +1,5 @@
 import deployment from '../../config/public-deployment.json';
+import type { DisplayPrice } from '../../modules/market/display-price';
 import { record } from '../../modules/providers/market-schema';
 import { validSourceDate } from '../../modules/providers/source-evidence';
 import type {
@@ -19,6 +20,14 @@ export interface StockDetail {
   notices: string[];
   historySource: string;
   notice: string;
+  displayPrice?: DisplayPrice;
+}
+const detailCache = new Map<string, { at: number; data: StockDetail }>();
+export function cachedStockDetail(
+  symbol: string,
+  view = 'summary',
+): StockDetail | null {
+  return detailCache.get(symbol + ':' + view)?.data ?? null;
 }
 function stock(value: unknown): value is MarketStock {
   return (
@@ -33,6 +42,7 @@ function stock(value: unknown): value is MarketStock {
 export async function marketJson(
   path: string,
   signal: AbortSignal,
+  cache?: RequestCache,
 ): Promise<unknown> {
   const base =
     process.env.NEXT_PUBLIC_WORKER_URL ||
@@ -40,7 +50,10 @@ export async function marketJson(
     ['localhost', '127.0.0.1'].includes(window.location.hostname)
       ? window.location.origin
       : deployment.workerUrl);
-  const response = await fetch(new URL(path, base), { signal });
+  const response = await fetch(new URL(path, base), {
+    signal,
+    ...(cache ? { cache } : {}),
+  });
   if (!response.ok)
     throw new Error(
       response.status === 404
@@ -64,10 +77,23 @@ export async function searchStocks(
 export async function stockDetail(
   symbol: string,
   signal: AbortSignal,
+  view: 'full' | 'summary' | 'history' = 'full',
+  fresh = false,
 ): Promise<StockDetail> {
+  const key = symbol + ':' + view;
+  const cached = detailCache.get(key);
+  if (
+    !fresh &&
+    cached &&
+    Date.now() - cached.at < (view === 'history' ? 60000 : 15000)
+  )
+    return cached.data;
   const body = await marketJson(
-    '/v1/stocks/' + encodeURIComponent(symbol),
+    '/v1/stocks/' +
+      encodeURIComponent(symbol) +
+      (view === 'full' ? '' : '?view=' + view + (fresh ? '&refresh=1' : '')),
     signal,
+    fresh ? 'no-store' : undefined,
   );
   if (
     !record(body) ||
@@ -132,5 +158,25 @@ export async function stockDetail(
     )
       throw new Error('Giá hiện tại không hợp lệ.');
   }
-  return body as unknown as StockDetail;
+  if (
+    body.displayPrice !== undefined &&
+    (!record(body.displayPrice) ||
+      !['quote', 'close', 'unavailable'].includes(
+        String(body.displayPrice.kind),
+      ) ||
+      (body.displayPrice.valueVnd !== null &&
+        (typeof body.displayPrice.valueVnd !== 'number' ||
+          !Number.isFinite(body.displayPrice.valueVnd) ||
+          body.displayPrice.valueVnd <= 0)) ||
+      (body.displayPrice.kind === 'close' &&
+        (typeof body.displayPrice.sessionDate !== 'string' ||
+          !validSourceDate(body.displayPrice.sessionDate))) ||
+      typeof body.displayPrice.source !== 'string')
+  )
+    throw new Error('Giá hiển thị không hợp lệ.');
+  const result = body as unknown as StockDetail;
+  if (detailCache.size >= 40)
+    detailCache.delete(detailCache.keys().next().value!);
+  detailCache.set(key, { at: Date.now(), data: result });
+  return result;
 }

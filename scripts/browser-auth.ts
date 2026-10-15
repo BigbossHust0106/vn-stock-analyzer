@@ -37,3 +37,13 @@ export async function authenticateBrowser(
     throw error;
   }
 }
+export async function openAccountMenu(page: Page) {
+  await page
+    .getByRole('button', { name: 'Menu tài khoản', exact: true })
+    .click();
+}
+export async function enableChart(page: Page) {
+  await page
+    .getByRole('checkbox', { name: 'Tự động tải biểu đồ nến', exact: true })
+    .check();
+}

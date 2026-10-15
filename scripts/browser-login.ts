@@ -1,6 +1,6 @@
 import { mkdir } from 'node:fs/promises';
 import { chromium, expect } from '@playwright/test';
-import { authenticateBrowser } from './browser-auth';
+import { authenticateBrowser, openAccountMenu } from './browser-auth';
 
 // Uses an admin-confirmed temporary account; does not test SMTP or Google consent.
 const base = process.env.MARKET_APP_URL || 'http://127.0.0.1:8878';
@@ -113,7 +113,11 @@ try {
   await expect(
     page.getByRole('navigation', { name: 'Chức năng chính' }),
   ).toBeVisible();
-  await page.getByRole('button', { name: 'Đăng xuất', exact: true }).click();
+  await openAccountMenu(page);
+  await page
+    .getByRole('navigation', { name: 'Quản lý tài khoản' })
+    .getByRole('button', { name: 'Đăng xuất', exact: true })
+    .click();
   await expect(page).toHaveURL(base + '/login?next=%2Fwatchlists');
   await expect(page.getByRole('navigation')).toHaveCount(0);
   guest = true;

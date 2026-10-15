@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { stockSnapshot } from './stock-snapshot';
 import type { Env } from '../index';
 import deployment from '../../../config/public-deployment.json';
 import { providers } from '../../../modules/providers/registry';
@@ -87,6 +88,21 @@ export async function marketResponse(
       return Response.json(
         { error: 'Không tìm thấy cổ phiếu trên HOSE/HNX/UPCOM' },
         { status: 404, headers },
+      );
+    const view = url.searchParams.get('view');
+    if (view === 'summary' || view === 'history')
+      return await stockSnapshot(
+        db,
+        stock,
+        { ...env, SUPABASE_URL: env.SUPABASE_URL || deployment.supabaseUrl },
+        view,
+        url.searchParams.get('refresh') === '1',
+        context,
+      );
+    if (view !== null && view !== 'full')
+      return Response.json(
+        { error: 'Chế độ dữ liệu không hợp lệ' },
+        { status: 400, headers },
       );
     const source = marketProviders(env);
     const today = vietnamDate(Date.now());

@@ -1,3 +1,4 @@
+import { openAccountMenu } from './browser-auth';
 import { randomUUID, randomBytes } from 'node:crypto';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { managementClient } from './sync-rankings';
@@ -274,12 +275,16 @@ async function main() {
       .selectOption({ label: 'Temporary A' });
     await page.getByTestId('watch-VNM').waitFor();
     await page.goto(base + '/top10');
-    for (const horizon of ['day', 'month', 'quarter'])
+    for (const horizon of ['day', 'month', 'quarter']) {
+      await page
+        .getByLabel('Kỳ xếp hạng', { exact: true })
+        .selectOption(horizon);
       await page
         .getByTestId('ranking-' + horizon)
         .locator('tbody tr')
         .nth(9)
         .waitFor({ timeout: 30000 });
+    }
     await page.getByLabel('Sàn', { exact: true }).selectOption('HNX');
     await page.waitForTimeout(500);
     await page.getByLabel('Sàn', { exact: true }).selectOption('');
@@ -313,6 +318,9 @@ async function main() {
     });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload();
+    await page
+      .getByLabel('Kỳ xếp hạng', { exact: true })
+      .selectOption('quarter');
     await page
       .getByTestId('ranking-quarter')
       .locator('tbody tr')
@@ -364,7 +372,11 @@ async function main() {
         document.querySelector<HTMLInputElement>('input[type=number]')
           ?.value === '70',
     );
-    await page.getByRole('button', { name: 'Đăng xuất', exact: true }).click();
+    await openAccountMenu(page);
+    await page
+      .getByRole('navigation', { name: 'Quản lý tài khoản' })
+      .getByRole('button', { name: 'Đăng xuất', exact: true })
+      .click();
     await page.waitForURL('**/login?next=%2Fwatchlists', { timeout: 30000 });
     // No reload in the second tab: SIGNED_OUT/storage must reset A to guest50/50.
     await peer.waitForFunction(
@@ -381,7 +393,11 @@ async function main() {
         document.querySelector<HTMLInputElement>('input[type=number]')
           ?.value === '30',
     );
-    await page.getByRole('button', { name: 'Đăng xuất', exact: true }).click();
+    await openAccountMenu(page);
+    await page
+      .getByRole('navigation', { name: 'Quản lý tài khoản' })
+      .getByRole('button', { name: 'Đăng xuất', exact: true })
+      .click();
     await page.waitForURL('**/login?next=%2Fwatchlists', { timeout: 30000 });
     await peer.waitForFunction(
       () =>

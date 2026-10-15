@@ -2,9 +2,17 @@
 import { StockNews } from './stock-news';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { stockDetail, type StockDetail as Detail } from '../lib/market-client';
+import dynamic from 'next/dynamic';
+import {
+  stockDetail,
+  cachedStockDetail,
+  type StockDetail as Detail,
+} from '../lib/market-client';
 import { changePercent } from '../../modules/market/chart';
-import { TradeWorkbench } from './trade-workbench';
+const TradeWorkbench = dynamic(
+  () => import('./trade-workbench').then((m) => m.TradeWorkbench),
+  { loading: () => <p role="status">Đang mở biểu đồ…</p> },
+);
 import type { FinancialData } from '../../modules/providers/financial-types';
 import { ScoringPanel } from './scoring-panel';
 export function StockDetail() {
@@ -14,7 +22,22 @@ export function StockDetail() {
 }
 function DetailContent({ symbol }: { symbol: string }) {
   const [financials, setFinancials] = useState<FinancialData | null>(null);
-  const [data, setData] = useState<Detail | null>(null);
+  const [data, setData] = useState<Detail | null>(() =>
+    cachedStockDetail(symbol),
+  );
+  const [chart, setChart] = useState(() => {
+    try {
+      return (
+        typeof window !== 'undefined' &&
+        localStorage.getItem('vn-stock-auto-chart') === 'true'
+      );
+    } catch {
+      return false;
+    }
+  });
+  const [history, setHistory] = useState<Detail | null>(null);
+  const [historyError, setHistoryError] = useState('');
+  const [updating, setUpdating] = useState(false);
   const [error, setError] = useState('');
   const [refresh, setRefresh] = useState(0);
   useEffect(() => {
@@ -22,31 +45,69 @@ function DetailContent({ symbol }: { symbol: string }) {
     if (!/^[A-Z0-9]{3,12}$/.test(symbol)) {
       return;
     }
-    stockDetail(symbol, controller.signal)
-      .then((d) => {
-        if (controller.signal.aborted) return;
-        setData(d);
-        document.title = `${symbol} · ${d.stock.name} | VN Stock`;
-      })
-      .catch((e) => {
-        if (!controller.signal.aborted)
-          setError(e instanceof Error ? e.message : 'Không tải được dữ liệu.');
-      });
-    return () => controller.abort();
+    const load = (fresh = false) => {
+      return stockDetail(symbol, controller.signal, 'summary', fresh)
+        .then((d) => {
+          if (controller.signal.aborted) return;
+          setData(d);
+          setError('');
+          document.title = `${symbol} · ${d.stock.name} | VN Stock`;
+        })
+        .catch((e) => {
+          if (!controller.signal.aborted)
+            setError(
+              e instanceof Error ? e.message : 'Không tải được dữ liệu.',
+            );
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setUpdating(false);
+        });
+    };
+    void load(refresh > 0);
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void load();
+    }, 30000);
+    return () => {
+      controller.abort();
+      window.clearInterval(timer);
+    };
   }, [symbol, refresh]);
+  useEffect(() => {
+    if (!chart) return;
+    const controller = new AbortController();
+    const loadHistory = () =>
+      stockDetail(symbol, controller.signal, 'history')
+        .then((h) => {
+          if (!controller.signal.aborted) {
+            setHistory(h);
+            setHistoryError('');
+          }
+        })
+        .catch(() => {
+          if (!controller.signal.aborted)
+            setHistoryError(
+              'Không tải được lịch sử. Tắt rồi bật lại để thử lại.',
+            );
+        });
+    void loadHistory();
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void loadHistory();
+    }, 60000);
+    return () => {
+      controller.abort();
+      window.clearInterval(timer);
+    };
+  }, [symbol, chart, refresh]);
   const money = (n: number | null | undefined) =>
-    n == null
-      ? 'Chưa có'
-      : n.toLocaleString('vi-VN', { maximumFractionDigits: 0 });
+    n == null ? '—' : n.toLocaleString('vi-VN', { maximumFractionDigits: 0 });
   function reload() {
-    setData(null);
-    setFinancials(null);
+    setUpdating(true);
     setError('');
     setRefresh((v) => v + 1);
   }
   if (!/^[A-Z0-9]{3,12}$/.test(symbol))
     return <p role="alert">Mã chứng khoán không hợp lệ.</p>;
-  if (error)
+  if (error && !data)
     return (
       <div className="empty-state" role="alert">
         <h1>{symbol}</h1>
@@ -61,8 +122,14 @@ function DetailContent({ symbol }: { symbol: string }) {
       </div>
     );
   const q = data.quote;
-  const historyStamp = data.bars.at(-1)?.fetchedAt;
-  const pct = q ? changePercent(q.lastPriceVnd, q.referenceVnd) : null;
+  const shown = data.displayPrice;
+  const historyStamp = history?.bars.at(-1)?.fetchedAt;
+  const pct =
+    shown?.kind === 'close'
+      ? null
+      : q
+        ? changePercent(q.lastPriceVnd, q.referenceVnd)
+        : null;
   return (
     <>
       <div className="detail-heading">
@@ -74,24 +141,38 @@ function DetailContent({ symbol }: { symbol: string }) {
             {symbol} <span>{data.stock.name}</span>
           </h1>
         </div>
-        <button className="refresh-button" onClick={reload}>
-          ↻ Cập nhật
+        <button className="refresh-button" onClick={reload} disabled={updating}>
+          {updating ? '↻ Đang cập nhật…' : '↻ Cập nhật'}
         </button>
       </div>
       <div className="quote-summary">
         <div>
-          <span>Giá hiện tại · VPS</span>
+          <span data-testid="display-price-label">
+            {shown?.kind === 'close'
+              ? `Đóng cửa phiên ${shown.sessionDate} · ${shown.source}`
+              : 'Giá VPS gần nhất'}
+          </span>
           <strong data-testid="current-price">
-            {money(q?.lastPriceVnd)} <small>VND</small>
+            {shown?.kind === 'unavailable' ? (
+              'Đang đồng bộ giá…'
+            ) : (
+              <>
+                {money(shown?.valueVnd ?? q?.lastPriceVnd)} <small>VND</small>
+              </>
+            )}
           </strong>
           <p
-            className={pct !== null && pct >= 0 ? 'positive' : 'negative'}
+            className={
+              pct === null ? 'neutral' : pct >= 0 ? 'positive' : 'negative'
+            }
             data-testid="price-change"
           >
             {pct === null
-              ? 'Chưa có biến động'
+              ? shown?.kind === 'close'
+                ? 'Giá đóng cửa dự phòng · không phải giá khớp lệnh hiện tại'
+                : 'Chưa có biến động'
               : `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`}{' '}
-            <span>so với tham chiếu</span>
+            {pct !== null && <span>so với tham chiếu</span>}
           </p>
         </div>
         <div className="quote-metrics">
@@ -125,7 +206,9 @@ function DetailContent({ symbol }: { symbol: string }) {
             }).format(new Date(q.fetchedAt)) +
             ' (giờ Việt Nam); chưa có timestamp sàn.'
           : 'Không lấy được quote hiện tại.'}{' '}
-        Lịch sử: {data.historySource} · {data.bars.length} phiên
+        {history
+          ? `Lịch sử: ${history.historySource} · ${history.bars.length} phiên`
+          : 'Biểu đồ chỉ tải khi bạn bật.'}
         {historyStamp
           ? ' · nhận ' +
             new Intl.DateTimeFormat('vi-VN', {
@@ -141,7 +224,43 @@ function DetailContent({ symbol }: { symbol: string }) {
           {n}
         </p>
       ))}
-      <TradeWorkbench detail={data} financials={financials} />
+      {error && <p role="status">{error} Đang giữ dữ liệu đã tải.</p>}
+      <section className="chart-preference">
+        <div>
+          <h2>Biểu đồ & vùng giá</h2>
+          <p>
+            Bật khi cần xem nến, MA và kế hoạch giao dịch. Lựa chọn được ghi nhớ
+            trên thiết bị này.
+          </p>
+        </div>
+        <label className="toggle-control">
+          <input
+            type="checkbox"
+            checked={chart}
+            onChange={(e) => {
+              setChart(e.target.checked);
+              try {
+                localStorage.setItem(
+                  'vn-stock-auto-chart',
+                  String(e.target.checked),
+                );
+              } catch {
+                /* Device storage optional. */
+              }
+            }}
+          />
+          Tự động tải biểu đồ nến
+        </label>
+      </section>
+      {chart &&
+        (history ? (
+          <TradeWorkbench
+            detail={{ ...data, bars: history.bars }}
+            financials={financials}
+          />
+        ) : (
+          <p role="status">{historyError || 'Đang tải lịch sử biểu đồ…'}</p>
+        ))}
       <StockNews symbol={symbol} />
       <ScoringPanel
         symbol={symbol}

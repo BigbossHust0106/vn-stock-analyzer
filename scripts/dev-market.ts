@@ -11,6 +11,7 @@ const types: Record<string, string> = {
   '.txt': 'text/plain',
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
+  '.jpg': 'image/jpeg',
   '.ico': 'image/x-icon',
 };
 const assets = {

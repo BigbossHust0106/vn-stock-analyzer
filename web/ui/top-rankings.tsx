@@ -315,6 +315,7 @@ function RankingTable({
 }
 export function TopRankings() {
   const [newsWeight, setNewsWeight] = useState(0.1);
+  const [horizon, setHorizon] = useState<Horizon>('day');
   const [exchange, setExchange] = useState(''),
     [sector, setSector] = useState(''),
     [cap, setCap] = useState(''),
@@ -336,6 +337,20 @@ export function TopRankings() {
         Giá cập nhật mỗi 30 giây; điểm tính sau lượt đồng bộ.
       </p>
       <div className="ranking-filters">
+        <label>
+          Kỳ xếp hạng
+          <select
+            aria-label="Kỳ xếp hạng"
+            value={horizon}
+            onChange={(e) => setHorizon(e.target.value as Horizon)}
+          >
+            {(['day', 'month', 'quarter'] as const).map((h) => (
+              <option key={h} value={h}>
+                {horizonLabels[h]}
+              </option>
+            ))}
+          </select>
+        </label>
         <label>
           Trọng số tâm lý tin tức (%)
           <input
@@ -402,17 +417,15 @@ export function TopRankings() {
           </select>
         </label>
       </div>
-      {(['day', 'month', 'quarter'] as const).map((horizon) => (
-        <RankingTable
-          key={horizon + exchange + sector + cap + newsWeight}
-          newsWeight={newsWeight}
-          horizon={horizon}
-          exchange={exchange}
-          sector={sector}
-          cap={cap}
-          onSectors={onSectors}
-        />
-      ))}
+      <RankingTable
+        key={horizon + exchange + sector + cap + newsWeight}
+        newsWeight={newsWeight}
+        horizon={horizon}
+        exchange={exchange}
+        sector={sector}
+        cap={cap}
+        onSectors={onSectors}
+      />
     </div>
   );
 }
