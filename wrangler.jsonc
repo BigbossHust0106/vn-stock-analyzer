@@ -5,7 +5,6 @@
   "keep_vars": true,
   "compatibility_date": "2026-10-12",
   "compatibility_flags": ["nodejs_compat"],
-  "limits": { "cpu_ms": 30000 },
   "assets": {
     "directory": "./web/out",
     "binding": "ASSETS",

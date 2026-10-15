@@ -6,6 +6,7 @@ import {
   plainText,
   canonicalUrl,
   duplicateTitle,
+  createTitleMatcher,
   boundedText,
   robotsAllowed,
 } from '../../modules/news/rss';
@@ -128,6 +129,15 @@ describe('RSS: nguồn thực có giới hạn, mã hóa và loại trùng', () 
     await expect(
       boundedText(new Response('', { status: 503 })),
     ).rejects.toThrow();
+  });
+  it('cache tiêu đề giữ ngưỡng Jaccard và không gộp số liệu mới qua nhiều lần gọi', () => {
+    const matches = createTitleMatcher();
+    const a = 'DPR công bố lợi nhuận kinh doanh tăng mạnh hôm nay';
+    // 11 từ trùng / 12 từ hợp > 90%; thêm hai từ: 11/13 < 90%.
+    expect(matches(a, a + ' tốt')).toBe(true);
+    expect(matches(a, a + ' rất tốt')).toBe(false);
+    expect(matches(a + ' 10', a + ' 20')).toBe(false);
+    expect(matches(a, a + ' tốt')).toBe(true);
   });
   it('robots ưu tiên nhóm bot riêng, luật dài nhất và Allow khi bằng độ dài', () => {
     const text =

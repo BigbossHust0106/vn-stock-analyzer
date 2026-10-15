@@ -54,8 +54,10 @@ export function tagArticle(
   a: Pick<RssArticle, 'title' | 'excerpt'>,
   stocks: StockTag[],
 ) {
-  const text = newsText(a),
-    f = fold(text);
+  return createArticleTagger(stocks)(a);
+}
+/** Prepare the catalog once per ingestion, rather than compiling it for every headline. */
+export function createArticleTagger(stocks: StockTag[]) {
   const ambiguous = new Set([
     'VND',
     'CEO',
@@ -65,25 +67,31 @@ export function tagArticle(
     'CPI',
     'FPTSHOP',
   ]);
-  const symbols = stocks.filter((s) => {
+  const prepared = stocks.map((s) => {
     const escaped = s.symbol.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const ticker = new RegExp(
       `(?:^|[^\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`,
       'u',
-    ).test(text);
+    );
     const explicit = new RegExp(
       `(?:mã|cổ phiếu|HOSE|HNX|UPCOM)\\s*[:(]?\\s*${escaped}(?![A-Z0-9])`,
       'iu',
-    ).test(text);
+    );
     const name = fold(s.name)
       .replace(
         /^(cong ty|ctcp|co phan|tong cong ty|tap doan|ngan hang|thuong mai|tnhh|mot thanh vien|\s)+/g,
         '',
       )
       .trim();
-    const named = name.length >= 10 && f.includes(name);
-    return explicit || named || (!ambiguous.has(s.symbol) && ticker);
+    return { stock: s, ticker, explicit, name };
   });
+  const sectorNames = [
+    ...new Set(
+      stocks.flatMap((s) =>
+        s.sector && s.sector.length >= 5 ? [s.sector] : [],
+      ),
+    ),
+  ].map((sector) => ({ sector, name: fold(sector) }));
   const topics: Record<string, RegExp> = {
     interest: /lai suat/,
     fx: /ty gia|ngoai te|usd\/vnd/,
@@ -92,36 +100,44 @@ export function tagArticle(
     oil: /gia dau|dau tho|brent|wti/,
     gold: /gia vang|vang mieng|vang nhan/,
   };
-  const macro_topics = Object.entries(topics)
-    .filter(([, r]) => r.test(f))
-    .map(([k]) => k);
-  const sectors = [
-    ...new Set([
-      ...symbols.flatMap((s) => (s.sector ? [s.sector] : [])),
-      ...stocks.flatMap((s) =>
-        s.sector && s.sector.length >= 5 && f.includes(fold(s.sector))
-          ? [s.sector]
-          : [],
-      ),
-    ]),
-  ];
-  const categories = [
-    ...(macro_topics.length ? ['macro'] : []),
-    ...(sectors.length ? ['sector'] : []),
-    ...(symbols.length ||
-    /co tuc|dai hoi co dong|ket qua kinh doanh|loi nhuan/.test(f)
-      ? ['corporate']
-      : []),
-    ...(/khoi ngoai|nha dau tu nuoc ngoai/.test(f) ? ['foreign'] : []),
-    ...(/thanh khoan|gia tri giao dich|khoi luong giao dich/.test(f)
-      ? ['liquidity']
-      : []),
-  ];
-  return {
-    symbols: symbols.map((s) => s.symbol),
-    sectors,
-    factors: categories,
-    macro_topics,
+  return (a: Pick<RssArticle, 'title' | 'excerpt'>) => {
+    const text = newsText(a),
+      f = fold(text);
+    const symbols = prepared
+      .filter(
+        ({ stock, ticker, explicit, name }) =>
+          explicit.test(text) ||
+          (name.length >= 10 && f.includes(name)) ||
+          (!ambiguous.has(stock.symbol) && ticker.test(text)),
+      )
+      .map((s) => s.stock);
+    const macro_topics = Object.entries(topics)
+      .filter(([, r]) => r.test(f))
+      .map(([k]) => k);
+    const sectors = [
+      ...new Set([
+        ...symbols.flatMap((s) => (s.sector ? [s.sector] : [])),
+        ...sectorNames.flatMap((s) => (f.includes(s.name) ? [s.sector] : [])),
+      ]),
+    ];
+    const categories = [
+      ...(macro_topics.length ? ['macro'] : []),
+      ...(sectors.length ? ['sector'] : []),
+      ...(symbols.length ||
+      /co tuc|dai hoi co dong|ket qua kinh doanh|loi nhuan/.test(f)
+        ? ['corporate']
+        : []),
+      ...(/khoi ngoai|nha dau tu nuoc ngoai/.test(f) ? ['foreign'] : []),
+      ...(/thanh khoan|gia tri giao dich|khoi luong giao dich/.test(f)
+        ? ['liquidity']
+        : []),
+    ];
+    return {
+      symbols: symbols.map((s) => s.symbol),
+      sectors,
+      factors: categories,
+      macro_topics,
+    };
   };
 }
 export function validAnalysis(

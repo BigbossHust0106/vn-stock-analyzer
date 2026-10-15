@@ -71,4 +71,4 @@ Bảng yếu tố ảnh hưởng là nhóm tin có link, không phải chuỗi �
 
 Kiểm thử workerd bắt lỗi riêng runtime Cloudflare: dùng `redirect: manual` và từ chối 3xx (Workers không hỗ trợ `error`). Đầu vào xếp hạng đọc qua RPC service-only theo lô100, giữ bộ lọc dữ liệu cũ và tránh N+1 HTTP trong Cron.
 
-Lượt chạy production đã ghi nhận `exceededCpu` ở khoảng 2.000 ms trước khi hoàn tất thu tin. Wrangler khai báo `limits.cpu_ms=30000` cho việc phân tích XML, gắn mã, loại trùng và tính điểm. Đây là trần CPU mỗi lượt, không phải thời gian chờ mạng; không tự thay gói dịch vụ. Theo dõi thời gian thực tế qua Workers Observability khi tăng khối lượng tin/danh mục.
+Lượt chạy production đã ghi nhận `exceededCpu` ở khoảng 2.000 ms trước khi hoàn tất thu tin. Gói Free không cho đặt `limits.cpu_ms`, nên không khai báo/nâng trần hoặc tự thay gói. Bộ so tiêu đề giữ chữ ký chuẩn hóa trong phạm vi mỗi lượt, dùng phép giao/hợp tập hợp không tạo lại mảng; bộ gắn mã chuẩn bị regex, tên và ngành một lần cho danh mục. Giữ nguyên tiêu chí nhận diện và loại trùng. Theo dõi CPU thực tế qua Workers Observability khi tăng khối lượng tin/danh mục.

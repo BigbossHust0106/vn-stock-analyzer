@@ -83,20 +83,38 @@ export const normalizedTitle = (t: string) =>
     .toLocaleLowerCase('vi')
     .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim();
+/** Cache belongs to one bounded ingestion/parse operation, never global Worker state. */
+export function createTitleMatcher() {
+  const cache = new Map<
+    string,
+    { normalized: string; words: Set<string>; numbers: string }
+  >();
+  function signature(title: string) {
+    let value = cache.get(title);
+    if (!value) {
+      const normalized = normalizedTitle(title);
+      value = {
+        normalized,
+        words: new Set(normalized.split(' ')),
+        numbers: (normalized.match(/\d+/g) ?? []).join(),
+      };
+      cache.set(title, value);
+    }
+    return value;
+  }
+  return (a: string, b: string) => {
+    const x = signature(a),
+      y = signature(b);
+    if (x.normalized === y.normalized) return true;
+    if (Math.min(x.words.size, y.words.size) < 8 || x.numbers !== y.numbers)
+      return false;
+    let intersection = 0;
+    for (const word of x.words) if (y.words.has(word)) intersection++;
+    return intersection / (x.words.size + y.words.size - intersection) >= 0.9;
+  };
+}
 export function duplicateTitle(a: string, b: string) {
-  const x = normalizedTitle(a),
-    y = normalizedTitle(b);
-  if (x === y) return true;
-  const aa = new Set(x.split(' ')),
-    bb = new Set(y.split(' '));
-  if (Math.min(aa.size, bb.size) < 8) return false;
-  // Distinct numerical claims must not be merged as the same event.
-  if ((x.match(/\d+/g) ?? []).join() !== (y.match(/\d+/g) ?? []).join())
-    return false;
-  return (
-    [...aa].filter((v) => bb.has(v)).length / new Set([...aa, ...bb]).size >=
-    0.9
-  );
+  return createTitleMatcher()(a, b);
 }
 export async function parseRss(
   xml: string,
@@ -118,7 +136,8 @@ export async function parseRss(
   }).parse(xml);
   const items: unknown = parsed?.rss?.channel?.item;
   if (!Array.isArray(items)) throw Error('Nguồn không phải RSS 2.0');
-  const out: RssArticle[] = [];
+  const out: RssArticle[] = [],
+    matchesTitle = createTitleMatcher();
   const now = Date.parse(asOf);
   if (!Number.isFinite(now)) throw Error('Thời điểm RSS sai');
   for (const raw of items.slice(0, 60)) {
@@ -136,7 +155,7 @@ export async function parseRss(
     )
       continue;
     const fingerprint = await digest(normalizedTitle(title));
-    if (out.some((a) => a.source_url === url || duplicateTitle(a.title, title)))
+    if (out.some((a) => a.source_url === url || matchesTitle(a.title, title)))
       continue;
     out.push({
       id: await digest(url),

@@ -10,7 +10,7 @@ import {
   boundedText,
   plainText,
   parseRss,
-  duplicateTitle,
+  createTitleMatcher,
   digest,
   normalizedTitle,
 } from '../../../modules/news/rss';
@@ -19,7 +19,7 @@ import {
   analyzeArticle,
   isPromotional,
   llmConfigured,
-  tagArticle,
+  createArticleTagger,
   type ClassifiedArticle,
   type StockTag,
 } from '../../../modules/news/analysis';
@@ -84,7 +84,9 @@ export async function collectNews(
         dirty.add(a.id);
       }
     }
-    const observed = new Set<string>();
+    const observed = new Set<string>(),
+      matchesTitle = createTitleMatcher(),
+      tagArticle = createArticleTagger(stocks);
     let inserted = 0,
       failed = 0;
     for (const source of newsSources) {
@@ -140,13 +142,13 @@ export async function collectNews(
                   (r) =>
                     r.id !== a.id &&
                     (r.fingerprint === a.fingerprint ||
-                      duplicateTitle(r.title, a.title)),
+                      matchesTitle(r.title, a.title)),
                 )
               )
                 continue;
               const row: ClassifiedArticle = {
                 ...a,
-                ...tagArticle(a, stocks),
+                ...tagArticle(a),
                 analysis: null,
                 analysis_status: 'pending',
                 analysis_attempts: 0,
