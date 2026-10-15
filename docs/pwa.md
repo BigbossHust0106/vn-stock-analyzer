@@ -20,9 +20,9 @@ Trình duyệt Chromium hỗ trợ `beforeinstallprompt` sẽ cho bấm cài khi
 
 ## Offline và quyền riêng tư
 
-Service worker `/sw.js` chỉ lưu **ba tài nguyên công khai** vào CacheStorage riêng `vn-stock-pwa-v1`:
+Service worker `/sw.js` chỉ lưu **ba tài nguyên công khai** vào CacheStorage riêng `vn-stock-pwa-v2`:
 
-- `/offline.html`
+- `/offline` (tệp nguồn `offline.html`)
 - `/icons/icon-192.png`
 - `/icons/icon-512.png`
 
@@ -47,6 +47,9 @@ Cần HTTPS, ngoại trừ localhost khi phát triển. `_headers` cấu hình s
 - Đọc cache không chỉ định tên có thể trùng tài nguyên ứng dụng khác: giới hạn cacheName và chỉ xóa prefix của mình.
 - Thanh điều hướng có thể chồng lên modal watchlist: tăng lớp modal; chừa safe-area và footer cho menu cố định.
 - Hàm mock native prompt bên trong page.evaluate bị helper __name của TSX khi serialize: dùng Promise.resolve.bind cho mock, không sửa app hay nới assertion.
+
+- Cloudflare307 từ `/offline.html` sang `/offline` làm response cache bị chặn khi điều hướng: dùng URL canonical, trả Response HTML mới không có cờ redirected và tăng cache v2. Hồi quy kiểm tra cache trả response.redirected=true nhưng fallback phải redirected=false.
+- Request phụ của Playwright không dùng proxy trong môi trường cloud: dùng fetch với --use-env-proxy cho manifest/icon công khai; không bỏ TLS/proxy.
 
 ## Chưa xác minh / rủi ro còn lại
 

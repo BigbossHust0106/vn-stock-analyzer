@@ -6,3 +6,6 @@ LOGIN UI PASS: desktop, 360/390/768px; signup/reset modes; accessible password v
 LOGIN AUTH PASS: real email/password; stock destination preserved; session survives reload; signed-in login redirects; logout hides workspace; no JS errors
 LOGIN CLEANUP PASS: temporary user and private data deleted
 FOCUS UI PASS: real Auth; header search from settings without leaving route, suggestions/Escape/Enter; stock-specific factors, collapsed articles and explicit context opt-in; both coverage badges; five routes at390/768px without overflow/JS errors (market/news fixtures).
+LOCAL MARKET: port 8878, real Worker handler + Supabase/provider, no fixture fallback
+PWA BROWSER PASS: HTTPS/localhost manifest and PNGs, iOS metadata, SW controls page, CacheStorage contains public offline assets only, offline API requires network, navigation shows offline fallback, install prompt UI (synthetic dismissal).
+PWA MOBILE PASS: real Supabase Auth, bottom navigation/search focus/settings, offline/online banner, install menu, 390px without overflow or JS errors. Physical Android/iPhone installation not performed.

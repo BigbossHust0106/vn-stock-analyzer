@@ -1,6 +1,6 @@
 /* Only public offline assets are cached. Never cache market APIs, auth, HTML workspaces or personal data. */
-const CACHE = 'vn-stock-pwa-v1';
-const OFFLINE = '/offline.html';
+const CACHE = 'vn-stock-pwa-v2';
+const OFFLINE = '/offline';
 const PUBLIC_ASSETS = [OFFLINE, '/icons/icon-192.png', '/icons/icon-512.png'];
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -38,14 +38,26 @@ self.addEventListener('fetch', (event) => {
     return;
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request).catch(
-        async () =>
-          (await caches.match(OFFLINE, { cacheName: CACHE })) ||
-          new Response('Bạn đang ngoại tuyến. Hãy kết nối mạng rồi thử lại.', {
-            status: 503,
-            headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-          }),
-      ),
+      fetch(request).catch(async () => {
+        const cached = await caches.match(OFFLINE, { cacheName: CACHE });
+        // Cloudflare can canonicalize .html URLs. Return a fresh, non-redirected
+        // document response; do not copy HTTP transfer/content-encoding headers.
+        return cached
+          ? new Response(cached.body, {
+              status: 200,
+              headers: {
+                'Content-Type': 'text/html; charset=utf-8',
+                'Cache-Control': 'no-store',
+              },
+            })
+          : new Response(
+              'Bạn đang ngoại tuyến. Hãy kết nối mạng rồi thử lại.',
+              {
+                status: 503,
+                headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+              },
+            );
+      }),
     );
     return;
   }

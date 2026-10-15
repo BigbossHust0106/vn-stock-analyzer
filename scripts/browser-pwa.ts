@@ -26,19 +26,24 @@ try {
   await expect(
     page.locator('meta[name="apple-mobile-web-app-capable"]'),
   ).toHaveAttribute('content', 'yes');
-  const response = await context.request.get(base + '/manifest.webmanifest');
-  expect(response.ok()).toBe(true);
-  expect(response.headers()['content-type']).toContain('manifest');
-  const manifest = await response.json();
+  const response = await fetch(base + '/manifest.webmanifest');
+  expect(response.ok).toBe(true);
+  expect(response.headers.get('content-type')).toContain('manifest');
+  const manifest = (await response.json()) as {
+    display: string;
+    scope: string;
+    start_url: string;
+    icons: { src: string }[];
+  };
   expect(manifest).toMatchObject({
     display: 'standalone',
     scope: '/',
     start_url: '/?source=pwa',
   });
   for (const icon of manifest.icons) {
-    const r = await context.request.get(base + icon.src);
-    expect(r.ok()).toBe(true);
-    expect(r.headers()['content-type']).toContain('image/png');
+    const r = await fetch(base + icon.src);
+    expect(r.ok).toBe(true);
+    expect(r.headers.get('content-type')).toContain('image/png');
   }
   await page.evaluate(() => navigator.serviceWorker.ready);
   await expect
@@ -56,7 +61,7 @@ try {
   expect(cacheUrls).toEqual([
     '/icons/icon-192.png',
     '/icons/icon-512.png',
-    '/offline.html',
+    '/offline',
   ]);
   // A synthetic browser event checks our UI; this does not install into Android or iOS.
   await page.evaluate(() => {
@@ -94,6 +99,10 @@ try {
   await expect(
     page.getByRole('heading', { name: 'Bạn đang ngoại tuyến' }),
   ).toBeVisible();
+  await expect(page.getByAltText('VN Stock')).toHaveJSProperty(
+    'naturalWidth',
+    192,
+  );
   await expect(page.locator('body')).not.toContainText(
     'Đang kiểm tra đăng nhập',
   );

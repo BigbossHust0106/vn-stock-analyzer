@@ -15,7 +15,7 @@ function serviceWorker() {
     match: vi.fn(async () => new Response('PUBLIC OFFLINE PAGE')),
     keys: vi.fn(async () => [
       'vn-stock-pwa-old',
-      'vn-stock-pwa-v1',
+      'vn-stock-pwa-v2',
       'other-application',
     ]),
     delete: vi.fn<(name: string) => Promise<boolean>>().mockResolvedValue(true),
@@ -52,7 +52,7 @@ it('install/activate only cache public offline assets and delete own older cache
   const s = serviceWorker();
   await s.lifecycle('install');
   expect(s.store.addAll.mock.calls[0]?.[0]).toEqual([
-    '/offline.html',
+    '/offline',
     '/icons/icon-192.png',
     '/icons/icon-512.png',
   ]);
@@ -94,13 +94,22 @@ it('documents are network-first and never saved; failed navigation gets only the
   expect(s.caches.match).not.toHaveBeenCalled();
   expect(s.store.put).not.toHaveBeenCalled();
   s.network.mockRejectedValue(new Error('offline'));
-  expect(
-    await (
-      await s.request('https://app.test/watchlists', 'GET', 'navigate')!
-    ).text(),
-  ).toBe('PUBLIC OFFLINE PAGE');
-  expect(s.caches.match).toHaveBeenCalledWith('/offline.html', {
-    cacheName: 'vn-stock-pwa-v1',
+  const redirected = new Response('PUBLIC OFFLINE PAGE', {
+    headers: { 'Content-Encoding': 'gzip' },
+  });
+  Object.defineProperty(redirected, 'redirected', { value: true });
+  s.caches.match.mockResolvedValueOnce(redirected);
+  const fallback = await s.request(
+    'https://app.test/watchlists',
+    'GET',
+    'navigate',
+  )!;
+  expect(await fallback.text()).toBe('PUBLIC OFFLINE PAGE');
+  expect(fallback.redirected).toBe(false);
+  expect(fallback.headers.get('content-encoding')).toBeNull();
+  expect(fallback.headers.get('cache-control')).toBe('no-store');
+  expect(s.caches.match).toHaveBeenCalledWith('/offline', {
+    cacheName: 'vn-stock-pwa-v2',
   });
   expect(s.store.put).not.toHaveBeenCalled();
 });
