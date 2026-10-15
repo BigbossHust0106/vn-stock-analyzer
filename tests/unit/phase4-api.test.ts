@@ -166,7 +166,7 @@ it('Giờ cron mới được phân luồng, thiếu key báo lỗi thay vì suc
       },
     },
   );
-  await expect(task).rejects.toThrow('Cron giá/xếp hạng thất bại');
+  await expect(task).rejects.toThrow('Cron thất bại; xem nhật ký hệ thống.');
   vi.restoreAllMocks();
 });
 

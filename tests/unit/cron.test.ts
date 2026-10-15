@@ -8,6 +8,24 @@ const env = {
 };
 afterEach(() => vi.unstubAllGlobals());
 
+function operationalMock(
+  url: string,
+  init?: RequestInit,
+): Response | undefined {
+  if (url.includes('/rpc/claim_system_job'))
+    return Response.json([{ id: 'fixture-job', generation: 1 }]);
+  if (url.includes('/system_job_runs'))
+    return new Response(null, { status: 204 });
+  if (url.includes('/watchlist_alert_rules')) return Response.json([]);
+  if (url.includes('/api_health'))
+    return init?.method === 'POST'
+      ? new Response(null, { status: 201 })
+      : Response.json(null);
+  // A health probe is separate from market ingestion and never writes quotes.
+  if (url.startsWith('https://bgapidatafeed.vps.com.vn/'))
+    return Response.json([fixture[0]]);
+  return undefined;
+}
 function mockServices(
   options: { closed?: boolean; empty?: boolean; writeFails?: boolean } = {},
 ) {
@@ -95,13 +113,13 @@ it.each([
   ['missing', null, null],
   ['before-close', true, '2026-10-12T10:00:00Z'],
 ])(
-  'Review4/8 cron16:00 %s không gọi catalog/quotes/BCTC',
+  'Review4/8 cron16:00 %s không ingest catalog/quotes/BCTC; vẫn ghi log',
   async (_label, isOpen, close) => {
     const { default: worker } = await import('../../worker/src/index');
     const calls: string[] = [];
     vi.stubGlobal(
       'fetch',
-      vi.fn<typeof fetch>(async (input) => {
+      vi.fn<typeof fetch>(async (input, init) => {
         const url = String(input);
         calls.push(url);
         if (url.includes('/trading_sessions'))
@@ -114,7 +132,9 @@ it.each([
                   closes_at: close,
                 },
           );
-        throw new Error('Cron should not call provider');
+        const operational = operationalMock(url, init);
+        if (operational) return operational;
+        throw new Error('Cron should not ingest market data');
       }),
     );
     const jobs: Promise<unknown>[] = [];
@@ -131,8 +151,17 @@ it.each([
       },
     );
     await Promise.all(jobs);
-    expect(calls).toHaveLength(1);
-    expect(calls[0]).toContain('/trading_sessions');
+    expect(calls.filter((u) => u.includes('/trading_sessions'))).toHaveLength(
+      1,
+    );
+    expect(
+      calls.some((u) =>
+        /ingest_current_quotes|reconcile_stock_catalog|financial_snapshots/.test(
+          u,
+        ),
+      ),
+    ).toBe(false);
+    expect(calls.some((u) => u.includes('/system_job_runs'))).toBe(true);
   },
 );
 it('Review4 cron chưa khai báo không đồng bộ ngoài ý muốn', async () => {
@@ -149,16 +178,18 @@ it('Review4 cron chưa khai báo không đồng bộ ngoài ý muốn', async ()
   expect(waitUntil).not.toHaveBeenCalled();
 });
 it.each(['*/5 2-8 * * 1-5', '15 8 * * 1-5'])(
-  'Review4/8: cron Phase4 %s bỏ toàn bộ tải khi ngày nghỉ',
+  'Review4/8: cron Phase4 %s không ingest ngày nghỉ; vẫn ghi log',
   async (cron) => {
     const { default: worker } = await import('../../worker/src/index');
-    const fetcher = vi.fn<typeof fetch>(async () =>
-      Response.json({
+    const fetcher = vi.fn<typeof fetch>(async (input, init) => {
+      const operational = operationalMock(String(input), init);
+      if (operational) return operational;
+      return Response.json({
         session_date: '2026-10-12',
         is_open: false,
         closes_at: null,
-      }),
-    );
+      });
+    });
     vi.stubGlobal('fetch', fetcher);
     const jobs: Promise<unknown>[] = [];
     worker.scheduled(
@@ -171,7 +202,51 @@ it.each(['*/5 2-8 * * 1-5', '15 8 * * 1-5'])(
       },
     );
     await Promise.all(jobs);
-    expect(fetcher).toHaveBeenCalledTimes(1);
-    expect(String(fetcher.mock.calls[0]![0])).toContain('/trading_sessions');
+    const urls = fetcher.mock.calls.map((c) => String(c[0]));
+    expect(urls.filter((u) => u.includes('/trading_sessions'))).toHaveLength(1);
+    expect(
+      urls.some((u) =>
+        /ingest_current_quotes|reconcile_stock_catalog|financial_snapshots/.test(
+          u,
+        ),
+      ),
+    ).toBe(false);
   },
 );
+it('Phần 7: cron cảnh báo riêng kiểm tra VPS, không ingest giá, email thiếu cấu hình là skipped', async () => {
+  const { default: worker } = await import('../../worker/src/index');
+  const writes: { url: string; body: unknown }[] = [];
+  vi.stubGlobal(
+    'fetch',
+    vi.fn<typeof fetch>(async (input, init) => {
+      const url = String(input);
+      if (init?.body) writes.push({ url, body: JSON.parse(String(init.body)) });
+      const response = operationalMock(url, init);
+      if (response) return response;
+      throw Error('Maintenance must not ingest market data');
+    }),
+  );
+  const jobs: Promise<unknown>[] = [];
+  worker.scheduled(
+    { cron: '*/5 * * * *', scheduledTime: timestamp } as ScheduledController,
+    env,
+    {
+      waitUntil: (p) => {
+        jobs.push(p);
+      },
+    },
+  );
+  await Promise.all(jobs);
+  expect(writes.some((w) => w.url.includes('ingest_current_quotes'))).toBe(
+    false,
+  );
+  expect(
+    writes.filter((w) => w.url.includes('system_job_runs')).map((w) => w.body),
+  ).toContainEqual(
+    expect.objectContaining({ state: 'skipped', code: 'EMAIL_UNCONFIGURED' }),
+  );
+  expect(writes.find((w) => w.url.includes('api_health'))?.body).toMatchObject({
+    provider: 'VPS',
+    state: 'ok',
+  });
+});

@@ -346,3 +346,14 @@ it('Ngày đủ momentum/volume/kỹ thuật và quote nguồn verified mới đ
   i.referenceOnly = true;
   expect(rankStock(i)[0]!.explanation.rankingEligibility.eligible).toBe(false);
 });
+
+it('Phần 7: chuyển tiếp sau đăng nhập chỉ vào alerts/status và tham số mức giá hợp lệ', () => {
+  for (const next of [
+    '/alerts',
+    '/status',
+    '/alerts?symbol=DPR&kind=buy_zone&lower=10000&upper=11000',
+  ])
+    expect(safeNext(next)).toBe(next);
+  expect(safeNext('/alerts?next=https://evil.test')).toBe('/watchlists');
+  expect(safeNext('//evil.test/alerts')).toBe('/watchlists');
+});

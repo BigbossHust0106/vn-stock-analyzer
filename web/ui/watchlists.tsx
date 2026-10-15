@@ -305,6 +305,9 @@ export function Watchlists() {
       <span className="eyebrow">DANH MỤC CỦA BẠN</span>
       <h1>Danh sách theo dõi</h1>
       <p>
+        <Link href="/alerts">Thiết lập cảnh báo & xem thông báo ↗</Link>
+      </p>
+      <p>
         Giá được làm mới mỗi 30 giây. Chênh lệch điểm so với phiên xếp hạng
         trước; nếu chưa có điểm cũ sẽ hiển thị rõ.
       </p>
