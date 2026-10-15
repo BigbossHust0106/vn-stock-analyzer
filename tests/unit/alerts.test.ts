@@ -131,6 +131,14 @@ it('điểm: lưu baseline, thay đổi đúng 10 điểm kích hoạt; thiếu 
     evaluateAlert({ ...r, config_version: 2 }, initial.state, next).events,
   ).toEqual([]);
 });
+it('thông báo điểm dùng dấu phẩy thập phân Việt Nam', () => {
+  const result = evaluateAlert(
+    { ...rule, kind: 'score_change', lower_vnd: null, upper_vnd: null },
+    { config: 1, score: 60.5, scoreAt: '2026-10-15T02:59:00Z' },
+    { ...input, score: { value: 70.5, asOf: now, complete: true } },
+  );
+  expect(result.events[0]?.body).toContain('60,5 lên/xuống 70,5/100');
+});
 it('tin quan trọng: chỉ bằng chứng LLM hợp lệ, đúng mã, sau ngày bật; không lặp cùng bài', () => {
   const a = {
     id: 'a'.repeat(64),

@@ -44,6 +44,7 @@ interface StatusData {
 }
 const names: Record<string, string> = {
   prices: 'Giá trong phiên',
+  fundamentals: 'Dữ liệu cơ bản',
   closing: 'Chốt phiên',
   market: 'Đồng bộ thị trường',
   news: 'Tin tức',
@@ -51,9 +52,10 @@ const names: Record<string, string> = {
   alerts: 'Cảnh báo watchlist',
   email: 'Email',
   vps: 'Kiểm tra VPS',
-  ingest: 'Ingest cuối ngày',
+  ingest: 'Thu thập cuối ngày',
 };
 const states: Record<string, string> = {
+  pending: 'Chờ dữ liệu',
   running: 'Đang chạy',
   ok: 'Thành công',
   skipped: 'Bỏ qua',

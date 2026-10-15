@@ -51,6 +51,8 @@ const fresh = (value: string, now: number, maxAge: number) =>
   Date.parse(value) <= now &&
   now - Date.parse(value) <= maxAge;
 const money = (n: number) => n.toLocaleString('vi-VN') + ' VND';
+const points = (n: number) =>
+  n.toLocaleString('vi-VN', { maximumFractionDigits: 1 });
 export function evaluateAlert(
   rule: AlertRule,
   previous: AlertSnapshot,
@@ -158,7 +160,7 @@ export function evaluateAlert(
       events.push({
         key: 'score:' + rule.config_version + ':' + s.asOf,
         title: alertLabels.score_change + ' · ' + input.symbol,
-        body: `Điểm ${rule.horizon === 'day' ? 'trong ngày' : rule.horizon === 'month' ? 'trong tháng' : 'trong quý'} từ ${state.score} lên/xuống ${s.value}/100; thay đổi ${(s.value - state.score).toFixed(1)} điểm, ngưỡng ${rule.score_delta}. So sánh hai snapshot cùng khung điểm; dữ liệu và trọng số có thể làm điểm thay đổi.`,
+        body: `Điểm ${rule.horizon === 'day' ? 'trong ngày' : rule.horizon === 'month' ? 'trong tháng' : 'trong quý'} từ ${points(state.score)} lên/xuống ${points(s.value)}/100; thay đổi ${points(s.value - state.score)} điểm, ngưỡng ${points(rule.score_delta)}. So sánh hai snapshot cùng khung điểm; dữ liệu và trọng số có thể làm điểm thay đổi.`,
         source_url: null,
         evidence: {
           previousScore: state.score,
