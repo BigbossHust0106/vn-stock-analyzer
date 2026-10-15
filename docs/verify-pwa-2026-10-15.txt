@@ -33,19 +33,21 @@ All matched files use Prettier code style!
       Coverage enabled with v8
 
 
- Test Files  19 passed (19)
-      Tests  153 passed (153)
-   Start at  15:28:04
-   Duration  1.60s (transform 34%, import 30%, tests 26%, worker 10%)
+ Test Files  20 passed (20)
+      Tests  163 passed (163)
+   Start at  15:38:05
+   Duration  1.65s (import 33%, transform 32%, tests 26%, worker 9%)
 
-    Isolate  19 workers spawned · ~72ms startup each (spawn + environment, per file)
-             at least ~386ms faster with isolate: false — reuses workers across files instead of one per file
+    Isolate  20 workers spawned · ~69ms startup each (spawn + environment, per file)
+             at least ~388ms faster with isolate: false — reuses workers across files instead of one per file
 
  % Coverage report from v8
 -------------------|---------|----------|---------|---------|-------------------
 File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
 -------------------|---------|----------|---------|---------|-------------------
-All files          |   98.26 |    95.84 |   98.99 |   99.35 |                   
+All files          |    98.1 |    95.68 |   98.53 |   99.09 |                   
+ alerts            |   95.55 |       94 |   83.33 |   95.45 |                   
+  evaluate.ts      |   95.55 |       94 |   83.33 |   95.45 | 155,193           
  news              |   96.83 |     92.8 |   96.72 |   98.69 |                   
   analysis.ts      |     100 |    98.59 |     100 |     100 | 110               
   ranking.ts       |     100 |    97.72 |     100 |     100 | 139               
@@ -61,10 +63,10 @@ All files          |   98.26 |    95.84 |   98.99 |   99.35 |
 -------------------|---------|----------|---------|---------|-------------------
 
 =============================== Coverage summary ===============================
-Statements   : 98.26% ( 681/693 )
-Branches     : 95.84% ( 993/1036 )
-Functions    : 98.99% ( 197/199 )
-Lines        : 99.35% ( 616/620 )
+Statements   : 98.1% ( 724/738 )
+Branches     : 95.68% ( 1087/1136 )
+Functions    : 98.53% ( 202/205 )
+Lines        : 99.09% ( 658/664 )
 ================================================================================
 
 [5/9] Build web + worker
@@ -77,29 +79,31 @@ Lines        : 99.35% ( 616/620 )
 > next build --webpack
 
 ▲ Next.js 16.4.0 (webpack)
-✓ Running next.config.mjs took 8ms
+✓ Running next.config.mjs took 7ms
 
   Creating an optimized production build ...
-✓ Compiled successfully in 2.7s
+✓ Compiled successfully in 3.0s
   Running TypeScript ...
-  Finished TypeScript in 807ms ...
+  Finished TypeScript in 829ms ...
   Collecting page data using 4 workers ...
-  Generating static pages using 4 workers (0/11) ...
-  Generating static pages using 4 workers (2/11) 
-  Generating static pages using 4 workers (5/11) 
-  Generating static pages using 4 workers (8/11) 
-✓ Generating static pages using 4 workers (11/11) in 301ms
+  Generating static pages using 4 workers (0/13) ...
+  Generating static pages using 4 workers (3/13) 
+  Generating static pages using 4 workers (6/13) 
+  Generating static pages using 4 workers (9/13) 
+✓ Generating static pages using 4 workers (13/13) in 389ms
   Finalizing page optimization ...
   Collecting build traces ...
 
 Route (app)
 ┌ ○ /
 ├ ○ /_not-found
+├ ○ /alerts
 ├ ○ /auth/callback
 ├ ○ /auth/password
 ├ ○ /install
 ├ ○ /login
 ├ ○ /settings
+├ ○ /status
 ├ ○ /stocks
 ├ ○ /top10
 └ ○ /watchlists
@@ -115,10 +119,10 @@ Route (app)
 
 
 
- ⛅️ wrangler 4.149.0
-────────────────────
-✨ Read 130 files from the assets directory /workspace/vn-stock-analyzer/web/out
-Total Upload: 1052.43 KiB / gzip: 224.23 KiB
+ ⛅️ wrangler 4.149.0 (update available 4.151.0)
+───────────────────────────────────────────────
+✨ Read 146 files from the assets directory /workspace/vn-stock-analyzer/web/out
+Total Upload: 1080.23 KiB / gzip: 231.54 KiB
 Your Worker has access to the following bindings:
 Binding                                             Resource                  
 env.ASSETS                                          Assets                    
@@ -132,11 +136,11 @@ env.NEWS_WEIGHT ("0.1")                             Environment Variable
 > vn-stock-analyzer@0.1.0 verify:secrets
 > node scripts/secrets.mjs
 
-3:28PM INF scanned ~3522779 bytes (3.52 MB) in 195ms
-3:28PM INF no leaks found
-3:28PM INF 32 commits scanned.
-3:28PM INF scanned ~3903006 bytes (3.90 MB) in 341ms
-3:28PM INF no leaks found
+3:38PM INF scanned ~3672966 bytes (3.67 MB) in 185ms
+3:38PM INF no leaks found
+3:38PM INF 33 commits scanned.
+3:38PM INF scanned ~3953614 bytes (3.95 MB) in 283ms
+3:38PM INF no leaks found
 
 [7/9] Migrations PostgreSQL
 
@@ -155,8 +159,10 @@ MIGRATION PASS: 20261014092000_complete_ranking_evidence.sql
 MIGRATION PASS: 202610150001_closing_snapshots.sql
 MIGRATION PASS: 20261015014539_phase6_news.sql
 MIGRATION PASS: 20261015023106_phase6_ranking_batches.sql
+MIGRATION PASS: 20261015082827_phase7_alerts_system.sql
 MIGRATION PASS: 20261015090000_data_priority.sql
 MIGRATION PASS: 20261015090100_financial_backups.sql
+MIGRATION PASS: 20261015090126_phase7_multiple_alert_levels.sql
 ingest_current_quotes 
 -----------------------
  
@@ -205,7 +211,7 @@ cache_reported_close
 CLOSING CACHE PASS: prior-date only, stale refusal, public read, service-only write, finality unverified
 DATA PRIORITY PASS: both strategies, 0.7 vs 0.3, exact query, exchange, escaping, public RLS read
 FINANCIAL BACKUP PASS: service write, public read only, empty/field-loss rejected, outage preserves good data, never scoring input
-MIGRATIONS PASS: 14 file SQL trên PostgreSQL 17 (auth shim; không thay thế Supabase Auth integration)
+MIGRATIONS PASS: 16 file SQL trên PostgreSQL 17 (auth shim; không thay thế Supabase Auth integration)
 
 [8/9] RLS 2 users
 
@@ -271,6 +277,47 @@ publish_rankings
 
 PHASE4 DB PASS: atomic three horizons, stale protection, filters before top10, score history, notes/target RLS, anonymous denied
 NEWS DB PASS: public evidence read; server-only writes/score/lease; no invented/empty LLM evidence; concurrent Cron excluded
+set_config              
+--------------------------------------
+ 71000000-0000-0000-0000-000000000001
+(1 row)
+
+              set_config              
+--------------------------------------
+ 71000000-0000-0000-0000-000000000002
+(1 row)
+
+ record_watchlist_alert 
+------------------------
+                      1
+(1 row)
+
+ record_watchlist_alert 
+------------------------
+                      0
+(1 row)
+
+ record_watchlist_alert 
+------------------------
+                      0
+(1 row)
+
+          create_test_alert           
+--------------------------------------
+ bba7b1fa-1b7f-4b26-ad1b-0bb3ce34c683
+(1 row)
+
+              set_config              
+--------------------------------------
+ 71000000-0000-0000-0000-000000000002
+(1 row)
+
+              set_config              
+--------------------------------------
+ 71000000-0000-0000-0000-000000000001
+(1 row)
+
+ALERTS DB PASS: A/B isolation; no forged notification/status; watchlist ownership; CAS and event dedupe; test rate limit; job lease; own read state
 
 [9/9] VPS fixture parser
 
@@ -281,10 +328,10 @@ NEWS DB PASS: public evidence read; server-only writes/score/lease; no invented/
  RUN  v5.0.3 /workspace/vn-stock-analyzer
 
 
- Test Files  9 passed (9)
-      Tests  40 passed | 1 todo (41)
-   Start at  15:28:23
-   Duration  801ms (tests 48%, transform 31%, import 19%, worker 2%)
+ Test Files  10 passed (10)
+      Tests  41 passed | 1 todo (42)
+   Start at  15:38:24
+   Duration  1.14s (tests 51%, import 25%, transform 23%, worker 1%)
 
 
 BẢNG TỔNG KẾT VERIFY

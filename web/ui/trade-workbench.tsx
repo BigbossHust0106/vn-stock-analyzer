@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import type { StockDetail } from '../lib/market-client';
 import type { FinancialData } from '../../modules/providers/financial-types';
@@ -236,7 +237,42 @@ export function TradeWorkbench({
                     {level.rr === null ? '—' : formatNumber(level.rr, 2) + ':1'}
                   </td>
                   <td>{level.band}</td>
-                  <td>{level.reason}</td>
+                  <td>
+                    {level.reason}
+                    {level.price !== null &&
+                      [
+                        'buy-low',
+                        'tp1',
+                        'tp2',
+                        'tp3',
+                        'stop',
+                        'trailing',
+                      ].includes(level.id) && (
+                        <p>
+                          <Link
+                            href={
+                              '/alerts?symbol=' +
+                              detail.stock.symbol +
+                              '&kind=' +
+                              (level.id === 'buy-low'
+                                ? 'buy_zone'
+                                : level.id.startsWith('tp')
+                                  ? 'sell_zone'
+                                  : 'stop_loss') +
+                              '&lower=' +
+                              level.price +
+                              (level.id === 'buy-low'
+                                ? '&upper=' +
+                                  (plan.levels.find((l) => l.id === 'buy-high')
+                                    ?.price ?? level.price)
+                                : '')
+                            }
+                          >
+                            Tạo cảnh báo mức này ↗
+                          </Link>
+                        </p>
+                      )}
+                  </td>
                 </tr>
               ))}
             </tbody>

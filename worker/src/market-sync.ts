@@ -112,12 +112,17 @@ export async function syncMarket(
   }
   await syncFinancials(env);
   await syncMetadata(env);
-  const { error: statusError } = await db.from('system_status').upsert({
-    component: 'prices',
-    state: failedHistory || failedQuotes ? 'degraded' : 'ok',
-    last_success_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  });
+  const { error: statusError } = await db
+    .from('system_status')
+    .update({
+      component: 'prices',
+      state: failedHistory || failedQuotes ? 'degraded' : 'ok',
+      ...(!failedHistory && !failedQuotes
+        ? { last_success_at: new Date().toISOString() }
+        : {}),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('component', 'prices');
   if (statusError) throw new Error('Không cập nhật trạng thái');
   return true;
 }

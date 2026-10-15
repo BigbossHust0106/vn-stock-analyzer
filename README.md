@@ -419,6 +419,10 @@ Trang chi tiết mã có vùng mua, TP1–TP3 đủ R:R ≥2, SL theo ATR/đáy/
 
 RSS bốn nguồn, Cron 30 phút, gắn mã/ngành/vĩ mô và loại trùng; trang chi tiết có tin, nguồn và bảng yếu tố ảnh hưởng. LLM tương thích OpenAI dùng secrets, tóm tắt trích xuất có bằng chứng; chưa cấu hình thì ghi không đủ dữ liệu. Top10 dùng trọng số tin mặc định10%, chỉnh0–30%, giữ nguyên bộ lọc dữ liệu đầy đủ. Xem [phương pháp, điều kiện nguồn và cấu hình Phần6](docs/phase6.md).
 
+## Phần 7: Cảnh báo và trạng thái
+
+Sau đăng nhập, mở `/alerts` để đặt cảnh báo cho mã trong watchlist và thử nhận thông báo trong app; `/status` hiển thị mốc dữ liệu thật, nhật ký cron và phép thử VPS. Cron cảnh báo riêng chạy mỗi 5 phút. Email Resend là tùy chọn, cần khóa và địa chỉ gửi thuộc domain đã xác minh. Xem [hướng dẫn Phần 7](docs/phase7.md) về điều kiện, RLS, retry và cấu hình còn thiếu.
+
 ## Ứng dụng điện thoại (PWA)
 
 Mở [Cài VN Stock](https://vn-stock-analyzer.manhhuong.workers.dev/install) trên điện thoại.

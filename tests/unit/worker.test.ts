@@ -85,9 +85,13 @@ describe('Worker và lịch giao dịch Việt Nam', () => {
         },
       },
     );
-    await expect(task).rejects.toThrow('Cron ingest thất bại');
+    await expect(task).rejects.toThrow('Cron thất bại; xem nhật ký hệ thống.');
     expect(error).toHaveBeenCalledWith(
-      'Cron ingest thất bại; kiểm tra cấu hình, lịch và nguồn dữ liệu',
+      JSON.stringify({
+        component: 'system-job',
+        code: 'JOB_FAILED',
+        cron: '30 8 * * 1-5',
+      }),
     );
     error.mockRestore();
   });

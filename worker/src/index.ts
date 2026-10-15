@@ -1,24 +1,25 @@
+import { notificationsResponse } from './api/notifications';
+import { systemStatusResponse } from './api/system-status';
+import { systemJobResponse } from './api/system-job';
+import { runScheduledJobs } from './jobs/scheduled';
+import type { AlertEmailConfig } from './alerts/email';
 import { newsJobResponse } from './api/news-job';
 import { newsResponse } from './api/news';
-import { syncNews } from './news/sync';
 import type { NewsConfig } from '../../modules/news/analysis';
 import { rankingsResponse } from './api/rankings';
 import { watchlistsResponse } from './api/watchlists';
-import { tradingSync } from './trading-sync';
-import { syncRankings } from './ranking-sync';
 import { financialResponse } from './api/financials';
 import { createClient } from '@supabase/supabase-js';
 import deployment from '../../config/public-deployment.json';
 import { marketResponse } from './api/market';
 import type { ProviderConfig } from '../../modules/providers/registry';
-import { syncMarket } from './market-sync';
 import { healthResponse } from './api/health';
 import { canIngest, vietnamDate } from '../../modules/market/calendar';
 import {
   validatedSymbols,
   VpsProvider,
 } from '../../modules/providers/vps-provider';
-export interface Env extends ProviderConfig, NewsConfig {
+export interface Env extends ProviderConfig, NewsConfig, AlertEmailConfig {
   SYNC_SYMBOLS?: string;
   ASSETS?: Pick<WorkerBindings['ASSETS'], 'fetch'>;
   SUPABASE_URL?: string;
@@ -26,7 +27,7 @@ export interface Env extends ProviderConfig, NewsConfig {
   SUPABASE_SERVICE_ROLE_KEY?: string;
 }
 
-export async function ingest(env: Env, timestamp: number): Promise<void> {
+export async function ingest(env: Env, timestamp: number) {
   const supabaseUrl = env.SUPABASE_URL || deployment.supabaseUrl;
   if (!env.SUPABASE_SERVICE_ROLE_KEY)
     throw new Error('Thiếu cấu hình Supabase');
@@ -39,7 +40,10 @@ export async function ingest(env: Env, timestamp: number): Promise<void> {
     .eq('session_date', vietnamDate(timestamp))
     .maybeSingle();
   if (sessionError) throw new Error('Không đọc được lịch giao dịch');
-  if (!canIngest(session, timestamp)) return;
+  if (!canIngest(session, timestamp))
+    return session
+      ? ('session_closed' as const)
+      : ('calendar_missing' as const);
   const provider = new VpsProvider();
   let imported = 0;
   for (let start = 0; ; start += 1000) {
@@ -81,6 +85,7 @@ export async function ingest(env: Env, timestamp: number): Promise<void> {
     updated_at: completedAt,
   });
   if (error) throw new Error('Không cập nhật được trạng thái');
+  return 'updated' as const;
 }
 export default {
   async fetch(
@@ -94,6 +99,12 @@ export default {
       'Access-Control-Allow-Origin': '*',
       'X-Content-Type-Options': 'nosniff',
     };
+    const systemJob = await systemJobResponse(request, env);
+    if (systemJob) return systemJob;
+    const notifications = await notificationsResponse(request, env);
+    if (notifications) return notifications;
+    const status = await systemStatusResponse(request, env);
+    if (status) return status;
     const job = await newsJobResponse(request, env);
     if (job) return job;
     if (request.method !== 'GET')
@@ -187,61 +198,32 @@ export default {
     env: Env,
     context: Pick<ExecutionContext, 'waitUntil'>,
   ): void {
-    if (controller.cron === '*/30 * * * *') {
-      context.waitUntil(
-        syncNews(env, controller.scheduledTime)
-          .then((result) =>
-            result?.skipped
-              ? undefined
-              : syncRankings(env, controller.scheduledTime),
-          )
-          .catch(() => {
-            console.error(
-              'Cron tin tức thất bại; không ghi log credential hay phản hồi LLM',
-            );
-            throw new Error('Cron tin tức thất bại');
-          }),
-      );
-      return;
-    }
     if (
-      controller.cron === '*/5 2-8 * * 1-5' ||
-      controller.cron === '15 8 * * 1-5'
-    ) {
-      context.waitUntil(
-        tradingSync(
-          env,
-          controller.scheduledTime,
-          controller.cron === '15 8 * * 1-5',
-        ).catch(() => {
-          console.error('Cron giá/xếp hạng thất bại');
-          throw new Error('Cron giá/xếp hạng thất bại');
-        }),
-      );
+      ![
+        '*/5 * * * *',
+        '*/30 * * * *',
+        '*/5 2-8 * * 1-5',
+        '15 8 * * 1-5',
+        '0 9 * * 1-5',
+        '30 8 * * 1-5',
+      ].includes(controller.cron)
+    )
       return;
-    }
-    if (controller.cron === '0 9 * * 1-5') {
-      context.waitUntil(
-        syncMarket(env, controller.scheduledTime)
-          .then((synced) =>
-            synced ? syncRankings(env, controller.scheduledTime) : undefined,
-          )
-          .catch(() => {
-            console.error(
-              'Đồng bộ thị trường thất bại; kiểm tra cấu hình và nguồn',
-            );
-            throw new Error('Đồng bộ thị trường thất bại');
-          }),
-      );
-      return;
-    }
-    if (controller.cron !== '30 8 * * 1-5') return;
     context.waitUntil(
-      ingest(env, controller.scheduledTime).catch(() => {
+      runScheduledJobs(
+        controller.cron,
+        controller.scheduledTime,
+        env,
+        ingest,
+      ).catch(() => {
         console.error(
-          'Cron ingest thất bại; kiểm tra cấu hình, lịch và nguồn dữ liệu',
+          JSON.stringify({
+            component: 'system-job',
+            code: 'JOB_FAILED',
+            cron: controller.cron,
+          }),
         );
-        throw new Error('Cron ingest thất bại');
+        throw new Error('Cron thất bại; xem nhật ký hệ thống.');
       }),
     );
   },

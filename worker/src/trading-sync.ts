@@ -32,7 +32,9 @@ export async function tradingSync(
   ) {
     if (!session)
       console.warn('Thiếu lịch phiên có nguồn; bỏ cập nhật/chốt giá.');
-    return;
+    return session
+      ? ('session_closed' as const)
+      : ('calendar_missing' as const);
   }
   const provider = marketProviders(env);
   let imported = 0;
@@ -84,4 +86,5 @@ export async function tradingSync(
     updated_at: new Date().toISOString(),
   });
   if (statusError) throw new Error('Không cập nhật được trạng thái giá');
+  return 'updated' as const;
 }

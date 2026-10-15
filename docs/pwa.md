@@ -14,7 +14,7 @@ Mở https://vn-stock-analyzer.manhhuong.workers.dev/install trên điện tho�
 
 Manifest có id/scope ổn định, start URL `/?source=pwa`, `display=standalone`, icon PNG192/512 và maskable, Apple touch icon180, theme mint/lavender. Thẻ Apple legacy được thêm riêng vì Next.js16.4 xuất thẻ chuẩn `mobile-web-app-capable`; không tự giả định nó đã xuất thẻ Apple.
 
-Điện thoại có thanh điều hướng dưới, nút tìm mã ngay trên header và khoảng chừa safe-area cho thiết bị có tai thỏ/thanh Home. Giữ chức năng đăng nhập, tra cứu, Top10, watchlist và cài đặt hiện có. Modal watchlist có thứ tự lớp cao hơn thanh điều hướng.
+Điện thoại có thanh điều hướng dưới, nút tìm mã ngay trên header và khoảng chừa safe-area cho thiết bị có tai thỏ/thanh Home. Giữ chức năng đăng nhập, tra cứu, Top10, watchlist và cài đặt hiện có. Modal watchlist có thứ tự lớp cao hơn thanh điều hướng. Đã ghép main mới có cảnh báo/trạng thái: chuông cảnh báo vẫn hiện trên header điện thoại và trang trạng thái có trong menu tài khoản.
 
 Trình duyệt Chromium hỗ trợ `beforeinstallprompt` sẽ cho bấm cài khi nó phát sự kiện đủ điều kiện. Safari dùng menu Chia sẻ; không giả lập cửa sổ cài của iOS. Chấp nhận prompt chưa được coi là đã cài xong trên hệ điều hành.
 
@@ -34,7 +34,7 @@ Cần HTTPS, ngoại trừ localhost khi phát triển. `_headers` cấu hình s
 
 ## Kiểm tra đã chạy
 
-- `npm run verify`: 9/9 PASS; 153 unit PASS, 40 provider PASS, 1 TODO cũ; 14 migration và RLS PASS. `npm run smoke`: web/Worker/API input PASS. Log nguyên văn [verify-pwa-2026-10-15.txt](verify-pwa-2026-10-15.txt).
+- `npm run verify`: 9/9 PASS; 163 unit PASS, 41 provider PASS, 1 TODO cũ; 16 migration và RLS PASS. `npm run smoke`: web/Worker/API input PASS. Log nguyên văn [verify-pwa-2026-10-15.txt](verify-pwa-2026-10-15.txt).
 - Unit bảo vệ cache: API/Auth/external/mutation không bị SW chặn hoặc ghi; điều hướng chỉ dùng mạng hoặc trang công khai; chỉ xóa cache có prefix của mình; kích thước PNG và manifest hợp lệ.
 - `npm run verify:pwa:browser`: Chromium với viewport390px; manifest/MIME/PNG/metadata iOS, SW thực sự điều khiển trang, CacheStorage chỉ có ba tài nguyên công khai cả trước và sau đăng nhập thật; tắt mạng không đọc được API và nhận trang offline. Bật lại mạng hoạt động tiếp; bottom navigation/tìm mã/menu cài đặt hoạt động.
 - Test prompt dùng sự kiện **mô phỏng** để kiểm tra nút và trạng thái hủy; **không phải cài đặt thực tế trên Android/iPhone**.

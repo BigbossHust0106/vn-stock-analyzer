@@ -6,6 +6,7 @@ import { MobileNav } from './mobile-nav';
 import { HeaderSearch } from './header-search';
 import { AuthNav } from './auth-nav';
 import { RequireAuth } from './require-auth';
+import { NotificationBell } from './notification-bell';
 import { ThemeSwitch } from './theme-switch';
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -39,6 +40,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             aria-current={pathname === '/settings' ? 'page' : undefined}
           >
             Cài đặt
+          </Link>
+          <NotificationBell />
+          <Link
+            href="/status"
+            aria-current={pathname === '/status' ? 'page' : undefined}
+          >
+            Trạng thái
           </Link>
           <AuthNav />
           <ThemeSwitch />

@@ -112,6 +112,7 @@ try {
   cleanup = await authenticateBrowser(page, base, '/watchlists');
   const nav = page.getByRole('navigation', { name: 'Điều hướng điện thoại' });
   await expect(nav).toBeVisible();
+  await expect(page.getByRole('link', { name: /^Cảnh báo,/ })).toBeVisible();
   await nav.getByRole('button', { name: 'Tìm mã' }).click();
   await expect(
     page.getByRole('combobox', { name: 'Tìm mã hoặc tên công ty' }),

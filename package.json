@@ -48,6 +48,8 @@
     "sync:news": "node --use-env-proxy --import tsx scripts/sync-news.ts",
     "verify:news:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-news.ts",
     "verify:ui:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-refresh-ui.ts",
+    "sync:system": "node --use-env-proxy --import tsx scripts/sync-system.ts",
+    "verify:alerts:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-alerts.ts",
     "verify:financial-backups:live": "node --use-env-proxy --import tsx scripts/verify-financial-backups.ts",
     "verify:focus:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-focus.ts",
     "verify:pwa:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-pwa.ts"

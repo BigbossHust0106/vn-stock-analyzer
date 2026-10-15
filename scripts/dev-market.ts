@@ -1,3 +1,4 @@
+import { managementClient } from './sync-rankings';
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
@@ -43,6 +44,9 @@ const assets = {
     }
   },
 };
+const serviceKey = process.argv.includes('--jobs')
+  ? (await managementClient()).key
+  : undefined;
 const server = createServer(async (req, res) => {
   try {
     const incomingHeaders = new Headers();
@@ -51,16 +55,29 @@ const server = createServer(async (req, res) => {
         value.forEach((item) => incomingHeaders.append(name, item));
       else if (typeof value === 'string') incomingHeaders.set(name, value);
     }
+    const chunks: Uint8Array[] = [];
+    let bytes = 0;
+    for await (const chunk of req) {
+      bytes += chunk.length;
+      if (bytes > 16000) {
+        res.writeHead(413);
+        res.end('Request too large');
+        return;
+      }
+      chunks.push(chunk);
+    }
     const response = await worker.fetch(
       new Request('http://127.0.0.1:8878' + req.url, {
         method: req.method ?? 'GET',
         headers: incomingHeaders,
+        ...(bytes ? { body: new Uint8Array(Buffer.concat(chunks)) } : {}),
       }),
       {
         SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
         SUPABASE_PUBLISHABLE_KEY:
           process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? '',
         ASSETS: assets,
+        ...(serviceKey ? { SUPABASE_SERVICE_ROLE_KEY: serviceKey } : {}),
       },
     );
     res.writeHead(response.status, Object.fromEntries(response.headers));
