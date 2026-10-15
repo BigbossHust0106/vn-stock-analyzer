@@ -62,7 +62,7 @@ Bảng yếu tố ảnh hưởng là nhóm tin có link, không phải chuỗi �
 
 ## Kiểm tra
 
-- `npm run verify`: typecheck/lint/format, unit và coverage≥80% cho module news, build, gitleaks, 11 migration PostgreSQL và RLS, provider tests.
+- `npm run verify`: typecheck/lint/format, unit và coverage≥80% cho module news, build, gitleaks, toàn bộ migration PostgreSQL và RLS, provider tests.
 - `npm run sync:news -- --migrate`: áp dụng migration và thu RSS bằng script server; chỉ dùng LLM nếu môi trường script có cấu hình.
 - `npm run sync:news -- --production`: chạy Worker thật với secrets của Worker, cập nhật tin và ba kỳ điểm.
 - `npm run verify:news:browser`: API và trình duyệt với dữ liệu thật, tài khoản tạm; nguồn/link, trạng thái thiếu hoặc nhãn thật, trọng số Top10, 390px; tự xóa tài khoản thử.
