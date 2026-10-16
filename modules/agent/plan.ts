@@ -147,3 +147,63 @@ export interface AgentReply {
 }
 export const helpText =
   'Bạn có thể hỏi “Phân tích FPT”, “So sánh VNM và HPG”, “Xem watchlist”, “Tạo danh sách Dài hạn”, “Thêm FPT vào Dài hạn”, “Đặt giá mục tiêu FPT 58.000 VND”, hoặc “Cảnh báo cắt lỗ FPT dưới 55.000 VND”. Ghi rõ đơn vị giá VND và danh sách. Mỗi thao tác thay đổi cần bạn xem trước và xác nhận. Agent không đặt lệnh mua/bán.';
+
+// Cloudflare JSON mode uses the raw JSON Schema, not OpenAI's name/schema wrapper.
+export const planSchema = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    intent: { type: 'string', enum: [...intents] },
+    symbols: {
+      type: 'array',
+      items: { type: 'string', pattern: '^[A-Z0-9]{3,12}$' },
+      maxItems: 3,
+      uniqueItems: true,
+    },
+    listId: {
+      type: ['string', 'null'],
+      pattern:
+        '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+    },
+    name: { type: ['string', 'null'], maxLength: 120 },
+    notes: { type: ['string', 'null'], maxLength: 1000 },
+    targetVnd: {
+      type: ['number', 'null'],
+      exclusiveMinimum: 0,
+      exclusiveMaximum: 1e12,
+    },
+    alertId: {
+      type: ['string', 'null'],
+      pattern:
+        '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+    },
+    kind: {
+      type: ['string', 'null'],
+      enum: ['buy_zone', 'sell_zone', 'stop_loss', null],
+    },
+    lowerVnd: {
+      type: ['number', 'null'],
+      exclusiveMinimum: 0,
+      exclusiveMaximum: 1e12,
+    },
+    upperVnd: {
+      type: ['number', 'null'],
+      exclusiveMinimum: 0,
+      exclusiveMaximum: 1e12,
+    },
+    enabled: { type: ['boolean', 'null'] },
+  },
+  required: [
+    'intent',
+    'symbols',
+    'listId',
+    'name',
+    'notes',
+    'targetVnd',
+    'alertId',
+    'kind',
+    'lowerVnd',
+    'upperVnd',
+    'enabled',
+  ],
+};

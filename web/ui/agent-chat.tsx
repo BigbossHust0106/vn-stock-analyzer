@@ -38,7 +38,31 @@ interface Turn {
 }
 export function AgentChat() {
   const { user } = useAuth();
-  return user ? <Conversation key={user.id} owner={user.id} /> : null;
+  const [sessionOwner, setSessionOwner] = useState<string | null>(
+    user?.id ?? null,
+  );
+  useEffect(() => {
+    let disposed = false,
+      unsubscribe: (() => void) | undefined;
+    void settingsClient()
+      .then((db) => {
+        if (disposed) return;
+        const { data } = db.auth.onAuthStateChange((_event, session) =>
+          setSessionOwner(session?.user.id ?? null),
+        );
+        unsubscribe = () => data.subscription.unsubscribe();
+      })
+      .catch(() => {
+        if (!disposed) setSessionOwner(null);
+      });
+    return () => {
+      disposed = true;
+      unsubscribe?.();
+    };
+  }, []);
+  return user && sessionOwner === user.id ? (
+    <Conversation key={user.id} owner={user.id} />
+  ) : null;
 }
 function Conversation({ owner }: { owner: string }) {
   const [turns, setTurns] = useState<Turn[]>([]),

@@ -233,3 +233,56 @@ it('grounded research uses exact stored quote, preserves old timestamp, reports 
   expect(r.sources).toHaveLength(1);
   expect(r.sources[0]!.url).toBe('/stocks?symbol=FPT');
 });
+it('preview refuses a renamed target captured during model inference, rather than asking to approve a stale description', async () => {
+  const { preview } = await import('../../worker/src/agent/actions');
+  const bodies: unknown[] = [];
+  vi.stubGlobal(
+    'fetch',
+    vi.fn<typeof fetch>(async (input, init) => {
+      const u = String(input);
+      if (init?.body) bodies.push(JSON.parse(String(init.body)));
+      if (u.includes('prepare_agent_action'))
+        return Response.json({
+          id: '97000000-0000-0000-0000-000000000008',
+          summary: 'rename',
+          status: 'pending',
+        });
+      if (u.includes('agent_proposals?'))
+        return Response.json({
+          before_state: { list: { name: 'Changed in another tab' } },
+        });
+      if (u.includes('resolve_agent_action'))
+        return Response.json({ status: 'cancelled' });
+      throw Error('Unexpected request');
+    }),
+  );
+  await expect(
+    preview(
+      createClient(env.SUPABASE_URL, 'fixture-public'),
+      {
+        ...plan,
+        intent: 'rename_list',
+        symbols: [],
+        listId: '97000000-0000-0000-0000-000000000004',
+        name: 'New name',
+      },
+      {
+        lists: [
+          { id: '97000000-0000-0000-0000-000000000004', name: 'Original name' },
+        ],
+        rules: [],
+        items: [],
+      },
+    ),
+  ).rejects.toThrow('STALE_PROPOSAL');
+  expect(bodies).toContainEqual({
+    proposal: '97000000-0000-0000-0000-000000000008',
+    apply: false,
+  });
+  expect(
+    bodies.some(
+      (b) =>
+        typeof b === 'object' && b !== null && 'apply' in b && b.apply === true,
+    ),
+  ).toBe(false);
+});

@@ -12,6 +12,7 @@ export interface AgentContext {
     upper_vnd: number | null;
     enabled: boolean;
     symbol: string;
+    config_version: number;
   }[];
 }
 export async function personalContext(
@@ -21,7 +22,9 @@ export async function personalContext(
     db.from('watchlists').select('id,name').order('created_at').limit(101),
     db
       .from('watchlist_alert_rules')
-      .select('id,watchlist_id,stock_id,kind,lower_vnd,upper_vnd,enabled')
+      .select(
+        'id,watchlist_id,stock_id,kind,lower_vnd,upper_vnd,enabled,config_version',
+      )
       .limit(201),
     db
       .from('watchlist_items')
@@ -53,7 +56,11 @@ export async function preview(
   const action: Record<string, unknown> = { type: p.intent };
   let list = context.lists.find((l) => l.id === p.listId);
   let stock: { id: string; symbol: string } | null = null;
-  if (p.symbols.length) {
+  if (
+    ['add_stock', 'remove_stock', 'edit_item', 'create_alert'].includes(
+      p.intent,
+    )
+  ) {
     const { data, error } = await db
       .from('stocks')
       .select('id,symbol')
@@ -81,6 +88,8 @@ export async function preview(
   if (stock) action.stockId = stock.id;
   const currency = (n: number | null) =>
     n === null ? 'không đặt' : n.toLocaleString('vi-VN') + ' VND';
+  let expectedItem:
+    { notes: string; target_price_vnd: number | null } | undefined;
   let summary = '';
   switch (p.intent) {
     case 'create_list':
@@ -108,6 +117,7 @@ export async function preview(
         .eq('stock_id', stock?.id ?? '')
         .maybeSingle();
       if (error || !data) throw Error('ITEM_REQUIRED');
+      expectedItem = data;
       action.notes = p.notes ?? data.notes;
       action.targetVnd = p.targetVnd ?? data.target_price_vnd;
       summary = `Sửa ${stock?.symbol} trong “${list?.name}”: giá mục tiêu ${currency(action.targetVnd as number | null)}; ghi chú “${action.notes}”.`;
@@ -135,6 +145,31 @@ export async function preview(
     description: summary,
   });
   if (error) throw Error(error.message);
+  // The preview description must match the same state captured by the RPC,
+  // including edits made while the model was interpreting the request.
+  if (list) {
+    const snapshot = await db
+      .from('agent_proposals')
+      .select('before_state')
+      .eq('id', data.id)
+      .single();
+    if (snapshot.error || !snapshot.data)
+      throw Error('PERSONAL_DATA_UNAVAILABLE');
+    const state = snapshot.data.before_state;
+    const rule = p.alertId
+      ? context.rules.find((r) => r.id === p.alertId)
+      : null;
+    if (
+      state.list?.name !== list.name ||
+      (expectedItem &&
+        (state.item?.notes !== expectedItem.notes ||
+          state.item?.target_price_vnd !== expectedItem.target_price_vnd)) ||
+      (rule && state.rule?.config_version !== rule.config_version)
+    ) {
+      await db.rpc('resolve_agent_action', { proposal: data.id, apply: false });
+      throw Error('STALE_PROPOSAL');
+    }
+  }
   return {
     text: 'Đây là bản xem trước. Chưa có dữ liệu nào được thay đổi. Kiểm tra mã, danh sách, ngưỡng giá VND rồi chọn Xác nhận hoặc Hủy.',
     sources: [],

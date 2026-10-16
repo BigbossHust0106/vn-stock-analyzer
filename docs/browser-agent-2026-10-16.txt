@@ -1,1 +1,1 @@
-AGENT BROWSER PASS: real Supabase Auth/RPC/RLS, mocked AI interpretation only; preview does not mutate; confirm list/add stock; cancel55000 VND stop-loss; no duplicate model calls;390/1440px; clear conversation; no JS errors.
+AGENT BROWSER PASS: real Supabase Auth/RPC/RLS, mocked AI interpretation only; preview does not mutate; confirm list/add stock; cancel55000 VND stop-loss; no duplicate model calls;390/1440px; clear conversation and draft on cross-tab signout/account switch; no A data in B; no JS errors.

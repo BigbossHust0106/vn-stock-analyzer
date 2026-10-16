@@ -11,6 +11,13 @@
 - BCTC cho Top 10, nguồn đã thử (FireAnt/HOSE/HNX) và lịch tự làm mới: [docs/financial-sources-2026-10-16.md](docs/financial-sources-2026-10-16.md).
 - Hướng dẫn theo tính năng: [Top 10/Auth/watchlist](docs/phase4.md), [tin tức](docs/phase6.md), [cảnh báo/trạng thái](docs/phase7.md), [backtest/hiệu năng/bảo mật](docs/phase8.md), [PWA](docs/pwa.md).
 
+## Trợ lý AI
+
+Mở `/agent` sau khi đăng nhập hoặc bấm **Trợ lý AI**. Có thể hỏi “Phân tích FPT”,
+“So sánh VNM và HPG”, xem watchlist, tạo danh sách, thêm/xóa mã và quản lý cảnh
+báo. Các thay đổi có bản xem trước và chỉ áp dụng sau xác nhận. Dùng Workers AI
+Cloudflare; không đưa API key vào browser. [Phạm vi, quyền riêng tư và kiểm tra](docs/agent-ai.md).
+
 ## Giới hạn dữ liệu cần biết trước
 
 Top 10 chỉ nhận mã đáp ứng chính sách `complete-v1`; không lấp đủ 10 bằng mã thiếu dữ liệu. Khi chưa đủ 10 mã, `/top10` hiện thêm **Bảng tham khảo** (`reference-v1`) tách riêng: chỉ mã đã qua lọc BCTC/giá/vốn hóa, bao phủ ≥30%, ghi rõ phần còn thiếu. BCTC tự làm mới 1 mã mỗi lượt Cron `*/5 * * * *`, không phụ thuộc lịch phiên. Khi khảo sát Phần 8, project chưa có lịch sàn/giá phiên điều chỉnh được xác minh và chưa có Top 10 đủ chuẩn. Bar VPS/KBS hiện có là giá báo cáo chưa xác minh adjusted/unadjusted; không tự đưa vào scoring/backtest chính thức. Chưa có feed VN-Index được xác minh. `/backtest` lưu lịch sử từ khi triển khai, hiển thị độ phủ/thiếu dữ liệu và có công cụ đối chiếu giá báo cáo **tách riêng khỏi backtest Top 10**.

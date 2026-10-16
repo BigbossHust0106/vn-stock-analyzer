@@ -34,12 +34,12 @@ All matched files use Prettier code style!
 
 
  Test Files  28 passed (28)
-      Tests  207 passed (207)
-   Start at  15:02:07
-   Duration  2.55s (tests 49%, import 26%, transform 17%, worker 8%)
+      Tests  208 passed (208)
+   Start at  15:14:48
+   Duration  2.64s (tests 51%, import 26%, transform 15%, worker 8%)
 
-    Isolate  28 workers spawned · ~71ms startup each (spawn + environment, per file)
-             at least ~588ms faster with isolate: false — reuses workers across files instead of one per file
+    Isolate  28 workers spawned · ~75ms startup each (spawn + environment, per file)
+             at least ~624ms faster with isolate: false — reuses workers across files instead of one per file
 
  % Coverage report from v8
 -------------------|---------|----------|---------|---------|-------------------
@@ -85,15 +85,15 @@ Lines        : 99.15% ( 707/713 )
 ✓ Running next.config.mjs took 8ms
 
   Creating an optimized production build ...
-✓ Compiled successfully in 1531ms
+✓ Compiled successfully in 1471ms
   Running TypeScript ...
-  Finished TypeScript in 835ms ...
+  Finished TypeScript in 941ms ...
   Collecting page data using 4 workers ...
   Generating static pages using 4 workers (0/17) ...
   Generating static pages using 4 workers (4/17) 
   Generating static pages using 4 workers (8/17) 
   Generating static pages using 4 workers (12/17) 
-✓ Generating static pages using 4 workers (17/17) in 358ms
+✓ Generating static pages using 4 workers (17/17) in 383ms
   Finalizing page optimization ...
   Collecting build traces ...
 
@@ -129,7 +129,7 @@ Route (app)
  ⛅️ wrangler 4.149.0 (update available 4.151.1)
 ───────────────────────────────────────────────
 ✨ Read 179 files from the assets directory /workspace/vn-stock-analyzer/web/out
-Total Upload: 1149.88 KiB / gzip: 249.04 KiB
+Total Upload: 1152.35 KiB / gzip: 249.59 KiB
 Your Worker has access to the following bindings:
 Binding                                             Resource                  
 env.AI                                              AI                        
@@ -146,11 +146,11 @@ env.NEWS_WEIGHT ("0.1")                             Environment Variable
 > vn-stock-analyzer@0.1.0 verify:secrets
 > node scripts/secrets.mjs
 
-3:02PM INF scanned ~5048632 bytes (5.05 MB) in 241ms
-3:02PM INF no leaks found
-3:02PM INF 41 commits scanned.
-3:02PM INF scanned ~5304195 bytes (5.30 MB) in 380ms
-3:02PM INF no leaks found
+3:15PM INF scanned ~5071959 bytes (5.07 MB) in 255ms
+3:15PM INF no leaks found
+3:15PM INF 42 commits scanned.
+3:15PM INF scanned ~5404886 bytes (5.40 MB) in 387ms
+3:15PM INF no leaks found
 
 [7/9] Migrations PostgreSQL
 
@@ -325,7 +325,7 @@ set_config
 
           create_test_alert           
 --------------------------------------
- b03027f7-adc2-4bc0-b553-2ab1aae5cf3f
+ ee156051-0557-4d2a-ac63-bbd4f5117c2e
 (1 row)
 
               set_config              
@@ -346,7 +346,7 @@ set_config
 
               set_config              
 --------------------------------------
- 068a3b00-5a9e-46a9-adf9-79a6d210cf3c
+ 6688f4db-7adf-42e6-ad1d-87ec67601af0
 (1 row)
 
               set_config              
@@ -361,22 +361,22 @@ set_config
 
                               resolve_agent_action                               
 ---------------------------------------------------------------------------------
- {"result": {"id": "7968d2cc-d931-4a54-9fe6-924c79c04b75"}, "status": "applied"}
+ {"result": {"id": "b1169f0d-3784-4808-b0d5-51aa2952e65c"}, "status": "applied"}
 (1 row)
 
                               resolve_agent_action                               
 ---------------------------------------------------------------------------------
- {"result": {"id": "7968d2cc-d931-4a54-9fe6-924c79c04b75"}, "status": "applied"}
+ {"result": {"id": "b1169f0d-3784-4808-b0d5-51aa2952e65c"}, "status": "applied"}
 (1 row)
 
               set_config              
 --------------------------------------
- 7968d2cc-d931-4a54-9fe6-924c79c04b75
+ b1169f0d-3784-4808-b0d5-51aa2952e65c
 (1 row)
 
               set_config              
 --------------------------------------
- b2058d72-ecf4-4903-a359-c742d663d07a
+ 7b609d49-510a-423e-a2a8-7434a86c9f63
 (1 row)
 
 AGENT DB PASS: preview-only, A/B isolation, immutable actions, confirmation/idempotency, stale/expired/cancelled protection, watchlist+alert operations, quota3/min
@@ -416,8 +416,11 @@ AGENT CONCURRENCY PASS: two simultaneous confirmations apply once; alert version
 
  Test Files  14 passed (14)
       Tests  55 passed | 1 todo (56)
-   Start at  15:02:27
-   Duration  1.50s (tests 53%, import 29%, transform 17%, worker 1%)
+   Start at  15:15:09
+   Duration  1.60s (tests 53%, import 28%, transform 17%, worker 1%)
+
+    Isolate  14 workers spawned · ~72ms startup each (spawn + environment, per file)
+             at least ~266ms faster with isolate: false — reuses workers across files instead of one per file
 
 
 BẢNG TỔNG KẾT VERIFY

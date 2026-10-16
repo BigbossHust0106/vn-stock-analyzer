@@ -32,6 +32,10 @@ Cloudflare yêu cầu. Không giả định có cấu hình LLM chỉ vì bindin
 phải kiểm tra một request thực tế. Lỗi model/quota/network trả trạng thái lỗi,
 không giả lập câu trả lời AI.
 
+Đầu ra dùng JSON Schema bắt buộc đủ trường, theo tài liệu
+https://developers.cloudflare.com/workers-ai/features/json-mode/ ; vẫn kiểm tra
+lại kiểu và ý nghĩa tham số ở server, không nới validator khi model sai.
+
 Model chỉ định tuyến công cụ/điền tham số, không tự viết số liệu hoặc kết luận
 đầu tư. Phân tích được dựng bằng dữ liệu và giải thích của engine; DCF proxy
 chưa xác minh vẫn unknown, không biến CFO hợp nhất thành tiền công ty mẹ. Các
@@ -74,7 +78,7 @@ mở hoàn toàn hay cam kết dự báo.
 
 ## Kiểm tra trước triển khai
 
-`npm run verify`:9/9 PASS;207 unit PASS,55 provider PASS và1 TODO cũ về
+`npm run verify`:9/9 PASS;208 unit PASS,55 provider PASS và1 TODO cũ về
 `lastVolume`;21 migration và RLS PASS. Hai process xác nhận cùng đề xuất đồng
 thời chỉ tăng alert version từ1 lên2, không lên3.
 [Log verify nguyên văn](verify-agent-2026-10-16.txt).
@@ -90,3 +94,17 @@ FPT, so sánh VNM/HPG, đề xuất/tạo danh sách, thêm FPT, cảnh báo5500
 kiểm tra hai người dùng và idempotency. Lệnh tách khỏi CI vì phụ thuộc mạng,
 quota Workers AI và cần quyền quản trị Supabase để tạo/xóa tài khoản thử. Không
 được dùng kết quả browser mock để khẳng định inference thật đã hoạt động.
+
+## Hiệu chỉnh sau kiểm tra thật
+
+- Đọc FPT và so sánh VNM/HPG đã gọi được Cloudflare AI thật ở đợt triển khai đầu.
+  JSON object mode bỏ sót/sai trường khi tạo danh sách và bị validator chặn; đã
+  chuyển sang JSON Schema, không sửa đáp án test hay bỏ kiểm tra tham số.
+- CI smoke không gọi dịch vụ AI: script đọc config sản xuất và tạo bản tạm chỉ
+  bỏ binding AI cho local health/HTTP guards. Giữ nguyên handler, assets và
+  assertions, thêm Auth401 của agent. `verify:agent:live` kiểm tra inference thật
+  riêng; không cần thêm token Cloudflare vào CI để chạy smoke.
+- UI xóa hội thoại/bản nháp ngay theo Auth event, gồm đăng xuất từ tab khác và
+  đổi người dùng; chờ xác thực user mới trước khi hiển thị phiên chat mới.
+- Bản xem trước kiểm tra cả trạng thái thay đổi trong lúc model suy nghĩ, trước
+  khi đưa proposal ra giao diện; RPC tiếp tục kiểm tra từ lúc xem trước đến xác nhận.

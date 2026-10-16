@@ -1,5 +1,25 @@
+import { readFileSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { resolve } from 'node:path';
+import ts from 'typescript';
 import { spawn } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
+// Health/validation smoke is fully local. Workers AI inference is tested separately
+// with verify:agent:live; Wrangler cannot emulate the AI binding without remote auth.
+const smokeConfigPath = resolve('.cache/smoke-worker.json');
+const parsed = ts.parseConfigFileTextToJson(
+  'wrangler.jsonc',
+  readFileSync('wrangler.jsonc', 'utf8'),
+);
+if (parsed.error) throw Error('Cannot parse Worker config for smoke');
+const smokeConfig = { ...parsed.config };
+delete smokeConfig.ai;
+smokeConfig.main = resolve(smokeConfig.main);
+smokeConfig.assets = {
+  ...smokeConfig.assets,
+  directory: resolve(smokeConfig.assets.directory),
+};
+mkdirSync('.cache', { recursive: true });
+writeFileSync(smokeConfigPath, JSON.stringify(smokeConfig));
 const services = [
   {
     name: 'web',
@@ -22,6 +42,8 @@ const services = [
     args: [
       'scripts/wrangler.mjs',
       'dev',
+      '--config',
+      smokeConfigPath,
       '--ip',
       '127.0.0.1',
       '--port',
@@ -83,10 +105,16 @@ try {
   if (invalid.status !== 400 || missing.status !== 503)
     throw new Error('Worker validation/config guard thất bại');
   console.log('SMOKE PASS: API input 400, thiếu Supabase 503');
+  const agent = await fetch('http://127.0.0.1:8788/v1/agent');
+  if (agent.status !== 401) throw Error('Agent auth guard failed');
+  console.log(
+    'SMOKE PASS: Agent requires Auth401; real AI inference is a separate live check',
+  );
 } catch (error) {
   console.error(error.message);
   process.exitCode = 1;
 } finally {
+  rmSync(smokeConfigPath, { force: true });
   for (const child of running) {
     if (child.pid) {
       try {

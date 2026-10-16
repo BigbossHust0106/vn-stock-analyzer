@@ -1,6 +1,6 @@
 import { chromium, expect } from '@playwright/test';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { authenticateBrowser } from './browser-auth';
+import { authenticateBrowser, openAccountMenu } from './browser-auth';
 import { agentResponse } from '../worker/src/api/agent';
 import type { AgentPlan } from '../modules/agent/plan';
 const base = process.env.MARKET_APP_URL || 'http://127.0.0.1:8878';
@@ -12,7 +12,10 @@ const config = (await (
 const browser = await chromium.launch({ headless: true });
 let cleanup: (() => Promise<void>) | undefined;
 try {
-  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+  });
+  const page = await context.newPage();
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   let userDb: SupabaseClient | undefined,
@@ -57,7 +60,9 @@ try {
               upperVnd: null,
               enabled: null,
             };
-            if (text.startsWith('Tạo')) {
+            if (text.startsWith('Xem')) {
+              plan.intent = 'watchlists';
+            } else if (text.startsWith('Tạo')) {
               plan.intent = 'create_list';
               plan.name = name;
             } else if (text.startsWith('Thêm')) {
@@ -174,8 +179,31 @@ try {
   await expect(page.getByTestId('agent-proposal')).toHaveCount(0);
   await page.setViewportSize({ width: 1440, height: 1000 });
   await expect(page.getByLabel('Yêu cầu của bạn')).toBeVisible();
+  await page
+    .getByLabel('Yêu cầu của bạn')
+    .fill('Bản nháp riêng của tài khoản A');
+  const other = await page.context().newPage();
+  await other.goto(base + '/watchlists');
+  await openAccountMenu(other);
+  await other.getByRole('button', { name: 'Đăng xuất', exact: true }).click();
+  await expect(page.getByLabel('Email', { exact: true })).toBeVisible({
+    timeout: 15000,
+  });
+  await other.close();
+  await cleanup();
+  cleanup = undefined;
+  cleanup = await authenticateBrowser(page, base, '/agent');
+  await expect(page.getByLabel('Yêu cầu của bạn')).toHaveValue('');
+  await page.getByLabel('Yêu cầu của bạn').fill('Xem watchlist của tôi');
+  await page.getByRole('button', { name: 'Gửi yêu cầu', exact: true }).click();
+  await expect(
+    page.getByText('Bạn chưa có danh sách theo dõi.', { exact: false }),
+  ).toBeVisible({ timeout: 30000 });
+  await expect(page.getByText(name, { exact: false })).toHaveCount(0);
+  expect(inferences).toBe(4);
+  expect(errors).toEqual([]);
   console.log(
-    'AGENT BROWSER PASS: real Supabase Auth/RPC/RLS, mocked AI interpretation only; preview does not mutate; confirm list/add stock; cancel55000 VND stop-loss; no duplicate model calls;390/1440px; clear conversation; no JS errors.',
+    'AGENT BROWSER PASS: real Supabase Auth/RPC/RLS, mocked AI interpretation only; preview does not mutate; confirm list/add stock; cancel55000 VND stop-loss; no duplicate model calls;390/1440px; clear conversation and draft on cross-tab signout/account switch; no A data in B; no JS errors.',
   );
 } finally {
   await browser.close();
