@@ -88,12 +88,52 @@ try {
     'Client can forge market history',
   );
   browser = await chromium.launch({ headless: true });
+  const ssr = await browser.newContext({ javaScriptEnabled: false });
+  const ssrPage = await ssr.newPage();
+  await ssrPage.goto(base + '/login');
+  await expect(ssrPage.getByLabel('Email', { exact: true })).toBeDisabled();
+  await expect(
+    ssrPage.getByRole('button', { name: 'Đăng nhập', exact: true }),
+  ).toBeDisabled();
+  await ssr.close();
   const context = await browser.newContext({
       viewport: { width: 1440, height: 1000 },
     }),
     page = await context.newPage();
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
+  page.on('response', async (response) => {
+    const parsed = new URL(response.url());
+    if (
+      parsed.pathname !== '/auth/v1/token' ||
+      parsed.searchParams.get('grant_type') !== 'password'
+    )
+      return;
+    try {
+      const payload = response.request().postDataJSON() as {
+        email?: string;
+        password?: string;
+      };
+      const body = response.ok()
+        ? null
+        : ((await response.json()) as { error_code?: unknown; code?: unknown });
+      const code = body?.error_code ?? body?.code;
+      console.log(
+        'AUTH FORM CHECK:',
+        JSON.stringify({
+          status: response.status(),
+          fieldsMatch:
+            payload.email === a.email && payload.password === a.password,
+          code:
+            typeof code === 'string' && /^[a-z_]{1,60}$/.test(code)
+              ? code
+              : null,
+        }),
+      );
+    } catch {
+      console.log('AUTH FORM CHECK: response unavailable');
+    }
+  });
   await page.goto(base + '/backtest');
   await expect(page).toHaveURL(/\/login\?next=/);
   assert(

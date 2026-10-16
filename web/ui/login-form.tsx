@@ -35,6 +35,7 @@ export function LoginForm() {
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState('');
   async function submit(google = false) {
+    if (!ready || busy) return;
     setBusy(true);
     setMessage('');
     try {
@@ -143,6 +144,7 @@ export function LoginForm() {
                   : 'Đăng nhập để tiếp tục hành trình đầu tư của bạn.'}
             </p>
             <form
+              aria-busy={!ready || busy}
               onSubmit={(e) => {
                 e.preventDefault();
                 void submit();
@@ -156,7 +158,7 @@ export function LoginForm() {
                 autoComplete="email"
                 placeholder="ban@example.com"
                 value={email}
-                disabled={busy}
+                disabled={busy || !ready}
                 onChange={(e) => setEmail(e.target.value)}
               />
               {mode !== 'reset' && (
@@ -177,7 +179,7 @@ export function LoginForm() {
                           : 'Nhập mật khẩu của bạn'
                       }
                       value={password}
-                      disabled={busy}
+                      disabled={busy || !ready}
                       onChange={(e) => setPassword(e.target.value)}
                     />
                     <button
@@ -188,7 +190,7 @@ export function LoginForm() {
                       }
                       aria-pressed={showPassword}
                       onClick={() => setShowPassword(!showPassword)}
-                      disabled={busy}
+                      disabled={busy || !ready}
                     >
                       <svg
                         viewBox="0 0 24 24"
@@ -213,14 +215,18 @@ export function LoginForm() {
                   <button
                     type="button"
                     className="login-text-button"
-                    disabled={busy}
+                    disabled={busy || !ready}
                     onClick={() => switchMode('reset')}
                   >
                     Quên mật khẩu?
                   </button>
                 </div>
               )}
-              <button type="submit" className="login-submit" disabled={busy}>
+              <button
+                type="submit"
+                className="login-submit"
+                disabled={busy || !ready}
+              >
                 {busy
                   ? 'Đang xử lý…'
                   : mode === 'signup'
@@ -241,7 +247,7 @@ export function LoginForm() {
                 <button
                   type="button"
                   className="login-google"
-                  disabled={busy}
+                  disabled={busy || !ready}
                   onClick={() => void submit(true)}
                 >
                   <svg
@@ -280,7 +286,7 @@ export function LoginForm() {
               <button
                 type="button"
                 className="login-text-button"
-                disabled={busy}
+                disabled={busy || !ready}
                 onClick={() =>
                   switchMode(mode === 'login' ? 'signup' : 'login')
                 }
@@ -289,7 +295,7 @@ export function LoginForm() {
               </button>
             </p>
             <p className="login-message" role="status" aria-live="polite">
-              {message}
+              {message || (!ready ? 'Đang chuẩn bị đăng nhập…' : '')}
             </p>
           </div>
           <Link className="login-install-link" href="/install">

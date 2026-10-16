@@ -52,6 +52,8 @@ Graham/Buffett và giả định DCF giữ cơ chế lưu Supabase/RLS. Thêm `r
 
 ## Kiểm chứng
 
+Kiểm tra production phát hiện form login có thể nhận thao tác trước khi React/Auth khởi tạo, khiến giá trị DOM và request không khớp. Form nay disabled từ HTML ban đầu đến khi Auth sẵn sàng. Browser test kiểm tra HTML không JavaScript và đăng nhập thật; log chẩn đoán chỉ có HTTP/code và boolean khớp trường, không ghi credential/token.
+
 `npm run verify` gồm các phép tính tay (+10%, +20%/−10%/0%, chỉ số +5%), mẫu thiếu/0, SQL cuối tháng/next-open/index/calendar gap, snapshot bất biến, RLS A/B, rate limit 429 và cache không chạm dữ liệu cá nhân. Fixture chỉ chạy PostgreSQL riêng, không nhập thị trường giả vào production.
 
 `npm run verify:backtest:browser` tạo hai tài khoản thử thật, kiểm tra login gate/backtest thiếu dữ liệu đúng, đối chiếu diagnostic với giá DB, lưu risk trên UI và kiểm tra RLS, mobile 390px/theme; tự xóa người dùng thử. Production: `MARKET_APP_URL=https://vn-stock-analyzer.manhhuong.workers.dev npm run verify:backtest:browser`. Chưa đủ dữ liệu để coi các fixture là backtest lợi nhuận thật của chiến lược.
