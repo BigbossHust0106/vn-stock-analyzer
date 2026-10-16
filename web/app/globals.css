@@ -3152,3 +3152,43 @@ button:disabled {
     font-size: 16px;
   }
 }
+
+.stock-export {
+  margin: 16px 0;
+}
+.export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+}
+.stock-export-dialog {
+  width: min(900px, calc(100vw - 24px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: clamp(16px, 3vw, 28px);
+  color: var(--text);
+  background: var(--panel);
+}
+.stock-export-dialog::backdrop {
+  background: rgb(15 23 42 / 65%);
+}
+.stock-export-dialog textarea {
+  display: block;
+  width: 100%;
+  min-height: 240px;
+  margin: 12px 0;
+  padding: 12px;
+  font-size: 16px;
+  resize: vertical;
+  color: inherit;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.stock-export-dialog h2 {
+  overflow-wrap: anywhere;
+}

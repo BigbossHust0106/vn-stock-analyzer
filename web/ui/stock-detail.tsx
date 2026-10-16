@@ -1,6 +1,7 @@
 'use client';
 import { pollVisible } from '../lib/polling';
 import Link from 'next/link';
+import { StockExport } from './stock-export';
 import { StockNews } from './stock-news';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -154,6 +155,7 @@ function DetailContent({ symbol }: { symbol: string }) {
           Thử đầu tư {symbol} bằng vốn ảo ↗
         </Link>
       </p>
+      <StockExport detail={data} />
       <div className="quote-summary">
         <div>
           <span data-testid="display-price-label">
