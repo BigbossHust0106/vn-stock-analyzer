@@ -29,7 +29,7 @@ export async function apiRateLimit(
       );
     if (
       env.ANALYSIS_RATE_LIMIT &&
-      ['/v1/backtest', '/v1/financials', '/v1/paper'].some((p) =>
+      ['/v1/backtest', '/v1/financials', '/v1/paper', '/v1/agent'].some((p) =>
         url.pathname.startsWith(p),
       ) &&
       !(await env.ANALYSIS_RATE_LIMIT.limit({ key: 'analysis:' + ip })).success

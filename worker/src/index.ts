@@ -1,3 +1,5 @@
+import { agentResponse } from './api/agent';
+import type { AgentBinding } from './agent/model';
 import { quotesResponse } from './api/quotes';
 import { notificationsResponse } from './api/notifications';
 import { paperResponse } from './api/paper';
@@ -22,6 +24,7 @@ import { healthResponse } from './api/health';
 import { canIngest, vietnamDate } from '../../modules/market/calendar';
 import { VpsProvider } from '../../modules/providers/vps-provider';
 export interface Env extends ProviderConfig, NewsConfig, AlertEmailConfig {
+  AI?: AgentBinding;
   API_RATE_LIMIT?: WorkerBindings['API_RATE_LIMIT'];
   ANALYSIS_RATE_LIMIT?: WorkerBindings['ANALYSIS_RATE_LIMIT'];
   SYNC_SYMBOLS?: string;
@@ -110,6 +113,8 @@ export default {
       if (systemJob) return systemJob;
       const paper = await paperResponse(request, env);
       if (paper) return paper;
+      const agent = await agentResponse(request, env);
+      if (agent) return agent;
       const notifications = await notificationsResponse(request, env);
       if (notifications) return notifications;
       const status = await systemStatusResponse(request, env);

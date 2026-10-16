@@ -3,6 +3,7 @@
   "name": "vn-stock-analyzer",
   "main": "worker/src/index.ts",
   "keep_vars": true,
+  "ai": { "binding": "AI" },
   "ratelimits": [
     {
       "name": "API_RATE_LIMIT",

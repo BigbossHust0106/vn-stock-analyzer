@@ -1,3 +1,4 @@
+import { testAgentConcurrency } from './test-agent-concurrency.mjs';
 import { spawnSync } from 'node:child_process';
 import { testPaperConcurrency } from './test-paper-concurrency.mjs';
 import { randomUUID } from 'node:crypto';
@@ -147,9 +148,11 @@ export async function rls() {
     sqlFile(name, 'tests/database/rankings.sql');
     sqlFile(name, 'tests/database/news.sql');
     sqlFile(name, 'tests/database/alerts.sql');
+    sqlFile(name, 'tests/database/agent.sql');
     sqlFile(name, 'tests/database/backtest.sql');
     sqlFile(name, 'tests/database/paper.sql');
     await testPaperConcurrency(name);
+    await testAgentConcurrency(name);
   } finally {
     cleanup();
   }

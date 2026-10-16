@@ -69,6 +69,9 @@ export function AuthNav() {
           <Link href="/huong-dan" onClick={() => setOpen(false)}>
             Hướng dẫn sử dụng
           </Link>
+          <Link href="/agent" onClick={() => setOpen(false)}>
+            Trợ lý AI · Phân tích & theo dõi
+          </Link>
           <Link href="/install" onClick={() => setOpen(false)}>
             Cài ứng dụng điện thoại
           </Link>

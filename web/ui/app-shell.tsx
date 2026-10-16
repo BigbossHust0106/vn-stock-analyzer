@@ -79,6 +79,15 @@ export function AppShell({ children }: { children: ReactNode }) {
         <span>VN Stock · HOSE / HNX / UPCOM</span>
         <p>Chỉ mang tính tham khảo, không phải lời khuyên đầu tư.</p>
       </footer>
+      {pathname !== '/agent' && (
+        <Link
+          className="agent-launcher"
+          href="/agent"
+          aria-label="Mở trợ lý AI"
+        >
+          ✦ Trợ lý AI
+        </Link>
+      )}
       <MobileNav />
     </RequireAuth>
   );

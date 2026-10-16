@@ -7,6 +7,7 @@ export function safeNext(value: string | null): string {
     value === '/alerts' ||
     value === '/status' ||
     value === '/backtest' ||
+    value === '/agent' ||
     value === '/paper' ||
     (value !== null && /^\/paper\?symbol=[A-Z0-9]{3,12}$/.test(value)) ||
     (value !== null &&

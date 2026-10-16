@@ -3035,3 +3035,120 @@ button:disabled {
     columns: 1;
   }
 }
+
+/* Authenticated AI workspace; touch targets and safe-area share the PWA shell. */
+.agent-page {
+  max-width: 980px;
+  margin: auto;
+}
+.agent-launcher {
+  position: fixed;
+  right: 20px;
+  bottom: 24px;
+  z-index: 45;
+  border-radius: 28px;
+  padding: 12px 18px;
+  background: linear-gradient(120deg, #376f5c, #765cab);
+  color: white;
+  box-shadow: 0 8px 25px #376f5c33;
+  font-weight: 700;
+  text-decoration: none;
+}
+.agent-privacy,
+.agent-conversation,
+.agent-composer {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+  margin: 18px 0;
+  background: var(--panel);
+}
+.agent-examples {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+.agent-examples button,
+.agent-composer button,
+.agent-proposal button {
+  min-height: 44px;
+  border-radius: 12px;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+.agent-turn {
+  padding: 18px;
+  margin: 14px 0;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+.agent-user {
+  background: color-mix(in srgb, #addec3 20%, transparent);
+  margin-left: 12%;
+}
+.agent-assistant {
+  background: color-mix(in srgb, #cec1ef 12%, transparent);
+  margin-right: 4%;
+}
+.agent-text {
+  white-space: pre-wrap;
+  line-height: 1.75;
+}
+.agent-proposal {
+  padding: 16px;
+  border: 2px solid #93b9a3;
+  border-radius: 14px;
+  background: color-mix(in srgb, #addec3 12%, transparent);
+}
+.agent-proposal button,
+.agent-composer button {
+  margin-right: 8px;
+  margin-top: 8px;
+}
+.agent-sources {
+  padding-left: 20px;
+  line-height: 1.8;
+}
+.agent-sources small {
+  opacity: 0.75;
+}
+.agent-composer label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.agent-composer textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: inherit;
+}
+@media (max-width: 650px) {
+  .agent-launcher {
+    bottom: calc(86px + env(safe-area-inset-bottom));
+    right: 14px;
+  }
+  .agent-conversation,
+  .agent-composer {
+    padding: 12px;
+  }
+  .agent-turn {
+    padding: 12px;
+  }
+  .agent-user {
+    margin-left: 5%;
+  }
+  .agent-assistant {
+    margin-right: 0;
+  }
+  .agent-composer textarea {
+    font-size: 16px;
+  }
+}
