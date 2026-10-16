@@ -1,0 +1,4 @@
+TOP10 BROWSER PASS: all three horizons capped at10 unique rows despite23+23 fixture; excluded table absent; mobile390/desktop1440; no JS errors.
+PRICE POLLING BROWSER PASS: independently expected21000/+5% to22000/+10% without reload; score90 unchanged; upstream failure retains22000 and warns; no physical exchange tick claimed.
+PWA BROWSER PASS: HTTPS/localhost manifest and PNGs, iOS metadata, SW controls page, CacheStorage contains public offline assets only, offline API requires network, navigation shows offline fallback, install prompt UI (synthetic dismissal).
+PWA MOBILE PASS: real Supabase Auth, bottom navigation/search focus/settings, offline/online banner, install menu, 390px without overflow or JS errors. Physical Android/iPhone installation not performed.

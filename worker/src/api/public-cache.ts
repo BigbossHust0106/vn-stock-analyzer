@@ -11,7 +11,7 @@ export async function publicReadCache(
     request.method !== 'GET' ||
     request.headers.has('Authorization') ||
     request.headers.has('Cookie') ||
-    !['/v1/backtest', '/v1/rankings', '/v1/stocks'].includes(url.pathname)
+    !['/v1/backtest', '/v1/stocks'].includes(url.pathname)
   )
     return load();
   url.searchParams.sort();

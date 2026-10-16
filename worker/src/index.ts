@@ -1,3 +1,4 @@
+import { quotesResponse } from './api/quotes';
 import { notificationsResponse } from './api/notifications';
 import { backtestResponse } from './api/backtest';
 import { publicReadCache } from './api/public-cache';
@@ -18,10 +19,7 @@ import { marketResponse } from './api/market';
 import type { ProviderConfig } from '../../modules/providers/registry';
 import { healthResponse } from './api/health';
 import { canIngest, vietnamDate } from '../../modules/market/calendar';
-import {
-  validatedSymbols,
-  VpsProvider,
-} from '../../modules/providers/vps-provider';
+import { VpsProvider } from '../../modules/providers/vps-provider';
 export interface Env extends ProviderConfig, NewsConfig, AlertEmailConfig {
   API_RATE_LIMIT?: WorkerBindings['API_RATE_LIMIT'];
   ANALYSIS_RATE_LIMIT?: WorkerBindings['ANALYSIS_RATE_LIMIT'];
@@ -156,56 +154,14 @@ export default {
       if (financial) return financial;
       const market = await marketResponse(request, env, context);
       if (market) return market;
-      if (url.pathname !== '/v1/quotes')
-        if (env.ASSETS && !url.pathname.startsWith('/v1/'))
-          return env.ASSETS.fetch(request);
-      if (url.pathname !== '/v1/quotes')
-        return Response.json(
-          { error: 'Không tìm thấy' },
-          { status: 404, headers },
-        );
-      let symbols: string[];
-      try {
-        symbols = validatedSymbols(
-          (url.searchParams.get('symbols') ?? '').split(','),
-        );
-      } catch {
-        return Response.json(
-          { error: 'Cần 1–50 mã hợp lệ, ngăn cách bằng dấu phẩy' },
-          { status: 400, headers },
-        );
-      }
-      if (!env.SUPABASE_PUBLISHABLE_KEY)
-        return Response.json(
-          { error: 'Nguồn dữ liệu chưa được cấu hình' },
-          { status: 503, headers },
-        );
-      // Requests công khai chỉ dùng publishable key: không dùng service_role để đọc dữ liệu người dùng.
-      try {
-        const db = createClient(supabaseUrl, env.SUPABASE_PUBLISHABLE_KEY, {
-          auth: { persistSession: false, autoRefreshToken: false },
-        });
-        const { data, error } = await db
-          .from('stocks')
-          .select('symbol,prices_current(*)')
-          .in('symbol', symbols);
-        if (error) throw new Error('Read failed');
-        return Response.json(
-          {
-            data,
-            notice:
-              'Snapshot có thể cũ; fetched_at không phải thời gian sàn. lot × 10 theo đối chiếu 1 mã/1 ngày; lastVolume và price basis chưa xác minh.',
-            disclaimer:
-              'Chỉ mang tính tham khảo, không phải lời khuyên đầu tư.',
-          },
-          { headers: { ...headers, 'Cache-Control': 'public, max-age=15' } },
-        );
-      } catch {
-        return Response.json(
-          { error: 'Không đọc được nguồn dữ liệu' },
-          { status: 502, headers },
-        );
-      }
+      const quotes = await quotesResponse(request, env);
+      if (quotes) return quotes;
+      if (env.ASSETS && !url.pathname.startsWith('/v1/'))
+        return env.ASSETS.fetch(request);
+      return Response.json(
+        { error: 'Không tìm thấy' },
+        { status: 404, headers },
+      );
     });
     const secured = new Response(response.body, response);
     secured.headers.set('X-Content-Type-Options', 'nosniff');
@@ -227,6 +183,7 @@ export default {
         '*/5 * * * *',
         '*/30 * * * *',
         '*/5 2-8 * * 1-5',
+        '* 2-8 * * 1-5',
         '15 8 * * 1-5',
         '0 9 * * 1-5',
         '30 8 * * 1-5',

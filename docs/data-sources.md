@@ -348,3 +348,15 @@ kỳ báo cáo mới và số năm. Coverage là tỷ lệ tiêu chí có dữ l
 đầu tư, mức kiểm toán hoặc xác suất lợi nhuận. Không nới điều kiện Top10 để lấp chỗ trống.
 Tin theo mã chỉ nhận bài nhắc trực tiếp mã trong chế độ mặc định; tin ngành/thị
 trường phải mở thêm, không coi cảm xúc vĩ mô là nhận định riêng từng doanh nghiệp.
+
+## Cập nhật 16/10/2026 — polling snapshot giá
+
+[Xem sửa Top10, luồng giá và bằng chứng live](live-prices-top10-2026-10-16.md).
+VPS `getliststockdata` được gọi lại thực tế: HTTP200 xen kẽ503; batch FPT/VNM/HPG
+có phản hồi200 khoảng2,3 giây, một request FPT mới lấy/lưu thành công khoảng4,2
+giây. Đây là độ trễ quan sát, không SLA. Không thêm endpoint mới hay tự nhận
+`fetchedAt` là timestamp sàn. Thêm sampling snapshot độc lập với chốt phiên đã
+xác minh; lịch trống vẫn không được tạo dữ liệu `prices_daily` hoặc chứng nhận
+phiên. Cache quotes trong luồng live5 giây; timeout12 giây; browser kiểm tra10 giây,
+cron lấy mẫu mỗi phút trong universe cấu hình. Nguồn lỗi phải giữ timestamp cũ và
+báo gián đoạn, không làm mới số liệu bằng fixture.

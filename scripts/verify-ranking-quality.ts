@@ -99,17 +99,20 @@ if (process.argv.includes('--browser')) {
     await page
       .getByLabel('Kỳ xếp hạng', { exact: true })
       .selectOption('quarter');
-    await expect(page.getByTestId('unranked-quarter-DPR')).toBeVisible();
-    await expect(page.getByTestId('unranked-quarter-DPR')).toContainText('DCF');
+    // Audit candidates are no longer rendered beneath Top10, even when no row qualifies.
+    await expect(page.getByTestId('ranking-quarter')).toContainText('Top 10');
+    await expect(page.locator('[data-testid^="unranked-"]')).toHaveCount(0);
+    assert(
+      (await page.locator('[data-testid="top10-table"] tbody tr').count()) <=
+        10,
+      'Top10 overflow',
+    );
     await mkdir('.cache/screenshots', { recursive: true });
     await page.screenshot({
       path: '.cache/screenshots/ranking-quality-desktop.png',
       fullPage: true,
     });
-    await page
-      .getByTestId('unranked-quarter-DPR')
-      .getByRole('link', { name: 'DPR', exact: true })
-      .click();
+    await page.goto(base + '/stocks?symbol=DPR');
     await expect(page.getByTestId('comparison-status')).toBeVisible({
       timeout: 300000,
     });
@@ -149,7 +152,7 @@ if (process.argv.includes('--browser')) {
       'Browser JavaScript error count: ' + errors.length,
     );
     console.log(
-      'QUALITY BROWSER PASS: DPR actual values and PDF links; temporary score warning; unknown DCF not fabricated; unranked queue; 390px; no JS errors',
+      'QUALITY BROWSER PASS: DPR actual values and PDF links; temporary score warning; unknown DCF not fabricated; audit candidates excluded from Top10; 390px; no JS errors',
     );
   } finally {
     try {

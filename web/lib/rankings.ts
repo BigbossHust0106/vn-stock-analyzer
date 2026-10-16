@@ -83,7 +83,21 @@ export async function fetchRankings(
     !Array.isArray(result.data)
   )
     throw new Error('Dữ liệu xếp hạng không hợp lệ.');
-  return result as RankingsResult;
+  const validated = result as RankingsResult;
+  // Defensive UI boundary: an older/misconfigured API cannot render 23 ranked rows.
+  const seen = new Set<string>();
+  return {
+    ...validated,
+    data: validated.data
+      .filter((row) => {
+        if (seen.has(row.stock_id) || seen.has(row.symbol)) return false;
+        seen.add(row.stock_id);
+        seen.add(row.symbol);
+        return true;
+      })
+      .slice(0, 10)
+      .map((row, i) => ({ ...row, position: i + 1 })),
+  };
 }
 export function formatNumber(value: number | null | undefined, digits = 0) {
   return value === null ||

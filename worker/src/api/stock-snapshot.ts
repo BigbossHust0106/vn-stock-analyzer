@@ -6,6 +6,7 @@ import type {
 } from '../../../modules/providers/data-provider';
 import { VpsProvider } from '../../../modules/providers/vps-provider';
 import { KbsProvider } from '../../../modules/providers/kbs-provider';
+import { liveQuotes, persistQuotes } from '../live-quotes';
 import { defaultHttpOptions } from '../../../modules/providers/http';
 import { displayPrice } from '../../../modules/market/display-price';
 import { vietnamDate, yearsBefore } from '../../../modules/market/calendar';
@@ -17,8 +18,6 @@ type Stock = {
   source: string;
 };
 const refreshes = new Map<string, number>();
-let quoteTransport: typeof fetch | null = null;
-let quotes: VpsProvider;
 let historyTransport: typeof fetch | null = null;
 let vpsHistory: VpsProvider;
 let kbsHistory: KbsProvider;
@@ -30,17 +29,6 @@ function historyProvider(source: string) {
     kbsHistory = new KbsProvider(fetch, options);
   }
   return source === 'KBS' ? kbsHistory : vpsHistory;
-}
-function quoteProvider() {
-  if (quoteTransport !== fetch) {
-    quoteTransport = fetch;
-    quotes = new VpsProvider(fetch, {
-      ...defaultHttpOptions,
-      retries: 0,
-      timeoutMs: 5000,
-    });
-  }
-  return quotes;
 }
 export async function stockSnapshot(
   db: SupabaseClient,
@@ -136,25 +124,8 @@ export async function stockSnapshot(
       })
     : null;
   const updateQuote = async () => {
-    const q = (await quoteProvider().fetchQuotes([stock.symbol]))[0]!;
-    if (writer) {
-      const { error } = await writer.rpc('ingest_current_quotes', {
-        rows: [
-          {
-            symbol: stock.symbol,
-            reference_vnd: q.referenceVnd,
-            ceiling_vnd: q.ceilingVnd,
-            floor_vnd: q.floorVnd,
-            last_price_vnd: q.lastPriceVnd,
-            bid3_price_vnd: q.bid3PriceVnd,
-            last_volume_raw: q.volumeRaw.lastVolume,
-            lot_raw: q.volumeRaw.lot,
-            fetched_at: q.fetchedAt,
-          },
-        ],
-      });
-      if (error) throw new Error('Quote persistence unavailable');
-    }
+    const q = (await liveQuotes([stock.symbol]))[0]!;
+    if (writer) await persistQuotes(writer, [q]);
     return q;
   };
   const updateHistory = async () => {
@@ -255,8 +226,8 @@ export async function stockSnapshot(
       } catch {
         notices.push('Nguồn quote tạm chậm; đang dùng giá đã lưu.');
       }
-    } else if (!quote || Date.now() - Date.parse(quote.fetchedAt) > 15000)
-      background('q:' + stock.symbol, 30000, updateQuote);
+    } else if (!quote || Date.now() - Date.parse(quote.fetchedAt) > 5000)
+      background('q:' + stock.symbol, 5000, updateQuote);
     if (!close && quote?.lastPriceVnd == null) {
       try {
         close = await updateClose();
@@ -275,6 +246,14 @@ export async function stockSnapshot(
     }
   } else if (Date.now() - Date.parse(bars.at(-1)!.fetchedAt) > 900000)
     background('h:' + source + stock.symbol, 900000, updateHistory);
+  if (
+    view === 'summary' &&
+    quote &&
+    Date.now() - Date.parse(quote.fetchedAt) > 60000
+  )
+    notices.push(
+      'Chưa nhận được snapshot giá mới trong hơn 1 phút; xem thời điểm nhận, không coi giá lưu là giá trực tiếp.',
+    );
   return Response.json(
     {
       stock,
@@ -294,7 +273,7 @@ export async function stockSnapshot(
     {
       headers: {
         'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'public, max-age=10, stale-while-revalidate=30',
+        'Cache-Control': view === 'summary' ? 'no-store' : 'public, max-age=60',
         'X-Content-Type-Options': 'nosniff',
       },
     },

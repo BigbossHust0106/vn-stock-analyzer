@@ -106,7 +106,7 @@ export async function stockDetail(
   if (
     !fresh &&
     cached &&
-    Date.now() - cached.at < (view === 'history' ? 60000 : 15000)
+    Date.now() - cached.at < (view === 'history' ? 60000 : 0)
   )
     return cached.data;
   const body = await marketJson(
@@ -114,7 +114,7 @@ export async function stockDetail(
       encodeURIComponent(symbol) +
       (view === 'full' ? '' : '?view=' + view + (fresh ? '&refresh=1' : '')),
     signal,
-    fresh ? 'no-store' : undefined,
+    view === 'summary' || fresh ? 'no-store' : undefined,
   );
   if (
     !record(body) ||

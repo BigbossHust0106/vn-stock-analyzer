@@ -1,3 +1,4 @@
+import { sampleQuotes } from '../quote-sampling';
 import type { Env } from '../index';
 import { serviceDatabase } from './database';
 import { runJob, type JobOutcome, type Job } from './runner';
@@ -72,6 +73,7 @@ export async function runScheduledJobs(
       '*/5 * * * *',
       '*/30 * * * *',
       '*/5 2-8 * * 1-5',
+      '* 2-8 * * 1-5',
       '15 8 * * 1-5',
       '0 9 * * 1-5',
       '30 8 * * 1-5',
@@ -91,7 +93,17 @@ export async function runScheduledJobs(
     failed ||= result.state === 'failed';
     return result;
   };
-  if (cron === '*/30 * * * *') {
+  if (cron === '* 2-8 * * 1-5') {
+    const sampled = await logJob('prices', () => sampleQuotes(env, stamp));
+    if (
+      (sampled.state === 'ok' || sampled.state === 'degraded') &&
+      new Date(stamp).getUTCMinutes() % 5 === 0
+    )
+      await logJob('rankings', async () => {
+        await syncRankings(env, Date.now());
+        return { state: 'ok' };
+      });
+  } else if (cron === '*/30 * * * *') {
     const result = await logJob('news', async () => {
       const news = await syncNews(env, stamp);
       if (news.skipped) return { state: 'skipped' };

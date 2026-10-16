@@ -14,7 +14,7 @@ export async function rankingsResponse(
   if (url.pathname !== '/v1/rankings') return null;
   const headers = {
     'Access-Control-Allow-Origin': '*',
-    'Cache-Control': 'public, max-age=15',
+    'Cache-Control': 'no-store',
     'X-Content-Type-Options': 'nosniff',
   };
   const horizon = url.searchParams.get('horizon') ?? 'day',
@@ -96,8 +96,15 @@ export async function rankingsResponse(
       row.explanation.rankingEligibility.quoteVerified &&
       row.explanation.rankingEligibility.financialCoverage === 1 &&
       row.explanation.rankingEligibility.blockers.length === 0;
+    const seen = new Set<string>();
     const data = mixed
       .filter(eligible)
+      .filter((row) => {
+        if (seen.has(row.stock_id) || seen.has(row.symbol)) return false;
+        seen.add(row.stock_id);
+        seen.add(row.symbol);
+        return true;
+      })
       .sort((a, b) => b.score! - a.score! || a.symbol.localeCompare(b.symbol))
       .slice(0, 10)
       .map((row, i) => ({ ...row, position: i + 1 }));

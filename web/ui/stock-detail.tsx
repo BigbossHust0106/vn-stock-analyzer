@@ -1,4 +1,5 @@
 'use client';
+import { pollVisible } from '../lib/polling';
 import { StockNews } from './stock-news';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -63,13 +64,15 @@ function DetailContent({ symbol }: { symbol: string }) {
           if (!controller.signal.aborted) setUpdating(false);
         });
     };
-    void load(refresh > 0);
-    const timer = window.setInterval(() => {
-      if (document.visibilityState === 'visible') void load();
-    }, 30000);
+    let initial = true;
+    const stop = pollVisible(async () => {
+      const fresh = initial && refresh > 0;
+      initial = false;
+      await load(fresh);
+    });
     return () => {
       controller.abort();
-      window.clearInterval(timer);
+      stop();
     };
   }, [symbol, refresh]);
   useEffect(() => {
@@ -204,7 +207,7 @@ function DetailContent({ symbol }: { symbol: string }) {
               dateStyle: 'short',
               timeStyle: 'medium',
             }).format(new Date(q.fetchedAt)) +
-            ' (giờ Việt Nam); chưa có timestamp sàn.'
+            ' (giờ Việt Nam); chưa có timestamp sàn. Tự kiểm tra mỗi 10 giây khi trang đang mở.'
           : 'Không lấy được quote hiện tại.'}{' '}
         {history
           ? `Lịch sử: ${history.historySource} · ${history.bars.length} phiên`

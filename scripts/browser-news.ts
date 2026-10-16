@@ -146,7 +146,11 @@ try {
     ),
     'Partial data entered Top10',
   );
-  await expect(page.getByTestId('ranking-day')).toContainText('Tâm lý tin tức');
+  await expect(page.getByTestId('ranking-day')).toContainText('Top 10');
+  assert(
+    (await page.locator('[data-testid="top10-table"] tbody tr').count()) <= 10,
+    'Top10 overflow',
+  );
   const zero = page.waitForResponse(
     (r) =>
       r.url().includes('/v1/rankings?') &&

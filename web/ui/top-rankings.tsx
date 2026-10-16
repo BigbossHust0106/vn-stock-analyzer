@@ -9,6 +9,8 @@ import {
   type RankingsResult,
 } from '../lib/rankings';
 import { priceChange, type Horizon } from '../../modules/scoring/rankings';
+import { pollVisible } from '../lib/polling';
+import { useLivePrices } from './use-live-prices';
 import { AddWatchButton } from './add-watch-button';
 const strategyLabels: Record<string, string> = {
   momentum: 'Động lượng',
@@ -41,9 +43,9 @@ function RankingTable({
   const [result, setResult] = useState<RankingsResult | null>(null),
     [error, setError] = useState(''),
     [loading, setLoading] = useState(true);
+  const live = useLivePrices(result?.data.map((row) => row.symbol) ?? []);
   useEffect(() => {
     let stopped = false,
-      first = true,
       controller: AbortController | undefined;
     const update = async () => {
       controller?.abort();
@@ -67,19 +69,14 @@ function RankingTable({
       } finally {
         if (!stopped) {
           setLoading(false);
-          first = false;
         }
       }
     };
-    // Xóa kết quả bộ lọc cũ ngay khi đổi bộ lọc.
-    void update();
-    const timer = window.setInterval(() => {
-      if (!first && document.visibilityState === 'visible') void update();
-    }, 30000);
+    const stop = pollVisible(update, 60000);
     return () => {
       stopped = true;
       controller?.abort();
-      window.clearInterval(timer);
+      stop();
     };
   }, [horizon, exchange, sector, cap, onSectors, newsWeight]);
   return (
@@ -88,7 +85,7 @@ function RankingTable({
         <h2>Top 10 · {horizonLabels[horizon]}</h2>
         <span>
           {result?.run
-            ? `Chấm ${formatTime(result.run.computed_at)} · ${result.run.universe_count} mã có BCTC`
+            ? `Điểm tính lúc ${formatTime(result.run.computed_at)} · ${result.data.length}/10 mã đạt điều kiện`
             : 'Chưa có lượt chấm'}
         </span>
       </div>
@@ -96,6 +93,11 @@ function RankingTable({
         <p role="alert">
           {error}
           {result ? ' Đang hiển thị bản đã tải trước đó.' : ''}
+        </p>
+      )}
+      {live.message && (
+        <p className="data-timestamp" data-testid="ranking-live-status">
+          {live.message} Điểm và thứ hạng có thời điểm tính riêng.
         </p>
       )}
       {loading && <p role="status">Đang tải dữ liệu…</p>}
@@ -107,7 +109,7 @@ function RankingTable({
       )}
       {result && result.data.length > 0 && (
         <div className="table-scroll">
-          <table className="ranking-table">
+          <table className="ranking-table" data-testid="top10-table">
             <thead>
               <tr>
                 <th>Hạng / mã</th>
@@ -119,7 +121,16 @@ function RankingTable({
               </tr>
             </thead>
             <tbody>
-              {result.data.map((row) => {
+              {result.data.map((stored) => {
+                const q = live.prices[stored.symbol];
+                const row = q
+                  ? {
+                      ...stored,
+                      price_vnd: q.last_price_vnd,
+                      reference_vnd: q.reference_vnd,
+                      quote_fetched_at: q.fetched_at,
+                    }
+                  : stored;
                 const change = priceChange(row.price_vnd, row.reference_vnd);
                 return (
                   <tr key={row.stock_id}>
@@ -159,8 +170,11 @@ function RankingTable({
                         </small>
                       )}
                       <small>
-                        {row.explanation.quoteSource ?? 'VPS'} ·{' '}
-                        {formatTime(row.quote_fetched_at)}
+                        {q
+                          ? 'VPS · phản hồi gần nhất'
+                          : (row.explanation.quoteSource ??
+                            'VPS · snapshot')}{' '}
+                        · {formatTime(row.quote_fetched_at)}
                       </small>
                     </td>
                     <td>
@@ -237,74 +251,6 @@ function RankingTable({
           </table>
         </div>
       )}
-      {!!result?.excluded?.length && (
-        <details className="ranking-audit" open={result.data.length === 0}>
-          <summary>
-            {result.excluded.length} mã chưa đủ bằng chứng để xếp hạng
-          </summary>
-          <p>
-            Các mã dưới đây vẫn có thể tra cứu và theo dõi. Không gán thứ hạng
-            khi thiếu đầu vào quan trọng; ưu tiên mã có nhiều dữ liệu hơn, không
-            coi đó là thứ hạng đầu tư.
-          </p>
-          <div className="table-scroll">
-            <table className="ranking-table">
-              <thead>
-                <tr>
-                  <th>Mã / doanh nghiệp</th>
-                  <th>Phần còn thiếu</th>
-                  <th>Theo dõi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {result.excluded.map((row) => (
-                  <tr
-                    key={row.stock_id}
-                    data-testid={'unranked-' + horizon + '-' + row.symbol}
-                  >
-                    <td>
-                      <Link href={'/stocks?symbol=' + row.symbol}>
-                        <strong>{row.symbol}</strong>
-                      </Link>
-                      <span>{row.name}</span>
-                      <small>
-                        {row.exchange} · Bao phủ{' '}
-                        {formatNumber(row.explanation.coverage * 100)}% trọng số
-                      </small>
-                    </td>
-                    <td>
-                      <p>
-                        Tâm lý tin tức:{' '}
-                        {row.explanation.strategies.news === null ||
-                        row.explanation.strategies.news === undefined
-                          ? 'không đủ dữ liệu'
-                          : formatNumber(
-                              row.explanation.strategies.news,
-                              1,
-                            )}{' '}
-                        · trọng số {Math.round(newsWeight * 100)}%
-                      </p>
-                      {(
-                        row.explanation.rankingEligibility?.blockers ?? [
-                          'Chưa được kiểm tra theo điều kiện dữ liệu đầy đủ.',
-                        ]
-                      ).map((reason) => (
-                        <p key={reason}>{reason}</p>
-                      ))}
-                    </td>
-                    <td>
-                      <AddWatchButton
-                        stockId={row.stock_id}
-                        symbol={row.symbol}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </details>
-      )}
       {result && result.data.length > 0 && result.data.length < 10 && (
         <p>
           Chỉ có {result.data.length} mã đủ điều kiện; bảng không bổ sung mã
@@ -337,8 +283,9 @@ export function TopRankings() {
       <p>
         Chỉ xếp hạng khi đủ 100% đầu vào của kỳ, tiêu chí tài chính bắt buộc và
         giá giao dịch có bằng chứng thời điểm nguồn. Mã chưa đủ thông tin được
-        liệt kê cùng phần còn thiếu, không dùng điểm tạm để so sánh mã tốt hơn.
-        Giá cập nhật mỗi 30 giây; điểm tính sau lượt đồng bộ.
+        loại khỏi bảng; mỗi kỳ hiển thị tối đa 10 mã, không lấp đủ bằng mã thiếu
+        dữ liệu. Giá tự lấy mỗi 10 giây khi mở trang; bảng điểm kiểm tra lại mỗi
+        phút và ghi rõ thời điểm tính.
       </p>
       <div className="ranking-filters">
         <label>

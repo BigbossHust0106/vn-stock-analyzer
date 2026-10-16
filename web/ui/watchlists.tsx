@@ -1,4 +1,6 @@
 'use client';
+import { useLivePrices } from './use-live-prices';
+import { pollVisible } from '../lib/polling';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { settingsClient } from '../lib/scoring-settings';
@@ -172,6 +174,9 @@ export function Watchlists() {
     [loading, setLoading] = useState(true),
     [loadedKey, setLoadedKey] = useState(''),
     [rename, setRename] = useState('');
+  const live = useLivePrices(
+    loadedKey === selected + horizon ? items.map((item) => item.symbol) : [],
+  );
   useEffect(() => {
     let stopped = false;
     void settingsClient()
@@ -224,13 +229,10 @@ export function Watchlists() {
         if (!stopped) setLoading(false);
       }
     }
-    void load();
-    const timer = window.setInterval(() => {
-      if (document.visibilityState === 'visible') void load();
-    }, 30000);
+    const stop = pollVisible(load, 60000);
     return () => {
       stopped = true;
-      window.clearInterval(timer);
+      stop();
     };
   }, [selected, horizon, revision]);
   async function mutate(action: 'create' | 'rename' | 'delete' | 'add') {
@@ -433,11 +435,25 @@ export function Watchlists() {
       {!lists.length && (
         <p>Tạo danh sách đầu tiên để bắt đầu theo dõi cổ phiếu.</p>
       )}
+      {live.message && <p className="data-timestamp">{live.message}</p>}
       <div className="watch-grid">
         {(loadedKey === selected + horizon ? items : []).map((item) => (
           <WatchItem
             key={selected + item.stock_id}
-            item={item}
+            item={
+              live.prices[item.symbol]
+                ? {
+                    ...item,
+                    price_vnd: live.prices[item.symbol]!.last_price_vnd,
+                    reference_vnd: live.prices[item.symbol]!.reference_vnd,
+                    quote_fetched_at: live.prices[item.symbol]!.fetched_at,
+                    explanation: {
+                      ...item.explanation,
+                      quoteSource: 'VPS · snapshot',
+                    },
+                  }
+                : item
+            }
             listId={selected}
             onChanged={() => setRevision((v) => v + 1)}
           />
