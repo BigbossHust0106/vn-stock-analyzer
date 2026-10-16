@@ -2,6 +2,8 @@ import { documentEvidenceFor } from './document-evidence';
 import {
   parseKbsReport,
   financialData,
+  parseVciCompany,
+  vciOrganCodes,
   type ReportType,
 } from './financial-schema';
 import type { FinancialData } from './financial-types';
@@ -63,15 +65,28 @@ export class KbsProvider implements DataProvider {
           if (parsed.length < 4) break;
         }
       }
-      let ratios: unknown = null;
+      let ratios: unknown = null,
+        organCode = symbol;
       try {
         ratios = await this.http.request(
           `https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/${symbol}/statistics-financial`,
         );
+        // Chỉ gọi thêm endpoint công ty khi ratios dùng organCode khác mã CK.
+        if (vciOrganCodes(ratios).some((code) => code !== symbol))
+          organCode = parseVciCompany(
+            await this.http.request(
+              `https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/${symbol}`,
+            ),
+            symbol,
+          );
       } catch {
         /* Source capability unavailable; no invented values. */
+        ratios = null;
+        missing.push(
+          'Vietcap ratios/organCode chưa xác nhận được; ROIC/số cổ phiếu giữ null.',
+        );
       }
-      const data = financialData(symbol, reports, ratios, now);
+      const data = financialData(symbol, reports, ratios, now, organCode);
       data.documentEvidence = documentEvidenceFor(symbol, now);
       data.notices.push(...missing);
       return data;

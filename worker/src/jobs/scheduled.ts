@@ -5,6 +5,7 @@ import { runJob, type JobOutcome, type Job } from './runner';
 import { syncNews } from '../news/sync';
 import { syncRankings } from '../ranking-sync';
 import { syncMarket } from '../market-sync';
+import { refreshStaleFinancials } from '../financial-sync';
 import { tradingSync } from '../trading-sync';
 import { evaluateWatchlistAlerts } from '../alerts/sync';
 import { deliverAlertEmails } from '../alerts/email';
@@ -60,7 +61,17 @@ export async function runMaintenance(env: Env, stamp: number) {
         : { state: 'ok' };
   });
   const vps = await runJob(db, 'vps', stamp, () => probeVps(db, Date.now()));
-  return { alerts, email, vps };
+  // Chạy cuối: lỗi/giới hạn subrequest của bước BCTC không ảnh hưởng cảnh báo/VPS.
+  const financials = await refreshStaleFinancials(env, stamp)
+    .then((r) => ({
+      state: r.failed.length ? ('degraded' as const) : ('ok' as const),
+      ...r,
+    }))
+    .catch(() => {
+      console.warn('BCTC REFRESH SKIPPED: chưa đọc/ghi được trạng thái BCTC');
+      return { state: 'skipped' as const };
+    });
+  return { alerts, email, vps, financials };
 }
 export async function runScheduledJobs(
   cron: string,

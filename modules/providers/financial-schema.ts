@@ -8,6 +8,8 @@ interface ReportPeriod {
   audited: boolean;
   consolidated: boolean;
   businessType: number;
+  // KBS đôi khi ghi sai PeriodBegin/PeriodEnd của kỳ năm (vd 2025: 202501–202612).
+  periodAnomaly: boolean;
   rows: Map<
     number,
     { value: number | null; name: string; unit: string | null }
@@ -44,8 +46,8 @@ export function parseKbsReport(
       !Number.isInteger(h.YearPeriod) ||
       Number(h.YearPeriod) < 1990 ||
       h.TermCode !== 'N' ||
-      h.PeriodBegin !== `${h.YearPeriod}01` ||
-      h.PeriodEnd !== `${h.YearPeriod}12` ||
+      typeof h.PeriodBegin !== 'string' ||
+      typeof h.PeriodEnd !== 'string' ||
       !Number.isInteger(h.BusinessType) ||
       typeof h.United !== 'string' ||
       typeof h.AuditedStatus !== 'string'
@@ -92,6 +94,8 @@ export function parseKbsReport(
       audited: h.AuditedStatus === 'KT',
       consolidated: h.United === 'HN',
       businessType: Number(h.BusinessType),
+      periodAnomaly:
+        h.PeriodBegin !== `${year}01` || h.PeriodEnd !== `${year}12`,
       rows,
     };
   }).filter((r) => Date.parse(r.publishedAt) <= Date.parse(now));
@@ -101,11 +105,39 @@ interface VciRatio {
   quarter: number;
   shares: number | null;
   roic: number | null;
+  netMargin: number | null;
+}
+// Vietcap trả organCode nội bộ (QNS => QNSC, SAB => SBCO); chỉ nhận ánh xạ khi
+// chính endpoint công ty xác nhận ticker trùng mã được hỏi.
+export function parseVciCompany(payload: unknown, symbol: string): string {
+  if (
+    !record(payload) ||
+    payload.successful !== true ||
+    payload.status !== 200 ||
+    !record(payload.data) ||
+    payload.data.ticker !== symbol ||
+    typeof payload.data.organCode !== 'string' ||
+    !/^[A-Z0-9]{3,12}$/.test(payload.data.organCode)
+  )
+    throw new Error('Vietcap: không xác nhận được organCode của mã');
+  return payload.data.organCode;
+}
+export function vciOrganCodes(payload: unknown): string[] {
+  return record(payload) && Array.isArray(payload.data)
+    ? [
+        ...new Set(
+          payload.data
+            .map((r: unknown) => (record(r) ? r.organCode : null))
+            .filter((c): c is string => typeof c === 'string'),
+        ),
+      ]
+    : [];
 }
 export function parseVciFinancialRatios(
   payload: unknown,
   symbol: string,
   now: string,
+  organCode: string = symbol,
 ): VciRatio[] {
   if (
     !record(payload) ||
@@ -119,7 +151,7 @@ export function parseVciFinancialRatios(
     .map((r: unknown) => {
       if (
         !record(r) ||
-        r.organCode !== symbol ||
+        (r.organCode !== symbol && r.organCode !== organCode) ||
         !['RATIO_TTM', 'RATIO_YEAR'].includes(String(r.ratioType)) ||
         !Number.isInteger(r.yearReport) ||
         !Number.isInteger(r.quarter) ||
@@ -140,11 +172,14 @@ export function parseVciFinancialRatios(
         throw new Error('Vietcap: số cổ phiếu sai kiểu');
       if (r.roic != null && !finite(r.roic))
         throw new Error('Vietcap: ROIC sai kiểu');
+      if (r.afterTaxProfitMargin != null && !finite(r.afterTaxProfitMargin))
+        throw new Error('Vietcap: biên lợi nhuận sai kiểu');
       return {
         year: Number(r.yearReport),
         quarter: Number(r.quarter),
         shares: (r.numberOfSharesMktCap ?? null) as number | null,
         roic: (r.roic ?? null) as number | null,
+        netMargin: (r.afterTaxProfitMargin ?? null) as number | null,
       };
     })
     .filter(
@@ -154,17 +189,55 @@ export function parseVciFinancialRatios(
     )
     .sort((a, b) => a.year - b.year || a.quarter - b.quarter);
 }
+// Chỉ chấp nhận kỳ năm KBS ghi sai PeriodBegin/PeriodEnd khi: các năm khác của
+// cùng báo cáo đều là năm dương lịch chuẩn, và biên LNST/doanh thu thuần KBS khớp
+// afterTaxProfitMargin năm đó của Vietcap (nguồn khác) trong 0,0001.
+// Ví dụ tính tay: LNST 3.146,75 / DT 10.000 = 0,314675; Vietcap 0,3146751 => lệch
+// 0,0000001 ≤ 0,0001 => khớp. Kỳ 24 tháng thật sẽ không khớp biên của năm.
+export function periodAnomalyConfirmed(
+  year: number,
+  reports: Record<ReportType, ReportPeriod[]>,
+  income: ReportPeriod | undefined,
+  ratios: VciRatio[],
+): boolean {
+  const normalYears = new Set(
+    reports.KQKD.filter((r) => !r.periodAnomaly && r.year !== year).map(
+      (r) => r.year,
+    ),
+  );
+  if (normalYears.size < 2) return false;
+  const vietcap = ratios.find((r) => r.year === year && r.quarter === 5);
+  const revenue = income?.rows.get(2216),
+    profit = income?.rows.get(2212);
+  if (
+    !vietcap ||
+    vietcap.netMargin === null ||
+    !revenue ||
+    !profit ||
+    !/Doanh thu thuần/.test(revenue.name) ||
+    !/Lợi nhuận sau thuế/.test(profit.name) ||
+    revenue.unit !== null ||
+    profit.unit !== null ||
+    !finite(revenue.value) ||
+    !finite(profit.value) ||
+    revenue.value <= 0
+  )
+    return false;
+  return Math.abs(profit.value / revenue.value - vietcap.netMargin) <= 0.0001;
+}
 export function financialData(
   symbol: string,
   reports: Record<ReportType, ReportPeriod[]>,
   ratioPayload: unknown,
   now: string,
+  organCode: string = symbol,
 ): FinancialData {
   symbolValue(symbol);
   const ratios =
     ratioPayload === null
       ? []
-      : parseVciFinancialRatios(ratioPayload, symbol, now);
+      : parseVciFinancialRatios(ratioPayload, symbol, now, organCode);
+  const periodNotices: string[] = [];
   const periodMap = (type: ReportType) =>
     new Map(reports[type].map((r) => [r.year, r]));
   for (const type of Object.keys(reports) as ReportType[])
@@ -194,6 +267,17 @@ export function financialData(
       (r): r is ReportPeriod => r !== undefined,
     );
     if (!evidence.length) continue;
+    if ([...evidence, ...(rk ? [rk] : [])].some((r) => r.periodAnomaly)) {
+      if (!periodAnomalyConfirmed(year, reports, income, ratios)) {
+        periodNotices.push(
+          `Năm ${year}: KBS ghi kỳ báo cáo sai định dạng và không đối chiếu được với Vietcap; bỏ năm này, không tự sửa kỳ.`,
+        );
+        continue;
+      }
+      periodNotices.push(
+        `Năm ${year}: KBS ghi kỳ báo cáo sai định dạng; biên LNST/doanh thu khớp Vietcap năm ${year} (lệch ≤0,01 điểm %) nên coi là BCTC năm dương lịch — giả định, chưa đối chiếu PDF.`,
+      );
+    }
     const read = (
       r: ReportPeriod | undefined,
       id: number,
@@ -283,6 +367,7 @@ export function financialData(
         ? ['Chưa hỗ trợ mô hình cho ngân hàng, chứng khoán và bảo hiểm.']
         : []),
       ...(ratios.length === 0 ? ['Chưa có ROIC/số cổ phiếu từ Vietcap.'] : []),
+      ...periodNotices,
     ],
   };
 }

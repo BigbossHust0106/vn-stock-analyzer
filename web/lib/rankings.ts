@@ -38,6 +38,9 @@ export interface RankingRow {
 export interface RankingsResult {
   data: RankingRow[];
   excluded?: RankingRow[];
+  // Bảng tham khảo `reference-v1`: chưa đủ chuẩn Top 10, luôn hiển thị tách riêng.
+  reference?: RankingRow[];
+  referencePolicy?: string;
   qualityPolicy?: string;
   run: { as_of: string; computed_at: string; universe_count: number } | null;
   sectors: string[];
@@ -86,9 +89,8 @@ export async function fetchRankings(
   const validated = result as RankingsResult;
   // Defensive UI boundary: an older/misconfigured API cannot render 23 ranked rows.
   const seen = new Set<string>();
-  return {
-    ...validated,
-    data: validated.data
+  const unique = (rows: RankingRow[]) =>
+    rows
       .filter((row) => {
         if (seen.has(row.stock_id) || seen.has(row.symbol)) return false;
         seen.add(row.stock_id);
@@ -96,7 +98,16 @@ export async function fetchRankings(
         return true;
       })
       .slice(0, 10)
-      .map((row, i) => ({ ...row, position: i + 1 })),
+      .map((row, i) => ({ ...row, position: i + 1 }));
+  const data = unique(validated.data);
+  return {
+    ...validated,
+    data,
+    // Không trộn mã tham khảo vào Top 10; chỉ nhận khi Top 10 chuẩn chưa đủ.
+    reference:
+      data.length < 10 && Array.isArray(validated.reference)
+        ? unique(validated.reference)
+        : [],
   };
 }
 export function formatNumber(value: number | null | undefined, digits = 0) {

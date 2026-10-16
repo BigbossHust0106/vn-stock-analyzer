@@ -66,6 +66,9 @@ export function AuthNav() {
           <Link href="/paper" onClick={() => setOpen(false)}>
             Ví đầu tư thử
           </Link>
+          <Link href="/huong-dan" onClick={() => setOpen(false)}>
+            Hướng dẫn sử dụng
+          </Link>
           <Link href="/install" onClick={() => setOpen(false)}>
             Cài ứng dụng điện thoại
           </Link>

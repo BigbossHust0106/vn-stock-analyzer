@@ -223,6 +223,16 @@ it('Phần 7: cron cảnh báo riêng kiểm tra VPS, không ingest giá, email 
       if (init?.body) writes.push({ url, body: JSON.parse(String(init.body)) });
       const response = operationalMock(url, init);
       if (response) return response;
+      // Bước BCTC độc lập lịch phiên chạy cuối; universe rỗng => không gọi nguồn.
+      if (
+        [
+          '/rest/v1/stocks?',
+          '/financial_snapshots?',
+          '/financial_report_backups?',
+        ].some((path) => url.includes(path)) &&
+        !init?.body
+      )
+        return Response.json([]);
       throw Error('Maintenance must not ingest market data');
     }),
   );

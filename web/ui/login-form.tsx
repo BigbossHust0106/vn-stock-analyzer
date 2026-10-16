@@ -301,6 +301,9 @@ export function LoginForm() {
           <Link className="login-install-link" href="/install">
             Cài VN Stock trên điện thoại
           </Link>
+          <Link className="login-install-link" href="/huong-dan">
+            Hướng dẫn sử dụng
+          </Link>
           <p className="login-disclaimer">
             Chỉ mang tính tham khảo, không phải lời khuyên đầu tư.
           </p>

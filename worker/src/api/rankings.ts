@@ -3,6 +3,10 @@ import {
   validNewsWeight,
 } from '../../../modules/news/ranking';
 import type { rankStock } from '../../../modules/scoring/rankings';
+import {
+  referencePolicy,
+  referenceRows,
+} from '../../../modules/scoring/reference';
 import { createClient } from '@supabase/supabase-js';
 import type { Env } from '../index';
 import deployment from '../../../config/public-deployment.json';
@@ -117,11 +121,20 @@ export async function rankingsResponse(
       )
       .slice(0, 100)
       .map((row) => ({ ...row, position: null }));
+    const reference =
+      data.length < 10
+        ? referenceRows(
+            mixed.filter((row) => !eligible(row)),
+            new Set(data.flatMap((row) => [row.stock_id, row.symbol])),
+          )
+        : [];
     return Response.json(
       {
         newsWeight,
         data,
         excluded,
+        reference,
+        referencePolicy,
         qualityPolicy: 'complete-v1',
         run: runs?.[0] ?? null,
         sectors: [

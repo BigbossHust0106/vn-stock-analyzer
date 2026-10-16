@@ -3,7 +3,6 @@ import {
   VietcapReportsProvider,
   type FinancialBackup,
 } from '../../modules/providers/financial-backup';
-const provider = new VietcapReportsProvider();
 export async function syncFinancialBackup(
   db: SupabaseClient,
   stockId: string,
@@ -18,8 +17,9 @@ export async function syncFinancialBackup(
   if (readError) throw Error('Không đọc được trạng thái BCTC dự phòng');
   if (stored && Date.now() - Date.parse(stored.fetched_at) < 86400000) return;
   try {
+    // Tạo theo lượt gọi để dùng transport hiện hành (không giữ fetch lúc import).
     const payload: FinancialBackup =
-      await provider.fetchFinancialReports(symbol);
+      await new VietcapReportsProvider().fetchFinancialReports(symbol);
     const { error } = await db.from('financial_report_backups').upsert(
       {
         stock_id: stockId,

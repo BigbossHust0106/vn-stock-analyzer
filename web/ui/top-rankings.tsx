@@ -6,6 +6,7 @@ import {
   formatNumber,
   formatTime,
   horizonLabels,
+  type RankingRow,
   type RankingsResult,
 } from '../lib/rankings';
 import { priceChange, type Horizon } from '../../modules/scoring/rankings';
@@ -25,6 +26,161 @@ const strategyLabels: Record<string, string> = {
   events: 'Sự kiện',
   news: 'Tâm lý tin tức',
 };
+function RankingRowsTable({
+  rows,
+  horizon,
+  live,
+  testId,
+  showMissing = false,
+}: {
+  showMissing?: boolean;
+  rows: RankingRow[];
+  horizon: Horizon;
+  live: ReturnType<typeof useLivePrices>;
+  testId: string;
+}) {
+  return (
+    <div className="table-scroll">
+      <table className="ranking-table" data-testid={testId}>
+        <thead>
+          <tr>
+            <th>Hạng / mã</th>
+            <th>Giá / thay đổi</th>
+            <th>Điểm tổng</th>
+            <th>Điểm chiến lược</th>
+            <th>Lý do chính</th>
+            <th>Theo dõi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((stored) => {
+            const q = live.prices[stored.symbol];
+            const row = q
+              ? {
+                  ...stored,
+                  price_vnd: q.last_price_vnd,
+                  reference_vnd: q.reference_vnd,
+                  quote_fetched_at: q.fetched_at,
+                }
+              : stored;
+            const change = priceChange(row.price_vnd, row.reference_vnd);
+            return (
+              <tr key={row.stock_id}>
+                <td>
+                  <strong>
+                    {row.position}.{' '}
+                    <Link href={'/stocks?symbol=' + row.symbol}>
+                      {row.symbol}
+                    </Link>
+                  </strong>
+                  <span>{row.name}</span>
+                  <small>
+                    {row.exchange} · {row.sector ?? 'Chưa có ngành'} ·{' '}
+                    {formatNumber((row.explanation.marketCapVnd ?? 0) / 1e9)} tỷ
+                  </small>
+                </td>
+                <td>
+                  <strong>
+                    {formatNumber(row.price_vnd ?? row.reference_vnd)} đ
+                  </strong>
+                  <span
+                    className={
+                      change !== null && change >= 0 ? 'positive' : 'negative'
+                    }
+                  >
+                    {change !== null && change > 0 ? '+' : ''}
+                    {formatNumber(change, 2)}%
+                  </span>
+                  {row.price_vnd === null && (
+                    <small>
+                      Giá tham chiếu; chưa có giá giao dịch cập nhật
+                    </small>
+                  )}
+                  <small>
+                    {q
+                      ? 'VPS · phản hồi gần nhất'
+                      : (row.explanation.quoteSource ?? 'VPS · snapshot')}{' '}
+                    · {formatTime(row.quote_fetched_at)}
+                  </small>
+                </td>
+                <td>
+                  <strong className="ranking-score">
+                    {formatNumber(row.score, 1)}
+                  </strong>
+                  <small>
+                    /100 · Bao phủ{' '}
+                    {formatNumber(row.explanation.coverage * 100)}%
+                  </small>
+                  <small>Tin cậy {row.explanation.confidence}%</small>
+                </td>
+                <td>
+                  <div className="strategy-chips">
+                    {Object.entries(row.explanation.strategies)
+                      .filter(
+                        ([key]) =>
+                          key === 'news' ||
+                          (horizon === 'day'
+                            ? [
+                                'momentum',
+                                'unusualVolume',
+                                'shortTechnical',
+                                'quality',
+                              ].includes(key)
+                            : horizon === 'month'
+                              ? [
+                                  'mediumTechnical',
+                                  'valuation',
+                                  'events',
+                                ].includes(key)
+                              : ['graham', 'buffett', 'safety'].includes(key)),
+                      )
+                      .map(([key, value]) => (
+                        <span key={key}>
+                          {strategyLabels[key]}:{' '}
+                          {value === null
+                            ? 'không đủ dữ liệu'
+                            : formatNumber(value, 1)}
+                        </span>
+                      ))}
+                  </div>
+                </td>
+                <td>
+                  {row.explanation.newsIntegration?.news.links
+                    .slice(0, 3)
+                    .map((link) => (
+                      <p key={link.url}>
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Nguồn tin: {link.title}
+                        </a>
+                      </p>
+                    ))}
+                  {row.explanation.reasons.map((reason) => (
+                    <p key={reason}>{reason}</p>
+                  ))}
+                  {showMissing &&
+                    row.explanation.rankingEligibility?.blockers.map(
+                      (blocker) => (
+                        <p className="ranking-missing" key={blocker}>
+                          Còn thiếu: {blocker}
+                        </p>
+                      ),
+                    )}
+                </td>
+                <td>
+                  <AddWatchButton stockId={row.stock_id} symbol={row.symbol} />
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 function RankingTable({
   horizon,
   exchange,
@@ -43,7 +199,11 @@ function RankingTable({
   const [result, setResult] = useState<RankingsResult | null>(null),
     [error, setError] = useState(''),
     [loading, setLoading] = useState(true);
-  const live = useLivePrices(result?.data.map((row) => row.symbol) ?? []);
+  const live = useLivePrices(
+    [...(result?.data ?? []), ...(result?.reference ?? [])].map(
+      (row) => row.symbol,
+    ),
+  );
   useEffect(() => {
     let stopped = false,
       controller: AbortController | undefined;
@@ -108,154 +268,41 @@ function RankingTable({
         </p>
       )}
       {result && result.data.length > 0 && (
-        <div className="table-scroll">
-          <table className="ranking-table" data-testid="top10-table">
-            <thead>
-              <tr>
-                <th>Hạng / mã</th>
-                <th>Giá / thay đổi</th>
-                <th>Điểm tổng</th>
-                <th>Điểm chiến lược</th>
-                <th>Lý do chính</th>
-                <th>Theo dõi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {result.data.map((stored) => {
-                const q = live.prices[stored.symbol];
-                const row = q
-                  ? {
-                      ...stored,
-                      price_vnd: q.last_price_vnd,
-                      reference_vnd: q.reference_vnd,
-                      quote_fetched_at: q.fetched_at,
-                    }
-                  : stored;
-                const change = priceChange(row.price_vnd, row.reference_vnd);
-                return (
-                  <tr key={row.stock_id}>
-                    <td>
-                      <strong>
-                        {row.position}.{' '}
-                        <Link href={'/stocks?symbol=' + row.symbol}>
-                          {row.symbol}
-                        </Link>
-                      </strong>
-                      <span>{row.name}</span>
-                      <small>
-                        {row.exchange} · {row.sector ?? 'Chưa có ngành'} ·{' '}
-                        {formatNumber(
-                          (row.explanation.marketCapVnd ?? 0) / 1e9,
-                        )}{' '}
-                        tỷ
-                      </small>
-                    </td>
-                    <td>
-                      <strong>
-                        {formatNumber(row.price_vnd ?? row.reference_vnd)} đ
-                      </strong>
-                      <span
-                        className={
-                          change !== null && change >= 0
-                            ? 'positive'
-                            : 'negative'
-                        }
-                      >
-                        {change !== null && change > 0 ? '+' : ''}
-                        {formatNumber(change, 2)}%
-                      </span>
-                      {row.price_vnd === null && (
-                        <small>
-                          Giá tham chiếu; chưa có giá giao dịch cập nhật
-                        </small>
-                      )}
-                      <small>
-                        {q
-                          ? 'VPS · phản hồi gần nhất'
-                          : (row.explanation.quoteSource ??
-                            'VPS · snapshot')}{' '}
-                        · {formatTime(row.quote_fetched_at)}
-                      </small>
-                    </td>
-                    <td>
-                      <strong className="ranking-score">
-                        {formatNumber(row.score, 1)}
-                      </strong>
-                      <small>
-                        /100 · Bao phủ{' '}
-                        {formatNumber(row.explanation.coverage * 100)}%
-                      </small>
-                      <small>Tin cậy {row.explanation.confidence}%</small>
-                    </td>
-                    <td>
-                      <div className="strategy-chips">
-                        {Object.entries(row.explanation.strategies)
-                          .filter(
-                            ([key]) =>
-                              key === 'news' ||
-                              (horizon === 'day'
-                                ? [
-                                    'momentum',
-                                    'unusualVolume',
-                                    'shortTechnical',
-                                    'quality',
-                                  ].includes(key)
-                                : horizon === 'month'
-                                  ? [
-                                      'mediumTechnical',
-                                      'valuation',
-                                      'events',
-                                    ].includes(key)
-                                  : ['graham', 'buffett', 'safety'].includes(
-                                      key,
-                                    )),
-                          )
-                          .map(([key, value]) => (
-                            <span key={key}>
-                              {strategyLabels[key]}:{' '}
-                              {value === null
-                                ? 'không đủ dữ liệu'
-                                : formatNumber(value, 1)}
-                            </span>
-                          ))}
-                      </div>
-                    </td>
-                    <td>
-                      {row.explanation.newsIntegration?.news.links
-                        .slice(0, 3)
-                        .map((link) => (
-                          <p key={link.url}>
-                            <a
-                              href={link.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              Nguồn tin: {link.title}
-                            </a>
-                          </p>
-                        ))}
-                      {row.explanation.reasons.map((reason) => (
-                        <p key={reason}>{reason}</p>
-                      ))}
-                    </td>
-                    <td>
-                      <AddWatchButton
-                        stockId={row.stock_id}
-                        symbol={row.symbol}
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <RankingRowsTable
+          rows={result.data}
+          horizon={horizon}
+          live={live}
+          testId="top10-table"
+        />
       )}
       {result && result.data.length > 0 && result.data.length < 10 && (
         <p>
           Chỉ có {result.data.length} mã đủ điều kiện; bảng không bổ sung mã
           thiếu dữ liệu.
         </p>
+      )}
+      {result && !!result.reference?.length && (
+        <div className="reference-ranking" data-testid="reference-ranking">
+          <h3>
+            Bảng tham khảo · {result.reference.length} mã có đủ BCTC cơ bản
+          </h3>
+          <p role="note">
+            <strong>Chưa phải Top 10 chuẩn.</strong> Các mã dưới đây đã qua bộ
+            lọc BCTC (EPS năm, lợi nhuận, vốn chủ dương; vốn hóa ≥100 tỷ; giá
+            ≥1.000đ) nhưng còn thiếu một phần đầu vào như thời điểm giá được sàn
+            xác minh, lịch sử phiên cho chỉ báo kỹ thuật hoặc tâm lý tin tức.
+            Điểm chỉ tính trên phần dữ liệu đang có, phần thiếu không được bù
+            nên điểm tối đa bằng mức “bao phủ”. Chỉ mang tính tham khảo, không
+            phải lời khuyên đầu tư.
+          </p>
+          <RankingRowsTable
+            rows={result.reference}
+            horizon={horizon}
+            live={live}
+            testId="reference-table"
+            showMissing
+          />
+        </div>
       )}
     </section>
   );
@@ -281,11 +328,13 @@ export function TopRankings() {
         <Link href="/backtest">Lịch sử &amp; backtest các lần công bố ↗</Link>
       </p>
       <p>
-        Chỉ xếp hạng khi đủ 100% đầu vào của kỳ, tiêu chí tài chính bắt buộc và
-        giá giao dịch có bằng chứng thời điểm nguồn. Mã chưa đủ thông tin được
-        loại khỏi bảng; mỗi kỳ hiển thị tối đa 10 mã, không lấp đủ bằng mã thiếu
-        dữ liệu. Giá tự lấy mỗi 10 giây khi mở trang; bảng điểm kiểm tra lại mỗi
-        phút và ghi rõ thời điểm tính.
+        Top 10 chuẩn chỉ xếp hạng khi đủ 100% đầu vào của kỳ, tiêu chí tài chính
+        bắt buộc và giá giao dịch có bằng chứng thời điểm nguồn; mỗi kỳ tối đa
+        10 mã, không lấp đủ bằng mã thiếu dữ liệu. Khi chưa đủ 10 mã, trang hiển
+        thị thêm <strong>Bảng tham khảo</strong> tách riêng cho các mã đã có
+        BCTC cơ bản, ghi rõ phần dữ liệu còn thiếu. Giá tự lấy mỗi 10 giây khi
+        mở trang; bảng điểm kiểm tra lại mỗi phút và ghi rõ thời điểm tính.{' '}
+        <Link href="/huong-dan#top10">Cách đọc bảng ↗</Link>
       </p>
       <div className="ranking-filters">
         <label>

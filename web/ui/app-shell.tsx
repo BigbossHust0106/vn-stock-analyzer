@@ -12,7 +12,11 @@ import { ThemeSwitch } from './theme-switch';
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   if (pathname === '/login') return children;
-  if (pathname === '/install' || pathname.startsWith('/auth/'))
+  if (
+    pathname === '/install' ||
+    pathname === '/huong-dan' ||
+    pathname.startsWith('/auth/')
+  )
     return <main className="auth-utility">{children}</main>;
   return (
     <RequireAuth>
@@ -59,6 +63,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             aria-current={pathname === '/status' ? 'page' : undefined}
           >
             Trạng thái
+          </Link>
+          <Link
+            href="/huong-dan"
+            aria-current={pathname === '/huong-dan' ? 'page' : undefined}
+          >
+            Hướng dẫn
           </Link>
           <AuthNav />
           <ThemeSwitch />

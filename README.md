@@ -7,11 +7,13 @@
 - Production: <https://vn-stock-analyzer.manhhuong.workers.dev>
 - Kiến trúc: [docs/architecture.md](docs/architecture.md).
 - Dữ liệu và mức độ xác minh: [docs/data-sources.md](docs/data-sources.md), [khảo sát API](docs/api-research-2026-10-13.md).
+- **Hướng dẫn sử dụng cho người dùng:** trang `/huong-dan` trên website (mở được cả khi chưa đăng nhập), bản đọc trong repo: [docs/huong-dan-su-dung.md](docs/huong-dan-su-dung.md).
+- BCTC cho Top 10, nguồn đã thử (FireAnt/HOSE/HNX) và lịch tự làm mới: [docs/financial-sources-2026-10-16.md](docs/financial-sources-2026-10-16.md).
 - Hướng dẫn theo tính năng: [Top 10/Auth/watchlist](docs/phase4.md), [tin tức](docs/phase6.md), [cảnh báo/trạng thái](docs/phase7.md), [backtest/hiệu năng/bảo mật](docs/phase8.md), [PWA](docs/pwa.md).
 
 ## Giới hạn dữ liệu cần biết trước
 
-Top 10 chỉ nhận mã đáp ứng chính sách `complete-v1`; không lấp đủ 10 bằng mã thiếu dữ liệu. Khi khảo sát Phần 8, project chưa có lịch sàn/giá phiên điều chỉnh được xác minh và chưa có Top 10 đủ chuẩn. Bar VPS/KBS hiện có là giá báo cáo chưa xác minh adjusted/unadjusted; không tự đưa vào scoring/backtest chính thức. Chưa có feed VN-Index được xác minh. `/backtest` lưu lịch sử từ khi triển khai, hiển thị độ phủ/thiếu dữ liệu và có công cụ đối chiếu giá báo cáo **tách riêng khỏi backtest Top 10**.
+Top 10 chỉ nhận mã đáp ứng chính sách `complete-v1`; không lấp đủ 10 bằng mã thiếu dữ liệu. Khi chưa đủ 10 mã, `/top10` hiện thêm **Bảng tham khảo** (`reference-v1`) tách riêng: chỉ mã đã qua lọc BCTC/giá/vốn hóa, bao phủ ≥30%, ghi rõ phần còn thiếu. BCTC tự làm mới 1 mã mỗi lượt Cron `*/5 * * * *`, không phụ thuộc lịch phiên. Khi khảo sát Phần 8, project chưa có lịch sàn/giá phiên điều chỉnh được xác minh và chưa có Top 10 đủ chuẩn. Bar VPS/KBS hiện có là giá báo cáo chưa xác minh adjusted/unadjusted; không tự đưa vào scoring/backtest chính thức. Chưa có feed VN-Index được xác minh. `/backtest` lưu lịch sử từ khi triển khai, hiển thị độ phủ/thiếu dữ liệu và có công cụ đối chiếu giá báo cáo **tách riêng khỏi backtest Top 10**.
 
 Kết quả backtest cần đủ thời gian quan sát và đầu vào có nguồn. Đọc [phương pháp và look-ahead/survivorship bias](docs/phase8.md) trước khi diễn giải lợi nhuận. Không cam kết giá thực thi hay hiệu quả đầu tư.
 

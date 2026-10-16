@@ -2970,3 +2970,68 @@ button:disabled {
     grid-template-columns: repeat(5, 1fr);
   }
 }
+.reference-ranking {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--border);
+}
+.reference-ranking h3 {
+  margin: 0 0 0.5rem;
+}
+.reference-ranking [role='note'] {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: var(--soft);
+  color: var(--text);
+}
+.ranking-missing {
+  color: var(--muted);
+}
+.user-guide {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  line-height: 1.6;
+}
+.user-guide h1 {
+  margin: 0.25rem 0 0.75rem;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  line-height: 1.2;
+}
+.user-guide h2 {
+  font-size: 1.25rem;
+}
+.user-guide ol,
+.user-guide ul {
+  padding-left: 1.25rem;
+}
+.user-guide ol {
+  list-style: decimal;
+}
+.user-guide ul {
+  list-style: disc;
+}
+.user-guide a {
+  color: var(--accent);
+}
+.user-guide section {
+  margin: 1.5rem 0;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--panel);
+}
+.user-guide section h2 {
+  margin-top: 0;
+}
+.user-guide li {
+  margin: 0.35rem 0;
+}
+.user-guide nav ol {
+  columns: 2;
+}
+@media (max-width: 640px) {
+  .user-guide nav ol {
+    columns: 1;
+  }
+}
