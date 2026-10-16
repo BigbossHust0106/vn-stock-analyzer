@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 const paths = {
+  paper: 'M3 7h18v14H3V7Zm3 0V3h12v4M3 12h18m-11-2h4v4h-4Z',
   top10: 'm4 7 4 3 4-6 4 6 4-3-2 12H6L4 7Z',
   watchlists: 'M6 4h12v17l-6-4-6 4V4Z',
   settings:
@@ -35,6 +36,7 @@ export function MobileNav() {
         [
           ['top10', 'Top 10'],
           ['watchlists', 'Theo dõi'],
+          ['paper', 'Đầu tư thử'],
           ['settings', 'Cài đặt'],
         ] as const
       ).map(([key, label]) => (

@@ -1,5 +1,6 @@
 'use client';
 import { pollVisible } from '../lib/polling';
+import Link from 'next/link';
 import { StockNews } from './stock-news';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -148,6 +149,11 @@ function DetailContent({ symbol }: { symbol: string }) {
           {updating ? '↻ Đang cập nhật…' : '↻ Cập nhật'}
         </button>
       </div>
+      <p>
+        <Link className="paper-detail-link" href={'/paper?symbol=' + symbol}>
+          Thử đầu tư {symbol} bằng vốn ảo ↗
+        </Link>
+      </p>
       <div className="quote-summary">
         <div>
           <span data-testid="display-price-label">

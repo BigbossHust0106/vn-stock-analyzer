@@ -1,5 +1,6 @@
 import { quotesResponse } from './api/quotes';
 import { notificationsResponse } from './api/notifications';
+import { paperResponse } from './api/paper';
 import { backtestResponse } from './api/backtest';
 import { publicReadCache } from './api/public-cache';
 import { apiRateLimit } from './api/rate-limit';
@@ -107,6 +108,8 @@ export default {
       };
       const systemJob = await systemJobResponse(request, env);
       if (systemJob) return systemJob;
+      const paper = await paperResponse(request, env);
+      if (paper) return paper;
       const notifications = await notificationsResponse(request, env);
       if (notifications) return notifications;
       const status = await systemStatusResponse(request, env);

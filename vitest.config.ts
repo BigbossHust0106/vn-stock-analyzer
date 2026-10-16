@@ -13,8 +13,15 @@ export default defineConfig({
         'modules/news/**/*.ts',
         'modules/alerts/**/*.ts',
         'modules/backtest/**/*.ts',
+        'modules/paper/**/*.ts',
       ],
       thresholds: {
+        'modules/paper/**': {
+          statements: 80,
+          branches: 80,
+          functions: 80,
+          lines: 80,
+        },
         'modules/backtest/**': {
           statements: 80,
           branches: 80,

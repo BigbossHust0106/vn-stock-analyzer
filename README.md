@@ -1,6 +1,6 @@
 # VN Stock Analyzer
 
-Ứng dụng phân tích cổ phiếu Việt Nam (HOSE/HNX/UPCOM): Graham/Buffett, vùng giá, Top 10, watchlist, tin tức, cảnh báo và backtest. Next.js static export + TypeScript, Cloudflare Worker API/Cron, Supabase PostgreSQL/Auth/RLS. Có PWA Android/iPhone.
+Ứng dụng phân tích cổ phiếu Việt Nam (HOSE/HNX/UPCOM): Graham/Buffett, vùng giá, Top 10, watchlist, tin tức, cảnh báo backtest và đầu tư thử bằng vốn ảo. Next.js static export + TypeScript, Cloudflare Worker API/Cron, Supabase PostgreSQL/Auth/RLS. Có PWA Android/iPhone.
 
 **Chỉ mang tính tham khảo, không phải lời khuyên đầu tư.** Thiếu dữ liệu luôn được ghi rõ, không điền số giả hay coi thiếu dữ liệu là doanh nghiệp xấu.
 
@@ -26,7 +26,7 @@ npm run verify
 npm run smoke
 ```
 
-`verify` bắt buộc: strict typecheck, lint 0 warning, format, unit/coverage ≥80% ở các module quy định, build, Gitleaks, 18 migration PostgreSQL và RLS hai tài khoản, provider fixtures. Database test dùng container PostgreSQL 17 pin digest, không mở cổng và tự xóa; không cần production credential. Kiểm thử nguồn live/Google/email tách khỏi CI. Một fixture provider chưa triển khai được giữ TODO, không tính là PASS.
+`verify` bắt buộc: strict typecheck, lint 0 warning, format, unit/coverage ≥80% ở các module quy định, build, Gitleaks, 19 migration PostgreSQL và RLS hai tài khoản, provider fixtures. Database test dùng container PostgreSQL 17 pin digest, không mở cổng và tự xóa; không cần production credential. Kiểm thử nguồn live/Google/email tách khỏi CI. Một fixture provider chưa triển khai được giữ TODO, không tính là PASS.
 
 Tạo `.dev.vars` ở root từ tên biến trong `.env.example` (file ignored, không commit credential). Hai terminal:
 
@@ -107,7 +107,7 @@ npm run sync:system -- --production
 
 Giới hạn nhóm mã bằng `SYNC_SYMBOLS`, xem `.env.example`. Không coi tải nguồn thành công là xác minh kỳ EPS, basis hay finality. Nhập lịch/sự kiện có nguồn qua `npm run import:evidence -- /path/calendar-events.json`; xem [phase4.md](docs/phase4.md). Không seed lịch bằng cách bỏ cuối tuần. Giá phiên điều chỉnh và VN-Index cần quy trình xác minh riêng tại [phase8.md](docs/phase8.md), chưa có nguồn tự động được chứng nhận.
 
-Đăng nhập → `/top10`, `/watchlists`, `/alerts`, `/status`, `/backtest`, `/settings`. Trang status phân biệt mốc dữ liệu, lần sync thành công, nguồn lỗi và cấu hình còn thiếu. Đọc log cron thay vì suy từ thời gian mở trang.
+Đăng nhập → `/top10`, `/watchlists`, `/alerts`, `/status`, `/backtest`, `/paper`, `/settings`. Trang status phân biệt mốc dữ liệu, lần sync thành công, nguồn lỗi và cấu hình còn thiếu. Đọc log cron thay vì suy từ thời gian mở trang.
 
 ### 5. Kiểm thử trên website thật
 
@@ -187,3 +187,15 @@ Cron UTC: `*/5 2-8 * * 1-5` kiểm tra giá trong phiên VN; `15 8 * * 1-5` ch�
 - Email thiếu khóa/domain: dùng thông báo trong app. Provider trả ID chỉ xác nhận chấp nhận, chưa chứng minh đã vào inbox.
 - Định kỳ chạy Supabase Security Advisors. Các bảng service-only RLS không policy là chủ ý deny client; cảnh báo leaked password protection hiện chưa bật cần chủ project cân nhắc, không tự nâng gói.
 - Rollback code qua Cloudflare deployment đã kiểm chứng; migration đã áp dụng giữ nguyên, sửa bằng migration mới. Không drop dữ liệu/lịch sử để làm status xanh.
+
+## Đầu tư thử bằng vốn ảo
+
+Đăng nhập → **Đầu tư thử** (`/paper`) → đặt tên ví, vốn ban đầu (100.000–1.000 tỷ VND) và tạo ví. Có thể tạo tối đa 20 ví để so sánh cách đầu tư; lịch sử ví cũ được giữ riêng. Từ trang chi tiết mã, chọn “Thử đầu tư” để điền sẵn mã.
+
+Chọn mã, mua/bán, số lượng bội số 100 và lấy giá trước khi xác nhận. Mặc định lấy giá VPS; nếu nguồn không có giá hợp lệ, có thể chủ động chọn **giá đã lưu** và đánh dấu chấp nhận ngày giá được hiển thị (tối đa 14 ngày). Không tự chuyển sang giá cũ. Phiếu giá hết hạn sau 2 phút, chỉ dùng một lần. Giá danh mục được kiểm tra mỗi 10 giây khi trang đang mở, số dư/lịch sử kiểm tra mỗi 30 giây. Giá trị danh mục dùng giá đã quan sát gần nhất, có mốc thời gian; thiếu giá thì tổng tài sản/lãi lỗ ghi “không đủ dữ liệu”.
+
+Phí giả định 0,15% mỗi chiều, thuế bán 0,1%, chỉnh được khi tạo ví (0–1%). Làm tròn phí/thuế lên 1 VND; vốn mua gồm phí; bán phân bổ giá vốn bình quân và ghi lãi/lỗ sau phí/thuế. Không margin, bán khống hay tiền thật. Khớp mô phỏng ngay, không mô phỏng T+2, trượt giá, thanh khoản thực, cổ tức hoặc điều chỉnh quyền; kết quả không thay thế backtest hay hiệu suất thực tế.
+
+Không cần secret/binding mới. Migration `20261016033651_paper_investing.sql` tạo 4 bảng riêng tư, RLS chỉ đọc dữ liệu của chủ ví. Chỉ Worker xác thực người dùng mới gọi RPC tạo ví/giá/giao dịch bằng service key. API không nhận giá hoặc số dư từ trình duyệt; khóa hàng ví trong transaction và mã yêu cầu chống ghi trùng. Snapshot tiền/danh mục/lịch sử đọc nhất quán; lịch sử phân trang 20 dòng; API no-store và dùng rate limit đã có.
+
+Kiểm tra: `npm run verify` gồm đáp án tính tay, RLS A/B và giao dịch đồng thời trong PostgreSQL tạm. Kiểm tra UI + Auth + ví thử trên môi trường đã áp dụng migration: `npm run verify:paper:browser` (mặc định local; đặt `MARKET_APP_URL` để thử deployment). Script tạo rồi xóa hai tài khoản thử, chỉ tạo vốn/giao dịch ảo, không ghi giá giả vào bảng dữ liệu thị trường.

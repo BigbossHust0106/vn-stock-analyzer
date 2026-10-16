@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process';
+import { testPaperConcurrency } from './test-paper-concurrency.mjs';
 import { randomUUID } from 'node:crypto';
 import {
   readFileSync,
@@ -139,7 +140,7 @@ export async function migrations() {
     throw error;
   }
 }
-export function rls() {
+export async function rls() {
   const { name } = state();
   try {
     sqlFile(name, 'tests/database/rls.sql');
@@ -147,6 +148,8 @@ export function rls() {
     sqlFile(name, 'tests/database/news.sql');
     sqlFile(name, 'tests/database/alerts.sql');
     sqlFile(name, 'tests/database/backtest.sql');
+    sqlFile(name, 'tests/database/paper.sql');
+    await testPaperConcurrency(name);
   } finally {
     cleanup();
   }
@@ -157,7 +160,7 @@ if (
 ) {
   try {
     if (process.argv[2] === 'migrations') await migrations();
-    else if (process.argv[2] === 'rls') rls();
+    else if (process.argv[2] === 'rls') await rls();
     else throw new Error('Chọn migrations hoặc rls');
   } catch (error) {
     console.error(error.message);

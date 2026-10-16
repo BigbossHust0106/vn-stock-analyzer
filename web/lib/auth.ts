@@ -7,6 +7,8 @@ export function safeNext(value: string | null): string {
     value === '/alerts' ||
     value === '/status' ||
     value === '/backtest' ||
+    value === '/paper' ||
+    (value !== null && /^\/paper\?symbol=[A-Z0-9]{3,12}$/.test(value)) ||
     (value !== null &&
       /^\/alerts\?symbol=[A-Za-z0-9]{3,12}&kind=(buy_zone|sell_zone|stop_loss)&lower=\d+(?:\.\d+)?(?:&upper=\d+(?:\.\d+)?)?$/.test(
         value,
