@@ -7,6 +7,13 @@ import { interpret } from '../agent/model';
 import { personalContext, preview, listPersonal } from '../agent/actions';
 import { research } from '../agent/research';
 const errors: Record<string, string> = {
+  AI_SCHEMA_REJECTED:
+    'Cloudflare chưa chấp nhận cấu trúc phản hồi AI. Chưa áp dụng thao tác.',
+  AI_PROVIDER_QUOTA: 'Cloudflare AI đang giới hạn quota. Hãy thử lại sau.',
+  AI_PROVIDER_AUTH:
+    'Cloudflare chưa cấp quyền gọi model này. Quản trị viên cần kiểm tra Workers AI.',
+  AI_PROVIDER_FAILED: 'Không gọi được Cloudflare AI. Chưa áp dụng thao tác.',
+
   NOT_FOUND: 'Không tìm thấy đối tượng trong tài khoản của bạn.',
   STOCK_NOT_FOUND: 'Không tìm thấy mã active.',
   ITEM_REQUIRED: 'Hãy thêm mã vào danh sách trước khi tạo cảnh báo hoặc sửa.',
@@ -47,6 +54,7 @@ export async function agentResponse(
       global: { headers: { Authorization: 'Bearer ' + token } },
     },
   );
+  let stage = 'auth';
   try {
     const { data: user, error } = await db.auth.getUser(token);
     if (error || !user.user)
@@ -108,14 +116,18 @@ export async function agentResponse(
         },
         503,
       );
+    stage = 'quota';
     const { data: allowed, error: quotaError } = await db.rpc(
       'claim_agent_request',
     );
     if (quotaError) throw Error('QUOTA_UNAVAILABLE');
     if (allowed !== true) return reply({ error: errors.RATE_LIMIT }, 429);
+    stage = 'context';
     const context = await personalContext(db);
+    stage = 'model';
     const plan = await interpret(env.AI, b.messages as string[], context);
     if (['stock', 'compare'].includes(plan.intent)) {
+      stage = 'research';
       const writer = env.SUPABASE_SERVICE_ROLE_KEY
         ? createClient(
             env.SUPABASE_URL || deployment.supabaseUrl,
@@ -130,6 +142,7 @@ export async function agentResponse(
     }
     if (plan.intent === 'watchlists')
       return reply({ ...(await listPersonal(db, context)), model: agentModel });
+    stage = 'action';
     if (mutations.has(plan.intent))
       return reply({
         ...(await preview(db, plan, context)),
@@ -153,8 +166,22 @@ export async function agentResponse(
           known ??
           'Chưa thực hiện được yêu cầu. Không khẳng định thao tác đã thành công; kiểm tra dữ liệu hoặc thử lại.',
         code: known ? code : 'AGENT_UNAVAILABLE',
+        stage,
+        providerCode:
+          e instanceof Error &&
+          'providerCode' in e &&
+          typeof e.providerCode === 'string' &&
+          /^\d{4}$/.test(e.providerCode)
+            ? e.providerCode
+            : null,
       },
-      code === 'NOT_FOUND' ? 404 : known ? 409 : 503,
+      code === 'NOT_FOUND'
+        ? 404
+        : code.startsWith('AI_PROVIDER') || code === 'AI_SCHEMA_REJECTED'
+          ? 503
+          : known
+            ? 409
+            : 503,
     );
   }
 }

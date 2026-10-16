@@ -154,44 +154,16 @@ export const planSchema = {
   additionalProperties: false,
   properties: {
     intent: { type: 'string', enum: [...intents] },
-    symbols: {
-      type: 'array',
-      items: { type: 'string', pattern: '^[A-Z0-9]{3,12}$' },
-      maxItems: 3,
-      uniqueItems: true,
-    },
-    listId: {
-      type: ['string', 'null'],
-      pattern:
-        '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
-    },
-    name: { type: ['string', 'null'], maxLength: 120 },
-    notes: { type: ['string', 'null'], maxLength: 1000 },
-    targetVnd: {
-      type: ['number', 'null'],
-      exclusiveMinimum: 0,
-      exclusiveMaximum: 1e12,
-    },
-    alertId: {
-      type: ['string', 'null'],
-      pattern:
-        '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
-    },
-    kind: {
-      type: ['string', 'null'],
-      enum: ['buy_zone', 'sell_zone', 'stop_loss', null],
-    },
-    lowerVnd: {
-      type: ['number', 'null'],
-      exclusiveMinimum: 0,
-      exclusiveMaximum: 1e12,
-    },
-    upperVnd: {
-      type: ['number', 'null'],
-      exclusiveMinimum: 0,
-      exclusiveMaximum: 1e12,
-    },
-    enabled: { type: ['boolean', 'null'] },
+    symbols: { type: 'array', items: { type: 'string' } },
+    listId: { anyOf: [{ type: 'string' }, { type: 'null' }] },
+    name: { anyOf: [{ type: 'string' }, { type: 'null' }] },
+    notes: { anyOf: [{ type: 'string' }, { type: 'null' }] },
+    targetVnd: { anyOf: [{ type: 'number' }, { type: 'null' }] },
+    alertId: { anyOf: [{ type: 'string' }, { type: 'null' }] },
+    kind: { anyOf: [{ type: 'string' }, { type: 'null' }] },
+    lowerVnd: { anyOf: [{ type: 'number' }, { type: 'null' }] },
+    upperVnd: { anyOf: [{ type: 'number' }, { type: 'null' }] },
+    enabled: { anyOf: [{ type: 'boolean' }, { type: 'null' }] },
   },
   required: [
     'intent',

@@ -58,6 +58,21 @@ export async function interpret(
         : raw.response;
     if (!validPlan(plan)) throw Error('AI_INVALID');
     return plan;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    if (message === 'AI_INVALID' || message === 'AI_TIMEOUT') throw error;
+    // Return only a fixed classification, never provider payloads/prompts/credentials.
+    const fail = (code: string) =>
+      Object.assign(Error(code), {
+        providerCode: message.match(/^\s*(\d{4}):/)?.[1] ?? null,
+      });
+    if (/schema|json mode|grammar|structured/i.test(message))
+      throw fail('AI_SCHEMA_REJECTED');
+    if (/quota|rate.limit|credit|budget|neurons/i.test(message))
+      throw fail('AI_PROVIDER_QUOTA');
+    if (/unauthorized|permission|not.allowed|authentication/i.test(message))
+      throw fail('AI_PROVIDER_AUTH');
+    throw fail('AI_PROVIDER_FAILED');
   } finally {
     if (timer) clearTimeout(timer);
   }

@@ -113,3 +113,8 @@ quota Workers AI và cần quyền quản trị Supabase để tạo/xóa tài k
   trong danh sách JSON Mode được Cloudflare hỗ trợ. Sau khi request schema thật
   bị từ chối, đổi sang Llama3.3 70B fp8-fast có tên trong danh sách hỗ trợ; không
   bỏ schema/validator để chấp nhận plan sai.
+
+- Schema gửi provider chỉ ràng buộc cấu trúc/kiểu cơ bản và đủ trường; mọi regex
+  UUID/mã, giá dương/hữu hạn, độ dài và điều kiện từng công cụ vẫn được validator
+  server kiểm tra. Lỗi provider được phân loại bằng mã cố định, không trả raw
+  provider payload/prompt hoặc credentials cho client.

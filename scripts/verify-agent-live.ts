@@ -43,9 +43,17 @@ async function user() {
     const value = (await r.json()) as AgentReply & {
       error?: string;
       code?: string;
+      stage?: string;
+      providerCode?: string;
       resolution?: { status: string };
     };
-    console.log('AGENT LIVE HTTP:', r.status, value.code ?? 'OK');
+    console.log(
+      'AGENT LIVE HTTP:',
+      r.status,
+      value.code ?? 'OK',
+      value.stage ?? '',
+      value.providerCode ?? '',
+    );
     assert(
       r.status === expected,
       'Agent response: ' + (value.error ?? 'unexpected HTTP'),
