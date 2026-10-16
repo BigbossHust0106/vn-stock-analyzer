@@ -123,7 +123,7 @@ export function ScoringPanel({
       </div>
       <p className="data-timestamp">
         {financials
-          ? `Nguồn: KBS + Vietcap · kỳ năm ${last?.year ?? 'chưa có'} · nhận ${new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', dateStyle: 'short', timeStyle: 'short' }).format(new Date(financials.fetchedAt))}`
+          ? `Nguồn: ${financials.source === 'FIREANT_VIETCAP' ? 'FireAnt + Vietcap (dự phòng khi KBS lỗi)' : 'KBS + Vietcap'} · kỳ năm ${last?.year ?? 'chưa có'} · nhận ${new Intl.DateTimeFormat('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', dateStyle: 'short', timeStyle: 'short' }).format(new Date(financials.fetchedAt))}`
           : 'Chưa có nguồn BCTC.'}{' '}
         · {report.confidenceLabel}. Thiếu dữ liệu không đồng nghĩa doanh nghiệp
         xấu.
@@ -158,8 +158,9 @@ export function ScoringPanel({
         <summary>Nguồn BCTC chính và dự phòng</summary>
         <p>
           KBS: số liệu chuẩn hóa cho cả Graham và Buffett; Vietcap: ratios và
-          kho báo cáo dự phòng độc lập. Không tự coi số raw là đã kiểm toán/hợp
-          nhất.
+          kho báo cáo dự phòng độc lập. Khi KBS lỗi, FireAnt (nếu đã cấu hình)
+          thay cho KBS, đối chiếu LNST công ty mẹ với Vietcap. Không tự coi số
+          raw là đã kiểm toán/hợp nhất.
         </p>
         {backups.length ? (
           backups.map((b) => (

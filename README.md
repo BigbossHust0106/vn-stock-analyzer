@@ -28,7 +28,7 @@ npm run verify
 npm run smoke
 ```
 
-`verify` bắt buộc: strict typecheck, lint 0 warning, format, unit/coverage ≥80% ở các module quy định, build, Gitleaks, 19 migration PostgreSQL và RLS hai tài khoản, provider fixtures. Database test dùng container PostgreSQL 17 pin digest, không mở cổng và tự xóa; không cần production credential. Kiểm thử nguồn live/Google/email tách khỏi CI. Một fixture provider chưa triển khai được giữ TODO, không tính là PASS.
+`verify` bắt buộc: strict typecheck, lint 0 warning, format, unit/coverage ≥80% ở các module quy định, build, Gitleaks, 20 migration PostgreSQL và RLS hai tài khoản, provider fixtures. Database test dùng container PostgreSQL 17 pin digest, không mở cổng và tự xóa; không cần production credential. Kiểm thử nguồn live/Google/email tách khỏi CI. Một fixture provider chưa triển khai được giữ TODO, không tính là PASS.
 
 Tạo `.dev.vars` ở root từ tên biến trong `.env.example` (file ignored, không commit credential). Hai terminal:
 
@@ -126,35 +126,36 @@ Scripts dùng management credential trong RAM, tạo user thử/kiểm tra RLS r
 
 Không commit giá trị credential; `.env.example` chỉ có tên/mặc định công khai.
 
-| Biến                                                               | Nơi dùng            | Ý nghĩa                                                                 |
-| ------------------------------------------------------------------ | ------------------- | ----------------------------------------------------------------------- |
-| `SUPABASE_URL`                                                     | Worker/local        | URL project; có mặc định công khai                                      |
-| `SUPABASE_PUBLISHABLE_KEY`                                         | Worker/local        | Key công khai dùng RLS, bắt buộc có dữ liệu                             |
-| `SUPABASE_SERVICE_ROLE_KEY`                                        | Worker secret       | Quyền server ghi cache/jobs; cấm browser/log                            |
-| `SUPABASE_PROJECT_REF`                                             | Script quản trị     | Project ref đúng đích                                                   |
-| `SUPABASE_ACCESS_TOKEN`                                            | Môi trường quản trị | Migration/sync/live tests; không đặt NEXT_PUBLIC                        |
-| `CLOUDFLARE_ACCOUNT_ID`                                            | CLI/CI              | Account chứa Worker                                                     |
-| `CLOUDFLARE_API_TOKEN`                                             | CLI/CI secret       | Token đúng quyền và account; khác Build token đã chọn trong dashboard   |
-| `NEXT_PUBLIC_WORKER_URL`                                           | Build web           | Ghi đè API base; public, thay đổi cần build lại                         |
-| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Kiểm tra kết nối    | Public config tùy script; web Auth chính lấy public-config              |
-| `CATALOG_PROVIDER`                                                 | Worker/script       | `kbs`                                                                   |
-| `QUOTE_PROVIDER`                                                   | Worker/script       | `vps`                                                                   |
-| `HISTORY_PROVIDER`                                                 | Worker/script       | `vps` hoặc `kbs`, không tự trộn nguồn                                   |
-| `FUNDAMENTALS_PROVIDER`                                            | Worker/script       | `kbs`; VPS chưa có BCTC xác minh                                        |
-| `SYNC_SYMBOLS`                                                     | Worker/script       | Danh sách tối đa 50 mã mỗi lượt đồng bộ                                 |
-| `NEWS_RSS_PERMISSION`                                              | Worker              | `personal-nonprofit` theo xác nhận; thương mại cần rà quyền lại         |
-| `NEWS_WEIGHT`                                                      | Worker              | 0–0,3; mặc định 0,1, thiếu LLM không có điểm tin giả                    |
-| `NEWS_LLM_API_KEY`                                                 | Worker secret       | Key API tương thích OpenAI                                              |
-| `NEWS_LLM_BASE_URL`                                                | Worker              | Base URL HTTPS, nối `/chat/completions`                                 |
-| `NEWS_LLM_MODEL`                                                   | Worker              | Model thực do nhà cung cấp hỗ trợ                                       |
-| `ALERT_EMAIL_API_KEY`                                              | Worker secret       | Resend, tùy chọn, hiện chưa cung cấp                                    |
-| `ALERT_EMAIL_FROM`                                                 | Worker              | Địa chỉ/domain đã xác minh Resend, hiện còn thiếu                       |
-| `VPS_LIVE_SYMBOLS`                                                 | Script/test         | Mã kiểm tra provider live, mặc định ACB                                 |
-| `MARKET_APP_URL`                                                   | Browser test        | URL website cần kiểm tra                                                |
-| `PLAYWRIGHT_BROWSERS_PATH`                                         | Browser test        | Thư mục Chromium                                                        |
-| `npm_config_cache`                                                 | Local/cloud         | Cache npm ghi được khi HOME hạn chế                                     |
-| `CF_DEPLOYMENT_MODE`                                               | GitHub variable     | `git-integration` cho cấu hình hiện tại; `actions` chỉ khi chọn Actions |
-| `CF_PAGES_PROJECT`                                                 | GitHub variable cũ  | Chỉ dùng nhánh triển khai Pages được cấu hình riêng                     |
+| Biến                                                               | Nơi dùng            | Ý nghĩa                                                                   |
+| ------------------------------------------------------------------ | ------------------- | ------------------------------------------------------------------------- |
+| `SUPABASE_URL`                                                     | Worker/local        | URL project; có mặc định công khai                                        |
+| `SUPABASE_PUBLISHABLE_KEY`                                         | Worker/local        | Key công khai dùng RLS, bắt buộc có dữ liệu                               |
+| `SUPABASE_SERVICE_ROLE_KEY`                                        | Worker secret       | Quyền server ghi cache/jobs; cấm browser/log                              |
+| `SUPABASE_PROJECT_REF`                                             | Script quản trị     | Project ref đúng đích                                                     |
+| `SUPABASE_ACCESS_TOKEN`                                            | Môi trường quản trị | Migration/sync/live tests; không đặt NEXT_PUBLIC                          |
+| `CLOUDFLARE_ACCOUNT_ID`                                            | CLI/CI              | Account chứa Worker                                                       |
+| `CLOUDFLARE_API_TOKEN`                                             | CLI/CI secret       | Token đúng quyền và account; khác Build token đã chọn trong dashboard     |
+| `NEXT_PUBLIC_WORKER_URL`                                           | Build web           | Ghi đè API base; public, thay đổi cần build lại                           |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Kiểm tra kết nối    | Public config tùy script; web Auth chính lấy public-config                |
+| `CATALOG_PROVIDER`                                                 | Worker/script       | `kbs`                                                                     |
+| `QUOTE_PROVIDER`                                                   | Worker/script       | `vps`                                                                     |
+| `HISTORY_PROVIDER`                                                 | Worker/script       | `vps` hoặc `kbs`, không tự trộn nguồn                                     |
+| `FUNDAMENTALS_PROVIDER`                                            | Worker/script       | `kbs`; VPS chưa có BCTC xác minh                                          |
+| `FIREANT_API_TOKEN`                                                | Worker secret       | Tùy chọn: BCTC dự phòng FireAnt khi KBS lỗi; cần migration 20261016100000 |
+| `SYNC_SYMBOLS`                                                     | Worker/script       | Danh sách tối đa 50 mã mỗi lượt đồng bộ                                   |
+| `NEWS_RSS_PERMISSION`                                              | Worker              | `personal-nonprofit` theo xác nhận; thương mại cần rà quyền lại           |
+| `NEWS_WEIGHT`                                                      | Worker              | 0–0,3; mặc định 0,1, thiếu LLM không có điểm tin giả                      |
+| `NEWS_LLM_API_KEY`                                                 | Worker secret       | Key API tương thích OpenAI                                                |
+| `NEWS_LLM_BASE_URL`                                                | Worker              | Base URL HTTPS, nối `/chat/completions`                                   |
+| `NEWS_LLM_MODEL`                                                   | Worker              | Model thực do nhà cung cấp hỗ trợ                                         |
+| `ALERT_EMAIL_API_KEY`                                              | Worker secret       | Resend, tùy chọn, hiện chưa cung cấp                                      |
+| `ALERT_EMAIL_FROM`                                                 | Worker              | Địa chỉ/domain đã xác minh Resend, hiện còn thiếu                         |
+| `VPS_LIVE_SYMBOLS`                                                 | Script/test         | Mã kiểm tra provider live, mặc định ACB                                   |
+| `MARKET_APP_URL`                                                   | Browser test        | URL website cần kiểm tra                                                  |
+| `PLAYWRIGHT_BROWSERS_PATH`                                         | Browser test        | Thư mục Chromium                                                          |
+| `npm_config_cache`                                                 | Local/cloud         | Cache npm ghi được khi HOME hạn chế                                       |
+| `CF_DEPLOYMENT_MODE`                                               | GitHub variable     | `git-integration` cho cấu hình hiện tại; `actions` chỉ khi chọn Actions   |
+| `CF_PAGES_PROJECT`                                                 | GitHub variable cũ  | Chỉ dùng nhánh triển khai Pages được cấu hình riêng                       |
 
 `ASSETS`, `API_RATE_LIMIT` (120/phút/IP), `ANALYSIS_RATE_LIMIT` (30/phút/IP) là **bindings trong wrangler**, không phải secret/environment string. Rate limit theo Cloudflare location, xấp xỉ; không phải quota toàn cầu và không giới hạn người dùng gọi Supabase REST trực tiếp. Public cache chỉ ở các API allowlist; dữ liệu cá nhân no-store/RLS. Không lưu service role trong `.env` public, source, issue hoặc README.
 

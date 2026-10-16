@@ -51,17 +51,16 @@ thiết kế tự làm mới snapshot >24 giờ, nên lần đo đã làm mới 
 
 ## Nguồn đã thử nhưng không dùng (16/10/2026)
 
-| Nguồn                 | Kết quả gọi thật                                                                        | Quyết định                                                              |
-| --------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| FireAnt `restv2`      | `full-financial-reports`, `financial-indicators`, `fundamental`: HTTP 401 cần token     | Không dùng token nhúng trong web FireAnt. Cần gói API/token chính thức. |
-| HOSE `hsx.vn`         | Trang SPA, BCTC công bố dạng tin/PDF; không có API BCTC có cấu trúc công khai           | Không tự trích PDF; giữ cơ chế bằng chứng tài liệu hiện có.             |
-| HNX `hnx.vn`          | TLS lỗi chuỗi chứng chỉ (`unable to get local issuer certificate`) qua CA chuẩn         | Không tắt kiểm tra TLS; không dùng làm nguồn tự động.                   |
-| Vietstock Finance     | Trang HTML ~1,2 MB, dữ liệu BCTC qua phiên/token web                                    | Không cào HTML.                                                         |
-| KBS + Vietcap (đã có) | KBS 200 khi có User-Agent (curl mặc định bị chặn, adapter đã gửi UA riêng); Vietcap 200 | Giữ làm nguồn chính; sửa parser như trên.                               |
+| Nguồn                 | Kết quả gọi thật                                                                        | Quyết định                                                           |
+| --------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| FireAnt `restv2`      | `full-financial-reports`, `financial-indicators`, `fundamental`: HTTP 401 cần token     | Sau đó có token người dùng: dùng làm **dự phòng** (xem mục Bổ sung). |
+| HOSE `hsx.vn`         | Trang SPA, BCTC công bố dạng tin/PDF; không có API BCTC có cấu trúc công khai           | Không tự trích PDF; giữ cơ chế bằng chứng tài liệu hiện có.          |
+| HNX `hnx.vn`          | TLS lỗi chuỗi chứng chỉ (`unable to get local issuer certificate`) qua CA chuẩn         | Không tắt kiểm tra TLS; không dùng làm nguồn tự động.                |
+| Vietstock Finance     | Trang HTML ~1,2 MB, dữ liệu BCTC qua phiên/token web                                    | Không cào HTML.                                                      |
+| KBS + Vietcap (đã có) | KBS 200 khi có User-Agent (curl mặc định bị chặn, adapter đã gửi UA riêng); Vietcap 200 | Giữ làm nguồn chính; sửa parser như trên.                            |
 
-Muốn thêm FireAnt: mua/đăng ký API, đặt secret `FIREANT_API_TOKEN` trong
-Cloudflare (không commit), rồi giao một phần việc để khảo sát schema thật và
-viết adapter + fixture. Không viết adapter khi chưa thấy response thật.
+Cập nhật cùng ngày: người dùng cung cấp token FireAnt, đã khảo sát response thật và
+thêm adapter dự phòng — xem mục “Bổ sung” bên dưới.
 
 ## Còn lại / rủi ro
 
@@ -79,3 +78,38 @@ viết adapter + fixture. Không viết adapter khi chưa thấy response thật
 - KBS/Vietcap là endpoint web không chính thức, không SLA.
 
 Log `npm run verify` nguyên văn: [verify-financial-sources-2026-10-16.txt](verify-financial-sources-2026-10-16.txt).
+
+## Bổ sung: BCTC dự phòng FireAnt (`FIREANT_VIETCAP`)
+
+Gọi thật 16/10/2026 bằng token người dùng cung cấp (token không nằm trong repo):
+`restv2.fireant.vn/symbols/{mã}/full-financial-reports?type=1|2|4&year=Y&quarter=0&limit=4`
+trả HTTP200 (~1,3–2,6 giây), 4 năm 2022–2025, đơn vị **đồng**. `type=3` trả `null`,
+`type=5` HTTP500. Đối chiếu VNM 2025 với KBS: doanh thu, LNST, LNST công ty mẹ, tài sản
+ngắn hạn, nợ ngắn/dài hạn, vốn chủ, lợi ích CĐ không kiểm soát, CFO, capex, cổ tức đều
+lệch < 1.000 đ (KBS làm tròn nghìn đồng).
+
+- **Chỉ dùng khi KBS lỗi hoặc không có kỳ năm hợp lệ**; không trộn hai nguồn trong
+  một snapshot. Snapshot FireAnt thiếu Nợ vay/VCSH nên không ghi đè snapshot KBS đầy
+  đủ (guard suy giảm hiện có).
+- FireAnt không có EPS cơ bản đã công bố (chỉ số `BasicEPS` 4.502 = LNST/số CP, khác
+  EPS công bố 4.028), ngày công bố, cờ kiểm toán/hợp nhất. Vì vậy EPS năm và ngày công
+  bố lấy từ Vietcap `INCOME_STATEMENT` (`isa23`, `publicDate`); một năm chỉ được nhận
+  khi LNST công ty mẹ FireAnt khớp Vietcap `isa22` trong 0,01%.
+- Hợp nhất: chỉ nhận năm có lợi ích CĐ không kiểm soát khác 0. **Giả định:** BCTC năm
+  công bố sau kỳ là bản kiểm toán. DHG/NT2 (riêng lẻ) bị loại; QNS (hợp nhất nhưng
+  không có CĐ thiểu số) cũng bị loại — sai âm bảo thủ.
+- ROEA/ROAA/biên gộp/biên ròng tính lại theo đúng định nghĩa KBS và khớp KBS VNM 2025
+  (29,89% / 17,37% / 41,18% / 14,79%). Nợ vay/VCSH để trống.
+- Mỗi mã dự phòng tốn 5–6 request (3 FireAnt + 2–3 Vietcap).
+
+### Bật trên production (bạn tự làm, 2 bước)
+
+1. Áp dụng migration `supabase/migrations/20261016100000_fireant_financial_fallback.sql`:
+   Supabase Dashboard → SQL Editor → dán toàn bộ nội dung file → Run. Chưa áp dụng thì
+   DB từ chối snapshot FireAnt và giữ dữ liệu cũ (không lỗi trang).
+2. Cloudflare Dashboard → Workers & Pages → `vn-stock-analyzer` → Settings → Variables
+   and Secrets → Add → Type **Secret**, tên `FIREANT_API_TOKEN`, giá trị là token (không
+   kèm chữ `Bearer`). Lưu sẽ tạo bản deploy mới.
+
+Token là phiên đăng nhập cá nhân FireAnt có quyền ghi lệnh/tài khoản; có thể bị FireAnt
+thu hồi bất kỳ lúc nào. Khi đó web tự quay về chỉ dùng KBS + snapshot cũ.

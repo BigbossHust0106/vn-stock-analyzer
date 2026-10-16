@@ -18,6 +18,7 @@ export function marketProviders(env: Env) {
     env.CATALOG_PROVIDER,
     env.HISTORY_PROVIDER,
     env.QUOTE_PROVIDER,
+    Boolean(env.FIREANT_API_TOKEN),
   ]);
   let found = instances.get(key);
   if (!found) {

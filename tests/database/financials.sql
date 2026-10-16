@@ -31,3 +31,22 @@ do $$ begin
 end $$;
 rollback;
 \echo FINANCIAL SQL PASS: older score computation cannot overwrite newer score
+
+begin;
+insert into public.stocks(id,symbol,exchange,name) values('20000000-0000-4000-8000-000000000011','TSF','HOSE','Synthetic fallback source test, not source data');
+set local role service_role;
+select public.ingest_financials('{"symbol":"TSF","source":"FIREANT_VIETCAP","verification":"provider_reported","fetchedAt":"2026-01-01T00:00:00Z","annual":[{"year":2024,"periodEnd":"2024-12-31","publishedAt":"2025-03-01T00:00:00+07:00","audited":true,"consolidated":true,"revenueVnd":100,"netProfitVnd":20,"parentProfitVnd":18,"epsAnnualVnd":4,"bvpsVnd":25,"roe":0.2,"roa":0.1,"roic":null,"grossMargin":0.3,"netMargin":0.2,"debtToEquity":null,"operatingCashFlowVnd":100,"capexVnd":20,"freeCashFlowVnd":80,"dividendsPaidVnd":20,"sharesOutstanding":10}]}');
+do $$ declare payload jsonb; begin
+ if (select source from public.financial_snapshots where stock_id='20000000-0000-4000-8000-000000000011')<>'FIREANT_VIETCAP' or (select source from public.fundamentals where stock_id='20000000-0000-4000-8000-000000000011')<>'FIREANT_VIETCAP' then raise exception 'Fallback source not recorded'; end if;
+ select s.payload into payload from public.financial_snapshots s where stock_id='20000000-0000-4000-8000-000000000011';
+ begin
+ perform public.ingest_financials(jsonb_set(jsonb_set(payload,'{source}','"UNKNOWN"'),'{fetchedAt}','"2026-01-02T00:00:00Z"'));
+ raise exception 'Unknown source accepted';
+ exception when raise_exception then if sqlerrm='Unknown source accepted' then raise; end if; end;
+ begin
+ update public.financial_snapshots set source='UNKNOWN' where stock_id='20000000-0000-4000-8000-000000000011';
+ raise exception 'Unknown snapshot source accepted';
+ exception when check_violation then null; end;
+end $$;
+rollback;
+\echo FINANCIAL SQL PASS: FIREANT_VIETCAP fallback recorded as its own source, unknown sources denied

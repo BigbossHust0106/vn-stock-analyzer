@@ -46,7 +46,11 @@ export class ProviderHttp {
     this.queue = result.catch(() => undefined);
     return result;
   }
-  async request(url: string): Promise<unknown> {
+  // `headers` dùng cho nguồn cần xác thực; lỗi không bao giờ chứa URL/header.
+  async request(
+    url: string,
+    headers: Record<string, string> = {},
+  ): Promise<unknown> {
     for (let attempt = 0; attempt <= this.options.retries; attempt++) {
       const wait = Math.max(
         0,
@@ -60,7 +64,10 @@ export class ProviderHttp {
         response = await this.transport.call(globalThis, url, {
           signal: AbortSignal.timeout(this.options.timeoutMs),
           redirect: 'manual',
-          headers: { 'User-Agent': 'vn-stock-analyzer/0.2 data-provider' },
+          headers: {
+            'User-Agent': 'vn-stock-analyzer/0.2 data-provider',
+            ...headers,
+          },
         });
       } catch {
         if (attempt === this.options.retries)

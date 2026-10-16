@@ -287,8 +287,10 @@ export default function GuidePage() {
           </li>
           <li>
             BCTC năm: KBS (báo cáo chuẩn hóa) kết hợp Vietcap (số cổ phiếu,
-            ROIC; kho báo cáo dự phòng). Hệ thống tự làm mới BCTC mỗi ngày theo
-            từng lượt nhỏ, kể cả cuối tuần; nguồn lỗi thì giữ bản cũ.
+            ROIC; kho báo cáo dự phòng); khi KBS lỗi và đã cấu hình, FireAnt
+            được dùng thay, trang chi tiết ghi rõ nguồn. Hệ thống tự làm mới
+            BCTC mỗi ngày theo từng lượt nhỏ, kể cả cuối tuần; nguồn lỗi thì giữ
+            bản cũ.
           </li>
           <li>
             Một số trường hợp vẫn ghi “không đủ dữ liệu”: công ty chỉ công bố

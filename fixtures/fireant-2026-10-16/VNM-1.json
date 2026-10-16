@@ -1,0 +1,2256 @@
+[
+  {
+    "id": 1,
+    "name": "TÀI SẢN",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": null },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": null },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": null },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": null }
+    ]
+  },
+  {
+    "id": 101,
+    "name": "A. Tài sản lưu động và đầu tư ngắn hạn",
+    "parentID": 1,
+    "expanded": true,
+    "level": 2,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 31560382174201.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 35935879621477.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 37553650065098.0
+      },
+      {
+        "period": "2025",
+        "year": 2025,
+        "quarter": 0,
+        "value": 36261180908033.0
+      }
+    ]
+  },
+  {
+    "id": 10101,
+    "name": "I. Tiền và các khoản tương đương tiền",
+    "parentID": 101,
+    "expanded": false,
+    "level": 3,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 2299943527624.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 2912027359925.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 2225943732075.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 1794879718871.0 }
+    ]
+  },
+  {
+    "id": 1010101,
+    "name": "1. Tiền",
+    "parentID": 10101,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 1327429518437.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 1025487470250.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 1877943732075.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 1630879718871.0 }
+    ]
+  },
+  {
+    "id": 1010102,
+    "name": "2. Các khoản tương đương tiền",
+    "parentID": 10101,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 972514009187.0 },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 1886539889675.0
+      },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 348000000000.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 164000000000.0 }
+    ]
+  },
+  {
+    "id": 10102,
+    "name": "II. Các khoản đầu tư tài chính ngắn hạn",
+    "parentID": 101,
+    "expanded": false,
+    "level": 3,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 17414055328683.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 20137243800460.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 23260088671767.0
+      },
+      {
+        "period": "2025",
+        "year": 2025,
+        "quarter": 0,
+        "value": 21354863600460.0
+      }
+    ]
+  },
+  {
+    "id": 1010201,
+    "name": "1. Chứng khoán kinh doanh",
+    "parentID": 10102,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 1159355253.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 1193065962.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 1248322211.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 1288677349.0 }
+    ]
+  },
+  {
+    "id": 1010202,
+    "name": "2. Dự phòng giảm giá chứng khoán kinh doanh",
+    "parentID": 10102,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": -689745197.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": -822663402.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": -920681738.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": -849021293.0 }
+    ]
+  },
+  {
+    "id": 1010203,
+    "name": "3. Đầu tư nắm giữ đến ngày đáo hạn",
+    "parentID": 10102,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 17413585718627.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 20136873397900.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 23259761031294.0
+      },
+      {
+        "period": "2025",
+        "year": 2025,
+        "quarter": 0,
+        "value": 21354423944404.0
+      }
+    ]
+  },
+  {
+    "id": 10103,
+    "name": "III. Các khoản phải thu ngắn hạn",
+    "parentID": 101,
+    "expanded": false,
+    "level": 3,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 6100402870854.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 6529705184034.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 6233758612009.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 6027719081073.0 }
+    ]
+  },
+  {
+    "id": 1010301,
+    "name": "1. Phải thu ngắn hạn của khách hàng",
+    "parentID": 10103,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 4633942510271.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 4808183557645.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 4793132726166.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 4701653413423.0 }
+    ]
+  },
+  {
+    "id": 1010302,
+    "name": "2. Trả trước cho người bán",
+    "parentID": 10103,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 589439884812.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 655619313409.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 566479222775.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 443955080617.0 }
+    ]
+  },
+  {
+    "id": 1010303,
+    "name": "3. Phải thu nội bộ ngắn hạn",
+    "parentID": 10103,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 1010304,
+    "name": "4. Phải thu theo tiến độ hợp đồng xây dựng",
+    "parentID": 10103,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 1010305,
+    "name": "5. Phải thu về cho vay ngắn hạn",
+    "parentID": 10103,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 1010306,
+    "name": "6. Phải thu ngắn hạn khác",
+    "parentID": 10103,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 890466200571.0 },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 1080803411003.0
+      },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 896479529747.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 915887527352.0 }
+    ]
+  },
+  {
+    "id": 1010307,
+    "name": "7. Dự phòng phải thu ngắn hạn khó đòi",
+    "parentID": 10103,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": -13445724800.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": -14901098023.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": -22332866679.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": -33776940319.0 }
+    ]
+  },
+  {
+    "id": 10104,
+    "name": "IV. Tổng hàng tồn kho",
+    "parentID": 101,
+    "expanded": false,
+    "level": 3,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 5537563396117.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 6128081805088.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 5686840161996.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 6839279842936.0 }
+    ]
+  },
+  {
+    "id": 1010401,
+    "name": "1. Hàng tồn kho",
+    "parentID": 10104,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 5560169453504.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 6165935294543.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 5723932310689.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 6897878201557.0 }
+    ]
+  },
+  {
+    "id": 1010402,
+    "name": "2. Dự phòng giảm giá hàng tồn kho",
+    "parentID": 10104,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": -22606057387.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": -37853489455.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": -37092148693.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": -58598358621.0 }
+    ]
+  },
+  {
+    "id": 10105,
+    "name": "V. Tài sản ngắn hạn khác",
+    "parentID": 101,
+    "expanded": false,
+    "level": 3,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 208417050923.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 228821471970.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 147018887251.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 244438664693.0 }
+    ]
+  },
+  {
+    "id": 1010501,
+    "name": "1. Chi phí trả trước ngắn hạn",
+    "parentID": 10105,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 97570693043.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 82860441483.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 89544473336.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 150006422830.0 }
+    ]
+  },
+  {
+    "id": 1010502,
+    "name": "2. Thuế giá trị gia tăng được khấu trừ",
+    "parentID": 10105,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 89204099539.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 99428954456.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 33580977723.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 64351825929.0 }
+    ]
+  },
+  {
+    "id": 1010503,
+    "name": "3. Thuế và các khoản phải thu Nhà nước",
+    "parentID": 10105,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 21642258341.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 46532076031.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 23893436192.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 30080415934.0 }
+    ]
+  },
+  {
+    "id": 1010504,
+    "name": "4. Giao dịch mua bán lại trái phiếu chính phủ",
+    "parentID": 10105,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 1010505,
+    "name": "5. Tài sản ngắn hạn khác",
+    "parentID": 10105,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 102,
+    "name": "B. Tài sản cố định và đầu tư dài hạn",
+    "parentID": 1,
+    "expanded": true,
+    "level": 2,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 16922282062019.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 16737491482983.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 17495411471963.0
+      },
+      {
+        "period": "2025",
+        "year": 2025,
+        "quarter": 0,
+        "value": 17051189809268.0
+      }
+    ]
+  },
+  {
+    "id": 10201,
+    "name": "I. Các khoản phải thu dài hạn",
+    "parentID": 102,
+    "expanded": false,
+    "level": 3,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 38422722715.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 16131990975.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 17592137763.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 23255275322.0 }
+    ]
+  },
+  {
+    "id": 1020101,
+    "name": "1. Phải thu dài hạn của khách hàng",
+    "parentID": 10201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 398152069.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 1020102,
+    "name": "2. Vốn kinh doanh tại các đơn vị trực thuộc",
+    "parentID": 10201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 1020103,
+    "name": "3. Phải thu dài hạn nội bộ",
+    "parentID": 10201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 1020104,
+    "name": "4. Phải thu về cho vay dài hạn",
+    "parentID": 10201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 1020105,
+    "name": "5. Phải thu dài hạn khác",
+    "parentID": 10201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 38422722715.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 16131990975.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 17193985694.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 23255275322.0 }
+    ]
+  },
+  {
+    "id": 1020106,
+    "name": "6. Dự phòng phải thu dài hạn khó đòi",
+    "parentID": 10201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 10202,
+    "name": "II. Tài sản cố định",
+    "parentID": 102,
+    "expanded": false,
+    "level": 3,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 11903207642940.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 12689652377511.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 12550564799221.0
+      },
+      {
+        "period": "2025",
+        "year": 2025,
+        "quarter": 0,
+        "value": 12648916412221.0
+      }
+    ]
+  },
+  {
+    "id": 1020201,
+    "name": "1. Tài sản cố định hữu hình",
+    "parentID": 10202,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 10860366507422.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 11688520305045.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 11520200967499.0
+      },
+      {
+        "period": "2025",
+        "year": 2025,
+        "quarter": 0,
+        "value": 11618118961976.0
+      }
+    ]
+  },
+  {
+    "id": 102020101,
+    "name": "- Nguyên giá",
+    "parentID": 1020201,
+    "expanded": false,
+    "level": 5,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 28502157270867.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 31109174369693.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 32713051932999.0
+      },
+      {
+        "period": "2025",
+        "year": 2025,
+        "quarter": 0,
+        "value": 34581520458638.0
+      }
+    ]
+  },
+  {
+    "id": 102020102,
+    "name": "- Giá trị hao mòn lũy kế",
+    "parentID": 1020201,
+    "expanded": false,
+    "level": 5,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": -17641790763445.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": -19420654064648.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": -21192850965500.0
+      },
+      {
+        "period": "2025",
+        "year": 2025,
+        "quarter": 0,
+        "value": -22963401496662.0
+      }
+    ]
+  },
+  {
+    "id": 1020202,
+    "name": "2. Tài sản cố định thuê tài chính",
+    "parentID": 10202,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 102020201,
+    "name": "- Nguyên giá",
+    "parentID": 1020202,
+    "expanded": false,
+    "level": 5,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 102020202,
+    "name": "- Giá trị hao mòn lũy kế",
+    "parentID": 1020202,
+    "expanded": false,
+    "level": 5,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 1020203,
+    "name": "3. Tài sản cố định vô hình",
+    "parentID": 10202,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 1042841135518.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 1001132072466.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 1030363831722.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 1030797450245.0 }
+    ]
+  },
+  {
+    "id": 102020301,
+    "name": "- Nguyên giá",
+    "parentID": 1020203,
+    "expanded": false,
+    "level": 5,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 1353423614905.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 1366405903459.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 1466192051516.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 1545930249660.0 }
+    ]
+  },
+  {
+    "id": 102020302,
+    "name": "- Giá trị hao mòn lũy kế",
+    "parentID": 1020203,
+    "expanded": false,
+    "level": 5,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": -310582479387.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": -365273830993.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": -435828219794.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": -515132799415.0 }
+    ]
+  },
+  {
+    "id": 10203,
+    "name": "III. Bất động sản đầu tư",
+    "parentID": 102,
+    "expanded": false,
+    "level": 3,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 57593807783.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 55594154394.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 53617793172.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 51780183216.0 }
+    ]
+  },
+  {
+    "id": 1020301,
+    "name": "- Nguyên giá",
+    "parentID": 10203,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 98822678885.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 98822678885.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 98822678885.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 98822678885.0 }
+    ]
+  },
+  {
+    "id": 1020302,
+    "name": "- Giá trị hao mòn lũy kế",
+    "parentID": 10203,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": -41228871102.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": -43228524491.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": -45204885713.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": -47042495669.0 }
+    ]
+  },
+  {
+    "id": 10204,
+    "name": "IV. Tài sản dở dang dài hạn",
+    "parentID": 102,
+    "expanded": false,
+    "level": 3,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 1805129940386.0
+      },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 936923649898.0 },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 1539776005637.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 1320803519138.0 }
+    ]
+  },
+  {
+    "id": 1020401,
+    "name": "1. Chi phí sản xuất, kinh doanh dở dang dài hạn",
+    "parentID": 10204,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 334547387349.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 381979710802.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 404666242750.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 449020626377.0 }
+    ]
+  },
+  {
+    "id": 1020402,
+    "name": "2. chi phí xây dựng cơ bản dở dang",
+    "parentID": 10204,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 1470582553037.0
+      },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 554943939096.0 },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 1135109762887.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 871782892761.0 }
+    ]
+  },
+  {
+    "id": 10205,
+    "name": "V. Các khoản đầu tư tài chính dài hạn",
+    "parentID": 102,
+    "expanded": false,
+    "level": 3,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 742670306431.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 831227597345.0 },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 1373189677193.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 957072946110.0 }
+    ]
+  },
+  {
+    "id": 1020501,
+    "name": "1. Đầu tư vào công ty con",
+    "parentID": 10205,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 1020502,
+    "name": "2. Đầu tư vào công ty liên kết, liên doanh",
+    "parentID": 10205,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 664302778018.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 602591028932.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 622223692780.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 511184069624.0 }
+    ]
+  },
+  {
+    "id": 1020503,
+    "name": "3. Đầu tư khác vào công cụ vốn",
+    "parentID": 10205,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 101950219081.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 101975059081.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 94548675081.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 94578411081.0 }
+    ]
+  },
+  {
+    "id": 1020504,
+    "name": "4. Dự phòng giảm giá đầu tư tài chính dài hạn",
+    "parentID": 10205,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": -23582690668.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": -23582690668.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": -23582690668.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": -23983512327.0 }
+    ]
+  },
+  {
+    "id": 1020505,
+    "name": "5. Đầu tư nắm giữ đến ngày đáo hạn",
+    "parentID": 10205,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 150244200000.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 680000000000.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 375293977732.0 }
+    ]
+  },
+  {
+    "id": 10206,
+    "name": "VI. Tổng tài sản dài hạn khác",
+    "parentID": 102,
+    "expanded": false,
+    "level": 3,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 2375257641764.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 2207961712860.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 1960671058977.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 2049361473261.0 }
+    ]
+  },
+  {
+    "id": 1020601,
+    "name": "1. Chi phí trả trước dài hạn",
+    "parentID": 10206,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 772804663141.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 871585543337.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 792476015491.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 1104735884699.0 }
+    ]
+  },
+  {
+    "id": 1020602,
+    "name": "2. Tài sản Thuế thu nhập hoãn lại",
+    "parentID": 10206,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 34985203461.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 14448509586.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 92172946105.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 115261492741.0 }
+    ]
+  },
+  {
+    "id": 1020603,
+    "name": "3. Tài sản dài hạn khác",
+    "parentID": 10206,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 10207,
+    "name": "VII. Lợi thế thương mại",
+    "parentID": 102,
+    "expanded": false,
+    "level": 3,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 1567467775162.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 1321927659937.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 1076022097381.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 829364095821.0 }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "TỔNG CỘNG TÀI SẢN",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 48482664236220.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 52673371104460.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 55049061537061.0
+      },
+      {
+        "period": "2025",
+        "year": 2025,
+        "quarter": 0,
+        "value": 53312370717301.0
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "NGUỒN VỐN",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": null },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": null },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": null },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": null }
+    ]
+  },
+  {
+    "id": 301,
+    "name": "A. Nợ phải trả",
+    "parentID": 3,
+    "expanded": true,
+    "level": 2,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 15666145881135.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 17647627338990.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 18874658707398.0
+      },
+      {
+        "period": "2025",
+        "year": 2025,
+        "quarter": 0,
+        "value": 18829355431194.0
+      }
+    ]
+  },
+  {
+    "id": 30101,
+    "name": "I. Nợ ngắn hạn",
+    "parentID": 301,
+    "expanded": false,
+    "level": 3,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 15308423081524.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 17138689974862.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 18459546837640.0
+      },
+      {
+        "period": "2025",
+        "year": 2025,
+        "quarter": 0,
+        "value": 18520286019795.0
+      }
+    ]
+  },
+  {
+    "id": 3010101,
+    "name": "1. Vay và nợ thuê tài chính ngắn hạn",
+    "parentID": 30101,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 4867129839103.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 8217757172267.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 9115435107250.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 9393736731992.0 }
+    ]
+  },
+  {
+    "id": 3010102,
+    "name": "2. Vay và nợ dài hạn đến hạn phải trả",
+    "parentID": 30101,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3010103,
+    "name": "3. Phải trả người bán ngắn hạn",
+    "parentID": 30101,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 4284158390163.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 3805885429198.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 3874064349587.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 3923308706878.0 }
+    ]
+  },
+  {
+    "id": 3010104,
+    "name": "4. Người mua trả tiền trước",
+    "parentID": 30101,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 161708567120.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 164712782108.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 191336029327.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 253080586375.0 }
+    ]
+  },
+  {
+    "id": 3010105,
+    "name": "5. Thuế và các khoản phải nộp nhà nước",
+    "parentID": 30101,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 598135128295.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 967878916785.0 },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 1014478141379.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 1803999103453.0 }
+    ]
+  },
+  {
+    "id": 3010106,
+    "name": "6. Phải trả người lao động",
+    "parentID": 30101,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 287914221269.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 289224237367.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 307904216360.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 321578564134.0 }
+    ]
+  },
+  {
+    "id": 3010107,
+    "name": "7. Chi phí phải trả ngắn hạn",
+    "parentID": 30101,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 1620874538443.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 1910204625860.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 2115775261996.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 1754110130538.0 }
+    ]
+  },
+  {
+    "id": 3010108,
+    "name": "8. Phải trả nội bộ ngắn hạn",
+    "parentID": 30101,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3010109,
+    "name": "9. Phải trả theo tiến độ kế hoạch hợp đồng xây dựng",
+    "parentID": 30101,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3010110,
+    "name": "10. Doanh thu chưa thực hiện ngắn hạn",
+    "parentID": 30101,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 4161405120.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 263912729.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 263912732.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3010111,
+    "name": "11. Phải trả ngắn hạn khác",
+    "parentID": 30101,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 3055541590234.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 1193900858465.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 1148532208981.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 102362732591.0 }
+    ]
+  },
+  {
+    "id": 3010112,
+    "name": "12. Dự phòng phải trả ngắn hạn",
+    "parentID": 30101,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 26635759312.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 16770514285.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 11775786301.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 15062839525.0 }
+    ]
+  },
+  {
+    "id": 3010113,
+    "name": "13. Quỹ khen thưởng phúc lợi",
+    "parentID": 30101,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 402163642465.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 572091525798.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 679981823727.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 953046624309.0 }
+    ]
+  },
+  {
+    "id": 3010114,
+    "name": "14. Quỹ bình ổn giá",
+    "parentID": 30101,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3010115,
+    "name": "15. Giao dịch mua bán lại trái phiếu chính phủ",
+    "parentID": 30101,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 30102,
+    "name": "II. Nợ dài hạn",
+    "parentID": 301,
+    "expanded": false,
+    "level": 3,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 357722799611.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 508937364128.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 415111869758.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 309069411399.0 }
+    ]
+  },
+  {
+    "id": 3010201,
+    "name": "1. Phải trả người bán dài hạn",
+    "parentID": 30102,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3010202,
+    "name": "2. Chi phí phải trả dài hạn",
+    "parentID": 30102,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3010203,
+    "name": "3. Phải trả nội bộ về vốn kinh doanh",
+    "parentID": 30102,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3010204,
+    "name": "4. Phải trả nội bộ dài hạn",
+    "parentID": 30102,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3010205,
+    "name": "5. Phải trả dài hạn khác",
+    "parentID": 30102,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 3711780002.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 1063378252.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 722927552.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 614465489.0 }
+    ]
+  },
+  {
+    "id": 3010206,
+    "name": "6. Vay và nợ thuê tài chính dài hạn",
+    "parentID": 30102,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 66028725000.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 238476074100.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 157903902450.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 62907826150.0 }
+    ]
+  },
+  {
+    "id": 3010207,
+    "name": "7. Trái phiếu chuyển đổi",
+    "parentID": 30102,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3010208,
+    "name": "8. Thuế thu nhập hoãn lại phải trả",
+    "parentID": 30102,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 287982294609.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 269397911776.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 256485039756.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 245547119760.0 }
+    ]
+  },
+  {
+    "id": 3010209,
+    "name": "9. Dự phòng trợ cấp mất việc làm",
+    "parentID": 30102,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3010210,
+    "name": "10. Dự phòng phải trả dài hạn",
+    "parentID": 30102,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3010211,
+    "name": "11. Doanh thu chưa thực hiện dài hạn",
+    "parentID": 30102,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3010212,
+    "name": "12. Quỹ phát triển khoa học và công nghệ",
+    "parentID": 30102,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 302,
+    "name": "B. Nguồn vốn chủ sở hữu",
+    "parentID": 3,
+    "expanded": true,
+    "level": 2,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 32816518355085.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 35025743765470.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 36174402829663.0
+      },
+      {
+        "period": "2025",
+        "year": 2025,
+        "quarter": 0,
+        "value": 34483015286107.0
+      }
+    ]
+  },
+  {
+    "id": 30201,
+    "name": "I. Vốn chủ sở hữu",
+    "parentID": 302,
+    "expanded": false,
+    "level": 3,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 32816518355085.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 35025743765470.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 36174402829663.0
+      },
+      {
+        "period": "2025",
+        "year": 2025,
+        "quarter": 0,
+        "value": 34483015286107.0
+      }
+    ]
+  },
+  {
+    "id": 3020101,
+    "name": "1. Vốn đầu tư của chủ sở hữu",
+    "parentID": 30201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 20899554450000.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 20899554450000.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 20899554450000.0
+      },
+      {
+        "period": "2025",
+        "year": 2025,
+        "quarter": 0,
+        "value": 20899554450000.0
+      }
+    ]
+  },
+  {
+    "id": 3020102,
+    "name": "2. Thặng dư vốn cổ phần",
+    "parentID": 30201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 34110709700.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 34110709700.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 34110709700.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 34110709700.0 }
+    ]
+  },
+  {
+    "id": 3020103,
+    "name": "3. Quyền chọn chuyển đổi trái phiếu",
+    "parentID": 30201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3020104,
+    "name": "4. Vốn khác của chủ sở hữu",
+    "parentID": 30201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 202658418215.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 499080803215.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 499080803215.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 746826728845.0 }
+    ]
+  },
+  {
+    "id": 3020105,
+    "name": "5. Cổ phiếu quỹ",
+    "parentID": 30201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3020106,
+    "name": "6. Chênh lệch đánh giá lại tài sản",
+    "parentID": 30201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3020107,
+    "name": "7. Chênh lệch tỷ giá hối đoái",
+    "parentID": 30201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 92498048227.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 174100152253.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 295734210956.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 403591671521.0 }
+    ]
+  },
+  {
+    "id": 3020108,
+    "name": "8. Quỹ đầu tư phát triển",
+    "parentID": 30201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 5266761584973.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 6163736586996.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 7079114621362.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 78722924597.0 }
+    ]
+  },
+  {
+    "id": 3020109,
+    "name": "9. Quỹ dự phòng tài chính",
+    "parentID": 30201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3020110,
+    "name": "10. Quỹ khác thuộc vốn chủ sở hữu",
+    "parentID": 30201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3020111,
+    "name": "11. Lợi nhuận sau thuế chưa phân phối",
+    "parentID": 30201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 3353468092666.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 3926232003987.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 3471224745772.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 8522576422223.0 }
+    ]
+  },
+  {
+    "id": 302011101,
+    "name": "- LNST chưa phân phối lũy kế đến cuối kỳ trước",
+    "parentID": 3020111,
+    "expanded": false,
+    "level": 5,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 2682865082625.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 1068453760015.0
+      },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 349300113785.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 5330404883138.0 }
+    ]
+  },
+  {
+    "id": 302011102,
+    "name": "- LNST chưa phân phối kỳ này",
+    "parentID": 3020111,
+    "expanded": false,
+    "level": 5,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 670603010041.0 },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 2857778243972.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 3121924631987.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 3192171539085.0 }
+    ]
+  },
+  {
+    "id": 3020112,
+    "name": "12. Nguồn vốn đầu tư xây dựng cơ bản",
+    "parentID": 30201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3020113,
+    "name": "13. Quỹ hỗ trợ sắp xếp doanh nghiệp",
+    "parentID": 30201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3020114,
+    "name": "14. Lợi ích của cổ đông không kiểm soát",
+    "parentID": 30201,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 2967467051304.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 3328929059319.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 3895583288658.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 3797632379221.0 }
+    ]
+  },
+  {
+    "id": 30202,
+    "name": "II. Nguồn kinh phí và quỹ khác",
+    "parentID": 302,
+    "expanded": false,
+    "level": 3,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3020201,
+    "name": "1. Nguồn kinh phí ",
+    "parentID": 30202,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3020202,
+    "name": "2. Nguồn kinh phí đã hình thành tài sản cố định",
+    "parentID": 30202,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 3020203,
+    "name": "3. Quỹ dự phòng trợ cấp mất việc làm",
+    "parentID": 30202,
+    "expanded": false,
+    "level": 4,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "TỔNG CỘNG NGUỒN VỐN",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 48482664236220.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 52673371104460.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 55049061537061.0
+      },
+      {
+        "period": "2025",
+        "year": 2025,
+        "quarter": 0,
+        "value": 53312370717301.0
+      }
+    ]
+  }
+]

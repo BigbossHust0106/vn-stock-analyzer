@@ -1,0 +1,400 @@
+[
+  {
+    "id": 1,
+    "name": "1. Tổng doanh thu hoạt động kinh doanh",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 5181739797774.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 5767734511921.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 5714422855630.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 6136905368338.0 }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "2. Các khoản giảm trừ doanh thu",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 505723789947.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 752339471200.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 829555200538.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 869942684288.0 }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "3. Doanh thu thuần (1)-(2)",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 4676016007827.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 5015395040721.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 4884867655092.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 5266962684050.0 }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "4. Giá vốn hàng bán",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 2418521064699.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 2671849997386.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 2747101521942.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 2760593928931.0 }
+    ]
+  },
+  {
+    "id": 5,
+    "name": "5. Lợi nhuận gộp (3)-(4)",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 2257494943128.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 2343545043335.0
+      },
+      {
+        "period": "2024",
+        "year": 2024,
+        "quarter": 0,
+        "value": 2137766133150.0
+      },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 2506368755119.0 }
+    ]
+  },
+  {
+    "id": 6,
+    "name": "6. Doanh thu hoạt động tài chính",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 137142907707.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 217890286468.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 148119966008.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 133235749052.0 }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "7. Chi phí tài chính",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 101162960616.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 90909165233.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 89739210554.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 81590241255.0 }
+    ]
+  },
+  {
+    "id": 701,
+    "name": "-Trong đó: Chi phí lãi vay",
+    "parentID": 7,
+    "expanded": true,
+    "level": 2,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 12558694966.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 29529505062.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 24810529888.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 25635277644.0 }
+    ]
+  },
+  {
+    "id": 8,
+    "name": "8. Phần lợi nhuận hoặc lỗ trong công ty liên kết liên doanh",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 9,
+    "name": "9. Chi phí bán hàng",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 913204497923.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 978424470755.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 904667099165.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 1157316021444.0 }
+    ]
+  },
+  {
+    "id": 10,
+    "name": "10. Chi phí quản lý doanh nghiệp",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 268212758590.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 312839173012.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 312823418686.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 396384204006.0 }
+    ]
+  },
+  {
+    "id": 11,
+    "name": "11. Lợi nhuận thuần từ hoạt động kinh doanh (5)+(6)-(7)+(8)-(9)-(10)",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 1112057633706.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 1179262520803.0
+      },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 978656370753.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 1004314037466.0 }
+    ]
+  },
+  {
+    "id": 12,
+    "name": "12. Thu nhập khác",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 9673632221.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 5105942083.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 5315643375.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 10448790264.0 }
+    ]
+  },
+  {
+    "id": 13,
+    "name": "13. Chi phí khác",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 22117946991.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 25194077802.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 79487447312.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 28163560553.0 }
+    ]
+  },
+  {
+    "id": 14,
+    "name": "14. Lợi nhuận khác (12)-(13)",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": -12444314770.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": -20088135719.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": -74171803937.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": -17714770289.0 }
+    ]
+  },
+  {
+    "id": 15,
+    "name": "15. Tổng lợi nhuận kế toán trước thuế (11)+(14)",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      {
+        "period": "2022",
+        "year": 2022,
+        "quarter": 0,
+        "value": 1099613318936.0
+      },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 1159174385084.0
+      },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 904484566816.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 986599267177.0 }
+    ]
+  },
+  {
+    "id": 16,
+    "name": "16. Chi phí thuế TNDN hiện hành",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 109468546668.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 109539123098.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 127031756728.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 141835055480.0 }
+    ]
+  },
+  {
+    "id": 17,
+    "name": "17. Chi phí thuế TNDN hoãn lại",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 1690126196.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": -1027396709.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": -1467309872.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": -7589895885.0 }
+    ]
+  },
+  {
+    "id": 18,
+    "name": "18. Chi phí thuế TNDN (16)+(17)",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 111158672864.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 108511726389.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 125564446856.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 134245159595.0 }
+    ]
+  },
+  {
+    "id": 19,
+    "name": "19. Lợi nhuận sau thuế thu nhập doanh nghiệp (15)-(18)",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 988454646072.0 },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 1050662658695.0
+      },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 778920119960.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 852354107582.0 }
+    ]
+  },
+  {
+    "id": 20,
+    "name": "20. Lợi nhuận sau thuế của cổ đông không kiểm soát",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 0.0 },
+      { "period": "2023", "year": 2023, "quarter": 0, "value": 0.0 },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 0.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 0.0 }
+    ]
+  },
+  {
+    "id": 21,
+    "name": "21. Lợi nhuận sau thuế của cổ đông của công ty mẹ (19)-(20)",
+    "parentID": -1,
+    "expanded": true,
+    "level": 1,
+    "field": null,
+    "values": [
+      { "period": "2022", "year": 2022, "quarter": 0, "value": 988454646072.0 },
+      {
+        "period": "2023",
+        "year": 2023,
+        "quarter": 0,
+        "value": 1050662658695.0
+      },
+      { "period": "2024", "year": 2024, "quarter": 0, "value": 778920119960.0 },
+      { "period": "2025", "year": 2025, "quarter": 0, "value": 852354107582.0 }
+    ]
+  }
+]

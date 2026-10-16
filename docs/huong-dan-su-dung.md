@@ -91,7 +91,7 @@ bản tốt gần nhất và tự thử lại.
 ## 12. Nguồn dữ liệu
 
 - Giá: VPS (bảng giá công khai), không phải feed chính thức từng lệnh của sàn.
-- BCTC năm: KBS + Vietcap; tự làm mới mỗi ngày theo từng lượt nhỏ, kể cả cuối
+- BCTC năm: KBS + Vietcap (FireAnt + Vietcap làm dự phòng khi KBS lỗi, nếu đã cấu hình); tự làm mới mỗi ngày theo từng lượt nhỏ, kể cả cuối
   tuần. Chi tiết: [financial-sources-2026-10-16.md](financial-sources-2026-10-16.md).
 - Vẫn “không đủ dữ liệu” khi: công ty chỉ có BCTC riêng lẻ, BCTC quá 550 ngày,
   nguồn ghi sai kỳ mà không đối chiếu được, hoặc ngành tài chính.

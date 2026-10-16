@@ -30,9 +30,12 @@ export interface AnnualFinancials {
   dividendsPaidVnd: number | null;
   sharesOutstanding: number | null;
 }
+export const financialSources = ['KBS_VIETCAP', 'FIREANT_VIETCAP'] as const;
+export type FinancialSource = (typeof financialSources)[number];
 export interface FinancialData {
   symbol: string;
-  source: 'KBS_VIETCAP';
+  // FIREANT_VIETCAP: dự phòng khi KBS lỗi; BCTC FireAnt + EPS/ngày công bố Vietcap.
+  source: FinancialSource;
   fetchedAt: string;
   verification: 'provider_reported';
   businessType: number;
@@ -72,7 +75,7 @@ export function isFinancialData(value: unknown): value is FinancialData {
   if (
     typeof d.symbol !== 'string' ||
     !/^[A-Z0-9]{3,12}$/.test(d.symbol) ||
-    d.source !== 'KBS_VIETCAP' ||
+    !financialSources.includes(d.source) ||
     d.verification !== 'provider_reported' ||
     typeof d.fetchedAt !== 'string' ||
     !Number.isFinite(Date.parse(d.fetchedAt)) ||
