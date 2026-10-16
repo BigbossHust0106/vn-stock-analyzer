@@ -17,12 +17,12 @@ Mở `/agent` sau khi đăng nhập, hoặc nút **Trợ lý AI** trên website/
 ## Kiến trúc và giới hạn
 
 `/agent` → Worker `/v1/agent` → Supabase Auth xác thực → quota theo user →
-Cloudflare Workers AI `@cf/qwen/qwen3-30b-a3b-fp8` diễn giải một JSON plan →
+Cloudflare Workers AI `@cf/meta/llama-3.3-70b-instruct-fp8-fast` diễn giải một JSON plan →
 validator allowlist → đọc dữ liệu hoặc tạo proposal → người dùng xác nhận →
 RPC transaction kiểm tra owner/trạng thái cũ/hạn dùng rồi áp dụng đúng một lần.
 
 Mô hình được kiểm tra trong tài liệu chính thức:
-https://developers.cloudflare.com/workers-ai/models/qwen3-30b-a3b-fp8/
+https://developers.cloudflare.com/workers-ai/models/llama-3.3-70b-instruct-fp8-fast/
 Binding: https://developers.cloudflare.com/workers-ai/configuration/bindings/
 
 Workers AI được khai báo trong `wrangler.jsonc` với binding `AI`, không cần đưa
@@ -108,3 +108,8 @@ quota Workers AI và cần quyền quản trị Supabase để tạo/xóa tài k
   đổi người dùng; chờ xác thực user mới trước khi hiển thị phiên chat mới.
 - Bản xem trước kiểm tra cả trạng thái thay đổi trong lúc model suy nghĩ, trước
   khi đưa proposal ra giao diện; RPC tiếp tục kiểm tra từ lúc xem trước đến xác nhận.
+
+- Model thử ban đầu Qwen3 có khai báo response_format ở API nhưng không nằm
+  trong danh sách JSON Mode được Cloudflare hỗ trợ. Sau khi request schema thật
+  bị từ chối, đổi sang Llama3.3 70B fp8-fast có tên trong danh sách hỗ trợ; không
+  bỏ schema/validator để chấp nhận plan sai.

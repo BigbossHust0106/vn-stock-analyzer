@@ -31,7 +31,7 @@ export async function interpret(
       },
       {
         role: 'user',
-        content: JSON.stringify({ context, messages }) + '\n/no_think',
+        content: JSON.stringify({ context, messages }),
       },
     ],
   };

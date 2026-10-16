@@ -1,4 +1,4 @@
-export const agentModel = '@cf/qwen/qwen3-30b-a3b-fp8' as const;
+export const agentModel = '@cf/meta/llama-3.3-70b-instruct-fp8-fast' as const;
 export const intents = [
   'stock',
   'compare',

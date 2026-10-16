@@ -2,7 +2,7 @@ import { chromium, expect } from '@playwright/test';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { authenticateBrowser, openAccountMenu } from './browser-auth';
 import { agentResponse } from '../worker/src/api/agent';
-import type { AgentPlan } from '../modules/agent/plan';
+import { agentModel, type AgentPlan } from '../modules/agent/plan';
 const base = process.env.MARKET_APP_URL || 'http://127.0.0.1:8878';
 const config = (await (
   await fetch(
@@ -41,7 +41,7 @@ try {
         SUPABASE_PUBLISHABLE_KEY: config.supabasePublishableKey,
         AI: {
           run: async (_model, input) => {
-            expect(_model).toBe('@cf/qwen/qwen3-30b-a3b-fp8');
+            expect(_model).toBe(agentModel);
             inferences++;
             const payload = JSON.parse(
               input.messages[1]!.content.split('\n/no_think')[0]!,
