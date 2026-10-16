@@ -179,3 +179,21 @@ export const planSchema = {
     'enabled',
   ],
 };
+
+// Copy literal user values for explicit create commands; never let the model
+// shorten years, numeric suffixes, case or quoted names before confirmation.
+export function bindLiteralName(plan: AgentPlan, message: string): AgentPlan {
+  if (plan.intent !== 'create_list') return plan;
+  const match = message
+    .trim()
+    .match(
+      /^(?:hãy\s+)?tạo(?:\s+cho\s+tôi)?(?:\s+một)?\s+(?:danh\s+sách(?:\s+theo\s+dõi)?|watchlist)\s+(?:(?:có\s+)?tên(?:\s+là)?\s+)?(.+)$/iu,
+    );
+  if (!match) return plan;
+  let name = match[1]!.trim();
+  if (/^["“].*["”]$/u.test(name)) name = name.slice(1, -1).trim();
+  else if (/\s+(?:và|rồi|sau đó)\s+/iu.test(name)) return plan;
+  const result = { ...plan, name };
+  if (!validPlan(result)) throw Error('AI_INVALID');
+  return result;
+}

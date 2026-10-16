@@ -2,7 +2,12 @@ import { createClient } from '@supabase/supabase-js';
 import type { Env } from '../index';
 import deployment from '../../../config/public-deployment.json';
 import { boundedText } from '../../../modules/news/rss';
-import { agentModel, mutations, helpText } from '../../../modules/agent/plan';
+import {
+  agentModel,
+  mutations,
+  helpText,
+  bindLiteralName,
+} from '../../../modules/agent/plan';
 import { interpret } from '../agent/model';
 import { personalContext, preview, listPersonal } from '../agent/actions';
 import { research } from '../agent/research';
@@ -125,7 +130,10 @@ export async function agentResponse(
     stage = 'context';
     const context = await personalContext(db);
     stage = 'model';
-    const plan = await interpret(env.AI, b.messages as string[], context);
+    const plan = bindLiteralName(
+      await interpret(env.AI, b.messages as string[], context),
+      (b.messages as string[]).at(-1)!,
+    );
     if (['stock', 'compare'].includes(plan.intent)) {
       stage = 'research';
       const writer = env.SUPABASE_SERVICE_ROLE_KEY

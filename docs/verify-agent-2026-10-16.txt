@@ -34,12 +34,12 @@ All matched files use Prettier code style!
 
 
  Test Files  28 passed (28)
-      Tests  208 passed (208)
-   Start at  15:23:59
-   Duration  2.51s (tests 50%, import 27%, transform 15%, worker 8%)
+      Tests  209 passed (209)
+   Start at  15:44:29
+   Duration  2.59s (tests 50%, import 26%, transform 16%, worker 8%)
 
-    Isolate  28 workers spawned · ~69ms startup each (spawn + environment, per file)
-             at least ~573ms faster with isolate: false — reuses workers across files instead of one per file
+    Isolate  28 workers spawned · ~74ms startup each (spawn + environment, per file)
+             at least ~614ms faster with isolate: false — reuses workers across files instead of one per file
 
  % Coverage report from v8
 -------------------|---------|----------|---------|---------|-------------------
@@ -82,12 +82,12 @@ Lines        : 99.15% ( 707/713 )
 > next build --webpack
 
 ▲ Next.js 16.4.0 (webpack)
-✓ Running next.config.mjs took 8ms
+✓ Running next.config.mjs took 9ms
 
   Creating an optimized production build ...
-✓ Compiled successfully in 1225ms
+✓ Compiled successfully in 1262ms
   Running TypeScript ...
-  Finished TypeScript in 1216ms ...
+  Finished TypeScript in 1133ms ...
   Collecting page data using 4 workers ...
   Generating static pages using 4 workers (0/17) ...
   Generating static pages using 4 workers (4/17) 
@@ -129,7 +129,7 @@ Route (app)
  ⛅️ wrangler 4.149.0 (update available 4.151.1)
 ───────────────────────────────────────────────
 ✨ Read 179 files from the assets directory /workspace/vn-stock-analyzer/web/out
-Total Upload: 1152.34 KiB / gzip: 249.58 KiB
+Total Upload: 1154.30 KiB / gzip: 250.32 KiB
 Your Worker has access to the following bindings:
 Binding                                             Resource                  
 env.AI                                              AI                        
@@ -146,11 +146,11 @@ env.NEWS_WEIGHT ("0.1")                             Environment Variable
 > vn-stock-analyzer@0.1.0 verify:secrets
 > node scripts/secrets.mjs
 
-3:24PM INF scanned ~5074341 bytes (5.07 MB) in 218ms
-3:24PM INF no leaks found
-3:24PM INF 43 commits scanned.
-3:24PM INF scanned ~5418240 bytes (5.42 MB) in 397ms
-3:24PM INF no leaks found
+3:44PM INF scanned ~5078409 bytes (5.08 MB) in 229ms
+3:44PM INF no leaks found
+3:44PM INF 45 commits scanned.
+3:44PM INF scanned ~5423202 bytes (5.42 MB) in 357ms
+3:44PM INF no leaks found
 
 [7/9] Migrations PostgreSQL
 
@@ -325,7 +325,7 @@ set_config
 
           create_test_alert           
 --------------------------------------
- b9091cf2-361c-4660-9e76-79dcd27dd598
+ 40b67f1d-405d-4272-b43c-c094bc0006ff
 (1 row)
 
               set_config              
@@ -346,7 +346,7 @@ set_config
 
               set_config              
 --------------------------------------
- 05c510ff-03b2-497d-82ce-15ca957abc26
+ 8b269e3c-24b3-484b-9b53-9721b35ff1e6
 (1 row)
 
               set_config              
@@ -361,22 +361,22 @@ set_config
 
                               resolve_agent_action                               
 ---------------------------------------------------------------------------------
- {"result": {"id": "d90f6d00-0b83-42c0-96af-0ceddb23d7b8"}, "status": "applied"}
+ {"result": {"id": "e7ae79cc-3ff3-40ea-8dae-0cb6d5cc5c58"}, "status": "applied"}
 (1 row)
 
                               resolve_agent_action                               
 ---------------------------------------------------------------------------------
- {"result": {"id": "d90f6d00-0b83-42c0-96af-0ceddb23d7b8"}, "status": "applied"}
+ {"result": {"id": "e7ae79cc-3ff3-40ea-8dae-0cb6d5cc5c58"}, "status": "applied"}
 (1 row)
 
               set_config              
 --------------------------------------
- d90f6d00-0b83-42c0-96af-0ceddb23d7b8
+ e7ae79cc-3ff3-40ea-8dae-0cb6d5cc5c58
 (1 row)
 
               set_config              
 --------------------------------------
- c49e7b1f-7316-4f3d-a434-32747e49d4ca
+ a83d8ba0-fe63-4a65-8911-1159ff4db100
 (1 row)
 
 AGENT DB PASS: preview-only, A/B isolation, immutable actions, confirmation/idempotency, stale/expired/cancelled protection, watchlist+alert operations, quota3/min
@@ -416,11 +416,11 @@ AGENT CONCURRENCY PASS: two simultaneous confirmations apply once; alert version
 
  Test Files  14 passed (14)
       Tests  55 passed | 1 todo (56)
-   Start at  15:24:18
-   Duration  1.57s (tests 52%, import 29%, transform 18%, worker 1%)
+   Start at  15:44:49
+   Duration  1.67s (tests 55%, import 29%, transform 14%, worker 1%)
 
-    Isolate  14 workers spawned · ~70ms startup each (spawn + environment, per file)
-             at least ~258ms faster with isolate: false — reuses workers across files instead of one per file
+    Isolate  14 workers spawned · ~81ms startup each (spawn + environment, per file)
+             at least ~298ms faster with isolate: false — reuses workers across files instead of one per file
 
 
 BẢNG TỔNG KẾT VERIFY

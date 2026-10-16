@@ -286,3 +286,25 @@ it('preview refuses a renamed target captured during model inference, rather tha
     ),
   ).toBe(false);
 });
+it('explicit list names preserve numeric suffixes and case from user input, not shortened model output', async () => {
+  const { bindLiteralName } = await import('../../modules/agent/plan');
+  const p = {
+    ...plan,
+    intent: 'create_list' as const,
+    symbols: [],
+    name: 'AI live A',
+  };
+  expect(bindLiteralName(p, 'Tạo danh sách AI live A 2026').name).toBe(
+    'AI live A 2026',
+  );
+  expect(bindLiteralName(p, 'Tạo danh sách tên “Dài hạn 2030”').name).toBe(
+    'Dài hạn 2030',
+  );
+  expect(
+    bindLiteralName(p, 'Hãy tạo một watchlist có tên là VỐN 123').name,
+  ).toBe('VỐN 123');
+  expect(() => bindLiteralName(p, 'Tạo danh sách ' + 'a'.repeat(121))).toThrow(
+    'AI_INVALID',
+  );
+  expect(bindLiteralName(plan, 'Tạo danh sách AI live A 2026')).toBe(plan); // No intent is invented by the extractor.
+});

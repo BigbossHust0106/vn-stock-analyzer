@@ -78,7 +78,7 @@ mở hoàn toàn hay cam kết dự báo.
 
 ## Kiểm tra trước triển khai
 
-`npm run verify`:9/9 PASS;208 unit PASS,55 provider PASS và1 TODO cũ về
+`npm run verify`:9/9 PASS;209 unit PASS,55 provider PASS và1 TODO cũ về
 `lastVolume`;21 migration và RLS PASS. Hai process xác nhận cùng đề xuất đồng
 thời chỉ tăng alert version từ1 lên2, không lên3.
 [Log verify nguyên văn](verify-agent-2026-10-16.txt).
@@ -118,3 +118,7 @@ quota Workers AI và cần quyền quản trị Supabase để tạo/xóa tài k
   UUID/mã, giá dương/hữu hạn, độ dài và điều kiện từng công cụ vẫn được validator
   server kiểm tra. Lỗi provider được phân loại bằng mã cố định, không trả raw
   provider payload/prompt hoặc credentials cho client.
+
+- Inference thật đã tạo được danh sách nhưng model rút gọn hậu tố số trong tên.
+  Lệnh tạo danh sách rõ ràng được server trích nguyên văn tên từ câu người dùng,
+  kể cả số/năm/chữ hoa; không sửa đáp án hoặc xác nhận tên đã bị AI rút gọn.

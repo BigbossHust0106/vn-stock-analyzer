@@ -87,7 +87,10 @@ try {
   console.log('AI LIVE COMPARE PASS: VNM/HPG actual source data.');
   const nameA = 'AI live A ' + Date.now();
   const p = await a.call({ op: 'chat', messages: ['Tạo danh sách ' + nameA] });
-  assert(p.proposal, 'Missing preview');
+  assert(
+    p.proposal && p.proposal.summary.includes(nameA),
+    'Requested exact list name missing from preview',
+  );
   assert(
     (await a.db.from('watchlists').select('id').eq('name', nameA)).data
       ?.length === 0,
@@ -101,7 +104,7 @@ try {
   assert(
     (await a.db.from('watchlists').select('id').eq('name', nameA)).data
       ?.length === 1,
-    'Duplicate apply',
+    'Expected exactly one list with the exact requested name after duplicate confirmation',
   );
   assert(
     (await b.db.from('watchlists').select('id').eq('name', nameA)).data
