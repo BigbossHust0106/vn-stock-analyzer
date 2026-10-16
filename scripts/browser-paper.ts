@@ -42,15 +42,24 @@ try {
   }
   const a = users[0]!,
     b = users[1]!;
-  const api = async (path: string, body?: unknown, user = a) =>
-    fetch(base + path, {
+  const api = async (path: string, body?: unknown, user = a) => {
+    const response = await fetch(base + path, {
       method: body ? 'POST' : 'GET',
       headers: {
         Authorization: 'Bearer ' + user.token,
         ...(body ? { 'Content-Type': 'application/json' } : {}),
       },
       ...(body ? { body: JSON.stringify(body) } : {}),
+      signal: AbortSignal.timeout(20000),
     });
+    console.log(
+      'PAPER API CHECK:',
+      body ? 'POST' : 'GET',
+      path.split('?')[0],
+      response.status,
+    );
+    return response;
+  };
   assert(
     (await fetch(base + '/v1/paper')).status === 401,
     'Anonymous wallet API accessible',
