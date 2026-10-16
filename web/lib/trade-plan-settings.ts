@@ -1,5 +1,6 @@
 'use client';
-import { useCallback, useSyncExternalStore } from 'react';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
+import { useAccountRisk } from './risk-settings';
 import {
   defaultTradeSettings,
   validTradeSettings,
@@ -10,10 +11,11 @@ const cache = new Map<
   string,
   { raw: string | null; value: TradePlanSettings }
 >();
-function snapshot(key: string) {
+function snapshot(key: string, fallback: TradePlanSettings) {
   try {
     const raw = localStorage.getItem(key),
       previous = cache.get(key);
+    if (raw === null) return fallback;
     if (previous?.raw === raw) return previous.value;
     const parsed: unknown = JSON.parse(raw ?? 'null');
     const value = validTradeSettings(parsed) ? parsed : defaultTradeSettings;
@@ -32,10 +34,15 @@ function subscribe(callback: () => void) {
   };
 }
 export function useTradeSettings(owner: string, symbol: string) {
+  const risk = useAccountRisk(owner === 'pending' ? null : owner);
+  const fallback = useMemo(
+    () => ({ ...defaultTradeSettings, ...risk.value }),
+    [risk.value],
+  );
   const key = 'vn-stock-trade-plan-v1:' + owner + ':' + symbol;
   const value = useSyncExternalStore(
     subscribe,
-    () => snapshot(key),
+    () => snapshot(key, fallback),
     () => defaultTradeSettings,
   );
   const save = useCallback(

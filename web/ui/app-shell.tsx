@@ -24,6 +24,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         <nav aria-label="Chức năng chính">
           <HeaderSearch />
           <Link
+            href="/backtest"
+            aria-current={pathname === '/backtest' ? 'page' : undefined}
+          >
+            Backtest
+          </Link>
+          <Link
             href="/top10"
             aria-current={pathname === '/top10' ? 'page' : undefined}
           >

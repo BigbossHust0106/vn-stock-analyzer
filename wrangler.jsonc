@@ -3,6 +3,18 @@
   "name": "vn-stock-analyzer",
   "main": "worker/src/index.ts",
   "keep_vars": true,
+  "ratelimits": [
+    {
+      "name": "API_RATE_LIMIT",
+      "namespace_id": "16010801",
+      "simple": { "limit": 120, "period": 60 },
+    },
+    {
+      "name": "ANALYSIS_RATE_LIMIT",
+      "namespace_id": "16010802",
+      "simple": { "limit": 30, "period": 60 },
+    },
+  ],
   "compatibility_date": "2026-10-12",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {

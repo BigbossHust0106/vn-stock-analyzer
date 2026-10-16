@@ -332,6 +332,9 @@ export function TopRankings() {
       <span className="eyebrow">SÀNG LỌC CỔ PHIẾU VIỆT NAM</span>
       <h1>Ba góc nhìn. Top 10 cổ phiếu.</h1>
       <p>
+        <Link href="/backtest">Lịch sử &amp; backtest các lần công bố ↗</Link>
+      </p>
+      <p>
         Chỉ xếp hạng khi đủ 100% đầu vào của kỳ, tiêu chí tài chính bắt buộc và
         giá giao dịch có bằng chứng thời điểm nguồn. Mã chưa đủ thông tin được
         liệt kê cùng phần còn thiếu, không dùng điểm tạm để so sánh mã tốt hơn.

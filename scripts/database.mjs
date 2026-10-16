@@ -146,6 +146,7 @@ export function rls() {
     sqlFile(name, 'tests/database/rankings.sql');
     sqlFile(name, 'tests/database/news.sql');
     sqlFile(name, 'tests/database/alerts.sql');
+    sqlFile(name, 'tests/database/backtest.sql');
   } finally {
     cleanup();
   }

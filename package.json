@@ -52,7 +52,8 @@
     "verify:alerts:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-alerts.ts",
     "verify:financial-backups:live": "node --use-env-proxy --import tsx scripts/verify-financial-backups.ts",
     "verify:focus:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-focus.ts",
-    "verify:pwa:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-pwa.ts"
+    "verify:pwa:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-pwa.ts",
+    "verify:backtest:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-backtest.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.3",

@@ -66,6 +66,9 @@ export function AuthNav() {
           <Link href="/install" onClick={() => setOpen(false)}>
             Cài ứng dụng điện thoại
           </Link>
+          <Link href="/backtest" onClick={() => setOpen(false)}>
+            Lịch sử & backtest Top 10
+          </Link>
           <Link href="/status" onClick={() => setOpen(false)}>
             Trạng thái hệ thống
           </Link>
