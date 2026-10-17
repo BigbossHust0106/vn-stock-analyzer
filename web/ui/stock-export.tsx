@@ -5,6 +5,7 @@ import {
   stockDetail,
   type StockDetail,
 } from '../lib/market-client';
+import type { ScoreReport } from '../../modules/scoring/engine';
 import { useScoringSettings } from '../lib/scoring-settings';
 import {
   auditTargets,
@@ -13,7 +14,13 @@ import {
   type AuditTarget,
 } from '../lib/stock-export';
 
-export function StockExport({ detail }: { detail: StockDetail }) {
+export function StockExport({
+  detail,
+  assessment,
+}: {
+  detail: StockDetail;
+  assessment: ScoreReport | null;
+}) {
   const settings = useScoringSettings();
   const [target, setTarget] = useState<AuditTarget | null>(null);
   const [text, setText] = useState('');
@@ -39,6 +46,8 @@ export function StockExport({ detail }: { detail: StockDetail }) {
         AbortSignal.any([abort.signal, AbortSignal.timeout(35000)]),
         marketJson,
         (signal) => stockDetail(detail.stock.symbol, signal, 'history'),
+        new Date().toISOString(),
+        assessment,
       );
       if (!abort.signal.aborted) {
         setText(auditPrompt(snapshot));
@@ -113,8 +122,8 @@ export function StockExport({ detail }: { detail: StockDetail }) {
         </button>
       </div>
       <small>
-        Xuất giá, lịch sử, BCTC, điểm, chỉ báo và tin tức kèm nguồn. Xem trước
-        rồi sao chép/dán vào AI.
+        Xuất số liệu, đánh giá, giải thích từng tiêu chí, rủi ro và phân tích
+        tin tức kèm nguồn. Xem trước rồi sao chép/dán vào AI.
       </small>
       <dialog
         ref={dialog}

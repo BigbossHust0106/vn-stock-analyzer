@@ -41,3 +41,24 @@ link đích, không tự gửi vào ChatGPT/Claude hoặc xác minh kết quả 
   để kiểm tra nội dung/URL; không tự đăng nhập hoặc gửi dữ liệu vào AI bên ngoài.
 - [Log verify nguyên văn](verify-stock-export-2026-10-16.txt).
 - [Log browser](browser-stock-export-2026-10-16.txt).
+
+## Đánh giá và phân tích của chính website
+
+Bản xuất v2 thêm khối đọc được **ĐÁNH GIÁ WEBSITE**: kết luận, điểm tổng,
+điểm Graham/Buffett, trọng số, độ phủ dữ liệu, mức tin cậy, từng tiêu chí và
+lý do đạt/không đạt/thiếu, giá trị nội tại, biên an toàn, kịch bản proxy và rủi ro.
+`websiteAssessment.report` giữ báo cáo thực sự đang hiển thị trên trang tại lúc
+bấm xuất, gồm thời điểm và đầu vào; tách riêng `scoringAtExport` là bản tính lại
+với dữ liệu tải lúc xuất. Nếu phần đánh giá chưa tải xong thì ghi rõ chưa có,
+không gán bản tính lại thành nội dung đã hiển thị. Phân tích ảnh hưởng tin tức
+và lập luận/nhãn của từng bài giữ trong `news.score` và `articles[].analysis`.
+
+Prompt yêu cầu AI phản biện cả suy luận/kết luận của website, không chỉ đối
+chiếu số: chỉ ra tiêu chí chấm sai, lập luận thiếu bằng chứng, giả định quá mức
+và kết luận cần sửa. Không thay đổi công thức hay điểm của website trong tính
+năng xuất này; không coi confidence là xác suất sinh lời.
+
+Kiểm tra bổ sung17/10/2026:216 unit PASS; browser Auth/API FPT thật xác nhận
+điểm/kết luận xuất khớp nội dung đang hiển thị, tất cả giải thích từng tiêu chí
+và rủi ro có trong gói. [Log browser](browser-export-assessment-2026-10-17.txt),
+[log verify nguyên văn](verify-export-assessment-2026-10-17.txt).

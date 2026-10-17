@@ -16,6 +16,7 @@ const TradeWorkbench = dynamic(
   () => import('./trade-workbench').then((m) => m.TradeWorkbench),
   { loading: () => <p role="status">Đang mở biểu đồ…</p> },
 );
+import type { ScoreReport } from '../../modules/scoring/engine';
 import type { FinancialData } from '../../modules/providers/financial-types';
 import { ScoringPanel } from './scoring-panel';
 export function StockDetail() {
@@ -24,6 +25,7 @@ export function StockDetail() {
   return <DetailContent key={symbol} symbol={symbol} />;
 }
 function DetailContent({ symbol }: { symbol: string }) {
+  const [assessment, setAssessment] = useState<ScoreReport | null>(null);
   const [financials, setFinancials] = useState<FinancialData | null>(null);
   const [data, setData] = useState<Detail | null>(() =>
     cachedStockDetail(symbol),
@@ -155,7 +157,7 @@ function DetailContent({ symbol }: { symbol: string }) {
           Thử đầu tư {symbol} bằng vốn ảo ↗
         </Link>
       </p>
-      <StockExport detail={data} />
+      <StockExport detail={data} assessment={assessment} />
       <div className="quote-summary">
         <div>
           <span data-testid="display-price-label">
@@ -276,6 +278,7 @@ function DetailContent({ symbol }: { symbol: string }) {
       <ScoringPanel
         symbol={symbol}
         onFinancials={setFinancials}
+        onReport={setAssessment}
         priceVnd={q?.lastPriceVnd ?? null}
         quoteFetchedAt={q?.fetchedAt ?? null}
       />

@@ -24,6 +24,15 @@ try {
       exact: true,
     }),
   ).toBeVisible({ timeout: 60000 });
+  await expect(page.getByTestId('scoring-panel')).toBeVisible({
+    timeout: 60000,
+  });
+  const displayedConclusion = await page
+    .getByTestId('score-conclusion')
+    .innerText();
+  const displayedScore = (await page.getByTestId('combined-score').innerText())
+    .replace(/\s+/g, ' ')
+    .trim();
   stage = 'history not eagerly loaded';
   expect(historyCalls).toBe(0); // Off by default: export must not eagerly load history.
   await page.evaluate(`(() => {
@@ -45,6 +54,21 @@ try {
     text.split('BEGIN_STOCK_DATA\n')[1]!.split('\nEND_STOCK_DATA')[0]!,
   );
   expect(snapshot.symbol).toBe('FPT');
+  expect(snapshot.websiteAssessment.origin).toBe('displayed_on_page');
+  expect(snapshot.websiteAssessment.report.conclusion).toBe(
+    displayedConclusion,
+  );
+  expect(displayedScore).toBe(
+    `${snapshot.websiteAssessment.report.score ?? '—'} / 100`,
+  );
+  expect(text).toContain('BEGIN_WEBSITE_ASSESSMENT');
+  expect(text).toContain('Kết luận: ' + displayedConclusion);
+  for (const strategy of snapshot.websiteAssessment.report.strategies) {
+    for (const criterion of strategy.criteria)
+      expect(text).toContain(criterion.explanation);
+  }
+  for (const risk of snapshot.websiteAssessment.report.risks)
+    expect(text).toContain(risk);
   expect(snapshot.history.bars.length).toBeGreaterThan(20);
   expect(snapshot.financials.financials.symbol).toBe('FPT');
   expect(snapshot.financials.financials.annual.length).toBeGreaterThan(0);
@@ -103,7 +127,7 @@ try {
   ).toBe(true);
   expect(errors).toEqual([]);
   console.log(
-    'STOCK EXPORT BROWSER PASS: real Auth and public FPT APIs; no eager history; full financial/history/MA payload; exact clipboard and downloaded file; fixed ChatGPT/Claude URLs without data; clipboard-denied fallback; 390/1440px; no JS errors. External AI input/inference not automated.',
+    'STOCK EXPORT BROWSER PASS: real Auth and public FPT APIs; no eager history; full financial/history/MA payload; actual displayed score/conclusion, every criterion explanation and risk exported; exact clipboard and downloaded file; fixed ChatGPT/Claude URLs without data; clipboard-denied fallback; 390/1440px; no JS errors. External AI input/inference not automated.',
   );
   await context.close();
 } catch (error) {

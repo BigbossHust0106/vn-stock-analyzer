@@ -4,7 +4,7 @@ import {
   type SupabaseClient,
   type Session,
 } from '@supabase/supabase-js';
-import { useEffect, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useSyncExternalStore } from 'react';
 import {
   defaultSettings,
   type ScoringSettings,
@@ -211,5 +211,5 @@ export function useScoringSettings() {
     () => JSON.stringify(readSettings()),
     () => defaultSnapshot,
   );
-  return JSON.parse(snapshot) as ScoringSettings;
+  return useMemo(() => JSON.parse(snapshot) as ScoringSettings, [snapshot]);
 }

@@ -1,0 +1,1 @@
+STOCK EXPORT BROWSER PASS: real Auth and public FPT APIs; no eager history; full financial/history/MA payload; actual displayed score/conclusion, every criterion explanation and risk exported; exact clipboard and downloaded file; fixed ChatGPT/Claude URLs without data; clipboard-denied fallback; 390/1440px; no JS errors. External AI input/inference not automated.

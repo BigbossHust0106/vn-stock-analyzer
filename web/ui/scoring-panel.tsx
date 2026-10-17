@@ -1,8 +1,8 @@
 'use client';
 import { parentEvidence } from '../../modules/providers/document-evidence';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { scoreStock } from '../../modules/scoring/engine';
+import { scoreStock, type ScoreReport } from '../../modules/scoring/engine';
 import {
   isFinancialData,
   type FinancialData,
@@ -16,11 +16,13 @@ export function ScoringPanel({
   priceVnd,
   quoteFetchedAt,
   onFinancials,
+  onReport,
 }: {
   symbol: string;
   priceVnd: number | null;
   quoteFetchedAt: string | null;
   onFinancials?: (data: FinancialData | null) => void;
+  onReport?: (report: ScoreReport | null) => void;
 }) {
   const [backups, setBackups] = useState<
     { source: string; fetched_at: string; last_error: string | null }[]
@@ -69,6 +71,13 @@ export function ScoringPanel({
       });
     return () => controller.abort();
   }, [symbol, onFinancials]);
+  const report = useMemo(
+    () => scoreStock(financials, priceVnd, asOf, settings, quoteFetchedAt),
+    [financials, priceVnd, asOf, settings, quoteFetchedAt],
+  );
+  useEffect(() => {
+    onReport?.(loading ? null : report);
+  }, [loading, report, onReport]);
   if (loading)
     return (
       <section className="scoring-section" aria-live="polite">
@@ -76,13 +85,7 @@ export function ScoringPanel({
         <p>Đang lấy báo cáo tài chính thật…</p>
       </section>
     );
-  const report = scoreStock(
-    financials,
-    priceVnd,
-    asOf,
-    settings,
-    quoteFetchedAt,
-  );
+
   const last = financials?.annual.at(-1);
   const missingCriteria = report.strategies.flatMap((strategy) =>
     strategy.criteria

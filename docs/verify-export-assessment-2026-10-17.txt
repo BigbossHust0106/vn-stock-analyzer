@@ -1,0 +1,436 @@
+
+> vn-stock-analyzer@0.1.0 verify
+> node scripts/verify.mjs
+
+
+[1/9] Typecheck strict
+
+> vn-stock-analyzer@0.1.0 typecheck
+> tsc --noEmit
+
+
+[2/9] ESLint (0 warning)
+
+> vn-stock-analyzer@0.1.0 lint
+> eslint . --max-warnings 0
+
+
+[3/9] Prettier check
+
+> vn-stock-analyzer@0.1.0 format:check
+> prettier --check .
+
+Checking formatting...
+All matched files use Prettier code style!
+
+[4/9] Vitest + coverage >=80%
+
+> vn-stock-analyzer@0.1.0 test
+> vitest run --coverage --exclude 'tests/providers/**'
+
+
+ RUN  v5.0.3 /workspace/vn-stock-analyzer
+      Coverage enabled with v8
+
+
+ Test Files  29 passed (29)
+      Tests  216 passed (216)
+   Start at  01:24:51
+   Duration  2.56s (tests 48%, import 25%, transform 18%, worker 8%)
+
+    Isolate  29 workers spawned · ~69ms startup each (spawn + environment, per file)
+             at least ~595ms faster with isolate: false — reuses workers across files instead of one per file
+
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   98.11 |    95.88 |   98.68 |   99.15 |                   
+ alerts            |   95.55 |       94 |   83.33 |   95.45 |                   
+  evaluate.ts      |   95.55 |       94 |   83.33 |   95.45 | 155,193           
+ news              |   96.83 |     92.8 |   96.72 |   98.69 |                   
+  analysis.ts      |     100 |    98.59 |     100 |     100 | 110               
+  ranking.ts       |     100 |    97.72 |     100 |     100 | 139               
+  relevance.ts     |   88.23 |    88.46 |     100 |   92.85 | 37                
+  rss.ts           |   95.27 |       84 |    91.3 |   98.18 | 68,159            
+ paper             |   95.83 |    98.33 |     100 |     100 |                   
+  accounting.ts    |   95.83 |    98.33 |     100 |     100 | 75                
+ scoring           |   99.15 |     97.4 |     100 |     100 |                   
+  rankings.ts      |   98.61 |    96.52 |     100 |     100 | 79,82,146-150,263 
+  reference.ts     |     100 |     92.3 |     100 |     100 | 34                
+ strategies        |     100 |     98.7 |     100 |     100 |                   
+  technical.ts     |     100 |    94.64 |     100 |     100 | 118,136,152       
+ trading           |   98.25 |    95.23 |     100 |   99.35 |                   
+  ...ange-rules.ts |     100 |    94.44 |     100 |     100 | 24,63             
+  trade-plan.ts    |   98.06 |    95.34 |     100 |   99.28 | 203               
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 98.11% ( 782/797 )
+Branches     : 95.88% ( 1187/1238 )
+Functions    : 98.68% ( 226/229 )
+Lines        : 99.15% ( 707/713 )
+================================================================================
+
+[5/9] Build web + worker
+
+> vn-stock-analyzer@0.1.0 build
+> npm run build --workspace web && npm run build --workspace worker
+
+
+> web@0.1.0 build
+> next build --webpack
+
+▲ Next.js 16.4.0 (webpack)
+✓ Running next.config.mjs took 7ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 1715ms
+  Running TypeScript ...
+  Finished TypeScript in 934ms ...
+  Collecting page data using 4 workers ...
+  Generating static pages using 4 workers (0/17) ...
+  Generating static pages using 4 workers (4/17) 
+  Generating static pages using 4 workers (8/17) 
+  Generating static pages using 4 workers (12/17) 
+✓ Generating static pages using 4 workers (17/17) in 318ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /agent
+├ ○ /alerts
+├ ○ /auth/callback
+├ ○ /auth/password
+├ ○ /backtest
+├ ○ /huong-dan
+├ ○ /install
+├ ○ /login
+├ ○ /paper
+├ ○ /settings
+├ ○ /status
+├ ○ /stocks
+├ ○ /top10
+└ ○ /watchlists
+
+
+○  (Static)  prerendered as static content
+
+
+> worker@0.1.0 build
+> node ../scripts/wrangler.mjs deploy --dry-run --outdir worker/dist
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mProxy environment variables detected. We'll use your proxy for fetch requests.[0m
+
+
+
+ ⛅️ wrangler 4.149.0 (update available 4.151.1)
+───────────────────────────────────────────────
+✨ Read 179 files from the assets directory /workspace/vn-stock-analyzer/web/out
+Total Upload: 1154.30 KiB / gzip: 250.32 KiB
+Your Worker has access to the following bindings:
+Binding                                             Resource                  
+env.AI                                              AI                        
+env.API_RATE_LIMIT (120 requests/60s)               Rate Limit                
+env.ANALYSIS_RATE_LIMIT (30 requests/60s)           Rate Limit                
+env.ASSETS                                          Assets                    
+env.NEWS_RSS_PERMISSION ("personal-nonprofit")      Environment Variable      
+env.NEWS_WEIGHT ("0.1")                             Environment Variable      
+
+--dry-run: exiting now.
+
+[6/9] Gitleaks
+
+> vn-stock-analyzer@0.1.0 verify:secrets
+> node scripts/secrets.mjs
+
+1:25AM INF scanned ~5129407 bytes (5.13 MB) in 199ms
+1:25AM INF no leaks found
+1:25AM INF 47 commits scanned.
+1:25AM INF scanned ~5470846 bytes (5.47 MB) in 370ms
+1:25AM INF no leaks found
+
+[7/9] Migrations PostgreSQL
+
+> vn-stock-analyzer@0.1.0 verify:migrations
+> node scripts/database.mjs migrations
+
+MIGRATION PASS: 202610120001_initial.sql
+MIGRATION PASS: 202610120002_current_quotes.sql
+MIGRATION PASS: 202610130001_market_history.sql
+MIGRATION PASS: 202610130002_financial_engine.sql
+MIGRATION PASS: 202610140001_review_integrity.sql
+MIGRATION PASS: 20261014012828_phase4_rankings_watchlists.sql
+MIGRATION PASS: 20261014015654_ranking_reference_prices.sql
+MIGRATION PASS: 20261014070000_ranking_input_provenance.sql
+MIGRATION PASS: 20261014092000_complete_ranking_evidence.sql
+MIGRATION PASS: 202610150001_closing_snapshots.sql
+MIGRATION PASS: 20261015014539_phase6_news.sql
+MIGRATION PASS: 20261015023106_phase6_ranking_batches.sql
+MIGRATION PASS: 20261015082827_phase7_alerts_system.sql
+MIGRATION PASS: 20261015090000_data_priority.sql
+MIGRATION PASS: 20261015090100_financial_backups.sql
+MIGRATION PASS: 20261015090126_phase7_multiple_alert_levels.sql
+MIGRATION PASS: 20261016010528_phase8_backtest_hardening.sql
+MIGRATION PASS: 20261016012832_phase8_bounded_null_page.sql
+MIGRATION PASS: 20261016033651_paper_investing.sql
+MIGRATION PASS: 20261016100000_fireant_financial_fallback.sql
+MIGRATION PASS: 20261016140000_ai_agent.sql
+ingest_current_quotes 
+-----------------------
+ 
+(1 row)
+
+ ingest_current_quotes 
+-----------------------
+ 
+(1 row)
+
+ ingest_price_history 
+----------------------
+ 
+(1 row)
+
+ ingest_price_history 
+----------------------
+ 
+(1 row)
+
+SCHEMA PASS: constraints, service-role RPC, idempotency, stale/unknown/empty quote rejection
+ingest_financials 
+-------------------
+ 
+(1 row)
+
+FINANCIAL SQL PASS: EPS VND, FCF separate from FCFE, stale protection, malformed/future publication denied
+FINANCIAL SQL PASS: older score computation cannot overwrite newer score
+ ingest_financials 
+-------------------
+ 
+(1 row)
+
+FINANCIAL SQL PASS: FIREANT_VIETCAP fallback recorded as its own source, unknown sources denied
+ingest_current_quotes 
+-----------------------
+ 
+(1 row)
+
+REVIEW SQL PASS: atomic rollback on score failure, exact input versions, stale quote rejected, empty/ratio regression preserves snapshot
+REVIEW SQL PASS: catalog reconciliation, missing inactive, returned active, incomplete/truncated refusal without mass deactivation
+cache_reported_close 
+----------------------
+ 
+(1 row)
+
+ cache_reported_close 
+----------------------
+ 
+(1 row)
+
+CLOSING CACHE PASS: prior-date only, stale refusal, public read, service-only write, finality unverified
+DATA PRIORITY PASS: both strategies, 0.7 vs 0.3, exact query, exchange, escaping, public RLS read
+FINANCIAL BACKUP PASS: service write, public read only, empty/field-loss rejected, outage preserves good data, never scoring input
+MIGRATIONS PASS: 21 file SQL trên PostgreSQL 17 (auth shim; không thay thế Supabase Auth integration)
+
+[8/9] RLS 2 users
+
+> vn-stock-analyzer@0.1.0 verify:rls
+> node scripts/database.mjs rls
+
+set_config              
+--------------------------------------
+ 10000000-0000-4000-8000-000000000002
+(1 row)
+
+              set_config              
+--------------------------------------
+ 10000000-0000-4000-8000-000000000001
+(1 row)
+
+              set_config              
+--------------------------------------
+ 10000000-0000-4000-8000-000000000002
+(1 row)
+
+RLS PASS: A/B isolation, own read/write, owner forgery, parent ownership, anonymous market read, market write denied
+              set_config              
+--------------------------------------
+ 10000000-0000-4000-8000-000000000002
+(1 row)
+
+              set_config              
+--------------------------------------
+ 10000000-0000-4000-8000-000000000001
+(1 row)
+
+ count 
+-------
+     0
+(1 row)
+
+RLS PASS: scoring preferences owner isolation, malformed settings denied, financial ingestion service-only, anon market read
+publish_rankings 
+------------------
+ 
+(1 row)
+
+ publish_rankings 
+------------------
+ 
+(1 row)
+
+ publish_rankings 
+------------------
+ 
+(1 row)
+
+              set_config              
+--------------------------------------
+ 10000000-0000-4000-8000-000000000002
+(1 row)
+
+              set_config              
+--------------------------------------
+ 10000000-0000-4000-8000-000000000001
+(1 row)
+
+PHASE4 DB PASS: atomic three horizons, stale protection, filters before top10, score history, notes/target RLS, anonymous denied
+NEWS DB PASS: public evidence read; server-only writes/score/lease; no invented/empty LLM evidence; concurrent Cron excluded
+set_config              
+--------------------------------------
+ 71000000-0000-0000-0000-000000000001
+(1 row)
+
+              set_config              
+--------------------------------------
+ 71000000-0000-0000-0000-000000000002
+(1 row)
+
+ record_watchlist_alert 
+------------------------
+                      1
+(1 row)
+
+ record_watchlist_alert 
+------------------------
+                      0
+(1 row)
+
+ record_watchlist_alert 
+------------------------
+                      0
+(1 row)
+
+          create_test_alert           
+--------------------------------------
+ 893da942-8a91-4cd2-9b09-e9acda823552
+(1 row)
+
+              set_config              
+--------------------------------------
+ 71000000-0000-0000-0000-000000000002
+(1 row)
+
+              set_config              
+--------------------------------------
+ 71000000-0000-0000-0000-000000000001
+(1 row)
+
+ALERTS DB PASS: A/B isolation; no forged notification/status; watchlist ownership; CAS and event dedupe; test rate limit; job lease; own read state
+set_config              
+--------------------------------------
+ 97000000-0000-0000-0000-000000000001
+(1 row)
+
+              set_config              
+--------------------------------------
+ b061c131-1dbd-496a-97a6-e8ca3f653be1
+(1 row)
+
+              set_config              
+--------------------------------------
+ 97000000-0000-0000-0000-000000000002
+(1 row)
+
+              set_config              
+--------------------------------------
+ 97000000-0000-0000-0000-000000000001
+(1 row)
+
+                              resolve_agent_action                               
+---------------------------------------------------------------------------------
+ {"result": {"id": "6645efc9-f245-4498-827d-47c5196492c0"}, "status": "applied"}
+(1 row)
+
+                              resolve_agent_action                               
+---------------------------------------------------------------------------------
+ {"result": {"id": "6645efc9-f245-4498-827d-47c5196492c0"}, "status": "applied"}
+(1 row)
+
+              set_config              
+--------------------------------------
+ 6645efc9-f245-4498-827d-47c5196492c0
+(1 row)
+
+              set_config              
+--------------------------------------
+ 38013cf8-73e0-490e-90fc-010206a6108b
+(1 row)
+
+AGENT DB PASS: preview-only, A/B isolation, immutable actions, confirmation/idempotency, stale/expired/cancelled protection, watchlist+alert operations, quota3/min
+set_config              
+--------------------------------------
+ 81000000-0000-0000-0000-000000000001
+(1 row)
+
+              set_config              
+--------------------------------------
+ 81000000-0000-0000-0000-000000000002
+(1 row)
+
+BACKTEST DB PASS: immutable observations; no backdating; next-open/month/quarter/index; adjusted-only; calendar gaps; bounded pagination; public read-only; risk A/B RLS
+set_config              
+--------------------------------------
+ 91000000-0000-0000-0000-000000000001
+(1 row)
+
+              set_config              
+--------------------------------------
+ 91000000-0000-0000-0000-000000000002
+(1 row)
+
+PAPER DB PASS: exact cash/cost/fees/tax/realized; partial sell; idempotency; quote expiry; stale consent; no overdraft/short/odd lot; read-only A/B RLS
+PAPER CONCURRENCY PASS: simultaneous buys cannot overdraw; simultaneous sells cannot short; exact cash and two fills
+AGENT CONCURRENCY PASS: two simultaneous confirmations apply once; alert version2, not3.
+
+[9/9] VPS fixture parser
+
+> vn-stock-analyzer@0.1.0 test:provider
+> vitest run tests/providers
+
+
+ RUN  v5.0.3 /workspace/vn-stock-analyzer
+
+
+ Test Files  14 passed (14)
+      Tests  55 passed | 1 todo (56)
+   Start at  01:25:11
+   Duration  1.53s (tests 55%, import 28%, transform 16%, worker 1%)
+
+
+BẢNG TỔNG KẾT VERIFY
+| Bước | Kết quả |
+| --- | --- |
+| Typecheck strict | PASS |
+| ESLint (0 warning) | PASS |
+| Prettier check | PASS |
+| Vitest + coverage >=80% | PASS |
+| Build web + worker | PASS |
+| Gitleaks | PASS |
+| Migrations PostgreSQL | PASS |
+| RLS 2 users | PASS |
+| VPS fixture parser | PASS |
+
+VERIFY PASS
