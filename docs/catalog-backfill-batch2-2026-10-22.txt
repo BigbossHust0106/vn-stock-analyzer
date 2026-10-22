@@ -1,0 +1,33 @@
+BEFORE 62 BATCH 31
+QTP 200 years 0 source KBS_VIETCAP
+PC1 200 years 4 source KBS_VIETCAP
+PET 200 years 4 source KBS_VIETCAP
+PVB 200 years 0 source KBS_VIETCAP
+VEF 200 years 0 source KBS_VIETCAP
+DDN 200 years 0 source KBS_VIETCAP
+BSR 200 years 4 source KBS_VIETCAP
+IDV 200 years 3 source FIREANT_VIETCAP
+SCS 200 years 0 source KBS_VIETCAP
+TNG 200 years 2 source KBS_VIETCAP
+NTC 200 years 0 source KBS_VIETCAP
+CLH 200 years 0 source KBS_VIETCAP
+MCH 200 years 4 source KBS_VIETCAP
+VRE 200 years 4 source KBS_VIETCAP
+DHT 200 years 4 source KBS_VIETCAP
+DDV 200 years 0 source KBS_VIETCAP
+DXP 200 years 1 source KBS_VIETCAP
+FOX 200 years 4 source KBS_VIETCAP
+PDR 200 years 4 source KBS_VIETCAP
+PVS 200 years 4 source KBS_VIETCAP
+VGS 200 years 4 source KBS_VIETCAP
+ACV 200 years 4 source KBS_VIETCAP
+VTP 200 years 4 source KBS_VIETCAP
+POW 200 years 4 source KBS_VIETCAP
+HDM 200 years 0 source KBS_VIETCAP
+PVD 200 years 4 source KBS_VIETCAP
+PVC 200 years 4 source KBS_VIETCAP
+PLX 200 years 4 source KBS_VIETCAP
+DTD 200 years 4 source KBS_VIETCAP
+NLG 200 years 4 source KBS_VIETCAP
+VPI 200 years 4 source KBS_VIETCAP
+AFTER 84 WITH_ANNUAL 84

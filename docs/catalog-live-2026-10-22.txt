@@ -1,0 +1,5 @@
+
+> vn-stock-analyzer@0.1.0 verify:catalog:live
+> node --use-env-proxy --import tsx scripts/verify-catalog-live.ts
+
+CATALOG LIVE PASS: {"mode":"local handler / real public DB","catalog":1522,"withAnnual":84,"lastPage":64,"pages":64,"queue":1522,"financialSnapshots":84}

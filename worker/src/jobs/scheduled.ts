@@ -4,7 +4,11 @@ import { serviceDatabase } from './database';
 import { runJob, type JobOutcome, type Job } from './runner';
 import { syncNews } from '../news/sync';
 import { syncRankings } from '../ranking-sync';
-import { syncMarket } from '../market-sync';
+import {
+  syncMarket,
+  refreshStockCatalog,
+  refreshCatalogIfStale,
+} from '../market-sync';
 import { refreshStaleFinancials } from '../financial-sync';
 import { tradingSync } from '../trading-sync';
 import { evaluateWatchlistAlerts } from '../alerts/sync';
@@ -61,6 +65,9 @@ export async function runMaintenance(env: Env, stamp: number) {
         : { state: 'ok' };
   });
   const vps = await runJob(db, 'vps', stamp, () => probeVps(db, Date.now()));
+  const catalog = await refreshCatalogIfStale(db, env, stamp).catch(() => ({
+    state: 'degraded' as const,
+  }));
   // Chạy cuối: lỗi/giới hạn subrequest của bước BCTC không ảnh hưởng cảnh báo/VPS.
   const financials = await refreshStaleFinancials(env, stamp)
     .then((r) => ({
@@ -71,7 +78,7 @@ export async function runMaintenance(env: Env, stamp: number) {
       console.warn('BCTC REFRESH SKIPPED: chưa đọc/ghi được trạng thái BCTC');
       return { state: 'skipped' as const };
     });
-  return { alerts, email, vps, financials };
+  return { alerts, email, vps, catalog, financials };
 }
 export async function runScheduledJobs(
   cron: string,
@@ -81,6 +88,7 @@ export async function runScheduledJobs(
 ) {
   if (
     ![
+      '* * * * *',
       '*/5 * * * *',
       '*/30 * * * *',
       '*/5 2-8 * * 1-5',
@@ -91,7 +99,23 @@ export async function runScheduledJobs(
     ].includes(cron)
   )
     return;
-  if (cron === '*/5 * * * *') {
+  if (
+    cron === '* * * * *' &&
+    new Date(stamp).getUTCHours() === 0 &&
+    new Date(stamp).getUTCMinutes() === 2
+  ) {
+    // 07:02 Vietnam, including holidays: one catalog request, guarded reconcile.
+    await refreshStockCatalog(env);
+    return;
+  }
+  if (cron === '* * * * *' && new Date(stamp).getUTCMinutes() % 5 !== 0) {
+    // One bounded financial symbol per minute, including weekends/off-session.
+    // Keep alert/email/VPS maintenance every five minutes, not every minute.
+    const result = await refreshStaleFinancials(env, stamp);
+    console.log('FINANCIAL CATALOG PROGRESS:', JSON.stringify(result));
+    return;
+  }
+  if (cron === '*/5 * * * *' || cron === '* * * * *') {
     const result = await runMaintenance(env, stamp);
     if (Object.values(result).some((r) => r.state === 'failed'))
       throw Error('Maintenance failed after bounded retries');

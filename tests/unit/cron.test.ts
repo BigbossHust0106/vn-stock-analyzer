@@ -16,6 +16,8 @@ function operationalMock(
     return Response.json([{ id: 'fixture-job', generation: 1 }]);
   if (url.includes('/system_job_runs'))
     return new Response(null, { status: 204 });
+  if (url.includes('/catalog_sync_state'))
+    return Response.json({ observed_at: new Date().toISOString() });
   if (url.includes('/watchlist_alert_rules')) return Response.json([]);
   if (url.includes('/api_health'))
     return init?.method === 'POST'
@@ -169,7 +171,7 @@ it('Review4 cron chưa khai báo không đồng bộ ngoài ý muốn', async ()
   const waitUntil = vi.fn();
   worker.scheduled(
     {
-      cron: '* * * * *',
+      cron: '7 * * * *',
       scheduledTime: Date.parse('2026-10-12T09:00:00Z'),
     } as ScheduledController,
     env,

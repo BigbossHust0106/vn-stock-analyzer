@@ -1,0 +1,34 @@
+BEFORE 32 BATCH 32
+ANV 200 years 4 source KBS_VIETCAP
+FRT 200 years 4 source KBS_VIETCAP
+LCG 200 years 4 source KBS_VIETCAP
+MSH 200 years 4 source KBS_VIETCAP
+HSG 200 years 2 source FIREANT_VIETCAP
+CII 200 years 4 source KBS_VIETCAP
+FCN 200 years 4 source KBS_VIETCAP
+DGW 200 years 4 source KBS_VIETCAP
+CTD 200 years 3 source FIREANT_VIETCAP
+BWE 200 years 4 source KBS_VIETCAP
+HDC 200 years 4 source KBS_VIETCAP
+AAA 200 years 4 source KBS_VIETCAP
+BAF 200 years 4 source KBS_VIETCAP
+BFC 200 years 4 source KBS_VIETCAP
+GAS 200 years 4 source KBS_VIETCAP
+KSB 200 years 4 source KBS_VIETCAP
+BCM 200 years 4 source KBS_VIETCAP
+DBC 200 years 4 source KBS_VIETCAP
+GEX 200 years 4 source KBS_VIETCAP
+KDC 200 years 4 source KBS_VIETCAP
+KDH 200 years 4 source KBS_VIETCAP
+ASM 200 years 4 source KBS_VIETCAP
+ACG 200 years 4 source KBS_VIETCAP
+DAT 200 years 0 source KBS_VIETCAP
+HHV 200 years 0 source unavailable
+DPG 200 years 4 source KBS_VIETCAP
+HAH 200 years 4 source KBS_VIETCAP
+GEG 200 years 4 source KBS_VIETCAP
+DXG 200 years 4 source KBS_VIETCAP
+KBC 200 years 4 source KBS_VIETCAP
+DIG 200 years 4 source KBS_VIETCAP
+CTR 200 years 4 source KBS_VIETCAP
+AFTER 61 WITH_ANNUAL 61

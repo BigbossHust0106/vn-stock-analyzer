@@ -93,7 +93,7 @@ export class KbsProvider implements DataProvider {
     });
   }
   async fetchStocks(exchange?: Exchange): Promise<StockInfo[]> {
-    const data = await this.http.cached('catalog', 86400000, async () =>
+    const data = await this.http.cached('catalog', 3600000, async () =>
       parseKbsStocks(
         await this.http.request(
           'https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/search/data',

@@ -1,3 +1,4 @@
+import { financialCatalog } from './financial-catalog';
 import { syncFinancialBackup } from './financial-backup';
 import { rankingUniverse } from '../../modules/market/ranking-universe';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
@@ -146,7 +147,7 @@ export async function syncFinancials(env: Env): Promise<void> {
 // thay vì ghi lại bản cache cũ.
 export const financialMaxAgeMs = 25 * 3600000;
 // Chọn mã cần làm mới: chưa có snapshot trước, sau đó snapshot cũ nhất. Xoay vòng
-// theo lượt cron để một mã lỗi liên tục không chặn các mã còn lại.
+// theo phút để một mã lỗi không cố định ở đầu hàng; không giới hạn theo rankingUniverse.
 export function staleFinancialSymbols(
   stocks: { id: string; symbol: string }[],
   fetched: Map<string, string>,
@@ -161,10 +162,10 @@ export function staleFinancialSymbols(
     .filter((s) => age(s.id) > maxAgeMs)
     .sort((a, b) => age(b.id) - age(a.id) || a.symbol.localeCompare(b.symbol));
   if (!stale.length) return [];
-  const turn = Math.floor(timestamp / 300000) % stale.length;
+  const turn = Math.floor(timestamp / 60000) % stale.length;
   return [...stale.slice(turn), ...stale.slice(0, turn)];
 }
-// Cron BCTC độc lập lịch phiên: BCTC không phụ thuộc ngày giao dịch. Mỗi lượt chỉ
+// Cron BCTC độc lập lịch phiên: BCTC không phụ thuộc ngày giao dịch. Mỗi phút chỉ
 // làm mới `limit` mã để nằm trong ngân sách subrequest/CPU của Workers Free.
 export async function refreshStaleFinancials(
   env: Env,
@@ -172,28 +173,7 @@ export async function refreshStaleFinancials(
   limit = 1,
 ): Promise<{ refreshed: string[]; failed: string[]; pending: number }> {
   const db = serviceClient(env);
-  const symbols = validatedSymbols(
-    (env.SYNC_SYMBOLS || rankingUniverse).split(','),
-  );
-  const { data: stocks, error } = await db
-    .from('stocks')
-    .select('id,symbol')
-    .in('symbol', symbols)
-    .eq('active', true);
-  if (error || !Array.isArray(stocks))
-    throw new Error('Không đọc được danh mục BCTC');
-  const { data: snapshots, error: snapshotError } = await db
-    .from('financial_snapshots')
-    .select('stock_id,fetched_at')
-    .in(
-      'stock_id',
-      stocks.map((s) => s.id),
-    );
-  if (snapshotError || !Array.isArray(snapshots))
-    throw new Error('Không đọc được thời điểm BCTC');
-  const fetched = new Map(
-    snapshots.map((s) => [String(s.stock_id), String(s.fetched_at)]),
-  );
+  const { stocks, fetched } = await financialCatalog(db);
   const queue = staleFinancialSymbols(
     stocks.map((s) => ({ id: String(s.id), symbol: String(s.symbol) })),
     fetched,

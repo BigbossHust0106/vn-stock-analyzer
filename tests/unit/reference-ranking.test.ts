@@ -167,14 +167,14 @@ it('Client: không để mã tham khảo trùng Top 10 chuẩn và bỏ tham kh�
   );
   expect(full.reference).toEqual([]);
 });
-it('Chọn mã BCTC cần làm mới: chưa có snapshot trước, rồi cũ nhất; xoay vòng theo lượt 5 phút', () => {
+it('Chọn mã BCTC cần làm mới: chưa có snapshot trước, rồi cũ nhất; xoay vòng theo từng phút', () => {
   const stocks = [
     { id: 'a', symbol: 'AAA' },
     { id: 'b', symbol: 'BBB' },
     { id: 'c', symbol: 'CCC' },
     { id: 'd', symbol: 'DDD' },
   ];
-  const now = Date.parse('2026-10-16T00:00:00Z'); // chia hết 300000 ms
+  const now = Date.parse('2026-10-16T00:00:00Z'); // chia hết 60000 ms
   const fetched = new Map([
     ['a', '2026-10-15T23:00:00Z'], // 1 giờ < 25 giờ => còn mới
     ['b', '2026-10-14T00:00:00Z'], // 48 giờ
@@ -182,14 +182,14 @@ it('Chọn mã BCTC cần làm mới: chưa có snapshot trước, rồi cũ nh�
     ['x', 'không phải ngày'],
   ]);
   // Thứ tự cũ nhất: DDD (chưa có) > BBB (48h) > CCC (26h); AAA mới nên bỏ.
-  // now/300000 = 5.920.560.000/300 => lượt chia hết cho 3 => turn = 0.
-  expect(Math.floor(now / 300000) % 3).toBe(0);
+  // now/60000 = số phút kể từ epoch => lượt chia hết cho 3 => turn = 0.
+  expect(Math.floor(now / 60000) % 3).toBe(0);
   expect(
     staleFinancialSymbols(stocks, fetched, now).map((s) => s.symbol),
   ).toEqual(['DDD', 'BBB', 'CCC']);
-  // Lượt kế tiếp (+5 phút) => turn = 1 => BBB lên đầu, mã lỗi không chặn mã khác.
+  // Lượt kế tiếp (+1 phút) => turn = 1 => BBB lên đầu, mã lỗi không chặn mã khác.
   expect(
-    staleFinancialSymbols(stocks, fetched, now + 300000).map((s) => s.symbol),
+    staleFinancialSymbols(stocks, fetched, now + 60000).map((s) => s.symbol),
   ).toEqual(['BBB', 'CCC', 'DDD']);
   expect(
     staleFinancialSymbols(stocks.slice(0, 1), fetched, now).map(

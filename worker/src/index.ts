@@ -1,3 +1,4 @@
+import { catalogResponse } from './api/catalog';
 import { agentResponse } from './api/agent';
 import type { AgentBinding } from './agent/model';
 import { quotesResponse } from './api/quotes';
@@ -160,6 +161,8 @@ export default {
       if (ranking) return ranking;
       const financial = await financialResponse(request, env, context);
       if (financial) return financial;
+      const catalog = await catalogResponse(request, env);
+      if (catalog) return catalog;
       const market = await marketResponse(request, env, context);
       if (market) return market;
       const quotes = await quotesResponse(request, env);
@@ -188,6 +191,7 @@ export default {
   ): void {
     if (
       ![
+        '* * * * *',
         '*/5 * * * *',
         '*/30 * * * *',
         '*/5 2-8 * * 1-5',

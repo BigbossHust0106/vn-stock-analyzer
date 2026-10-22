@@ -1,7 +1,7 @@
 import { rankingUniverse } from '../../modules/market/ranking-universe';
 import { syncMetadata } from './metadata-sync';
 import { syncFinancials } from './financial-sync';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Env } from './index';
 import deployment from '../../config/public-deployment.json';
 import { marketProviders } from './api/market';
@@ -34,20 +34,7 @@ export async function syncMarket(
     if (!canIngest(session, timestamp)) return false;
   }
   const provider = marketProviders(env);
-  const stocks = await provider.catalog.fetchStocks();
-  if (stocks.length < 100) throw new Error('Catalog không đầy đủ');
-  const { error: catalogError } = await db.rpc('reconcile_stock_catalog', {
-    rows: stocks.map((s) => ({
-      ...s,
-      search_text: normalizeSearch(s.symbol + ' ' + s.name),
-    })),
-    complete: true,
-    observed_at: stocks[0]!.fetchedAt,
-  });
-  if (catalogError)
-    throw new Error(
-      'Danh mục không đủ bằng chứng đối soát; không vô hiệu hóa mã',
-    );
+  await reconcileCatalog(db, env);
   const symbols = validatedSymbols(
     (env.SYNC_SYMBOLS || rankingUniverse).split(','),
   );
@@ -125,4 +112,51 @@ export async function syncMarket(
     .eq('component', 'prices');
   if (statusError) throw new Error('Không cập nhật trạng thái');
   return true;
+}
+
+// Catalog membership is independent of trading sessions/holidays.
+export async function reconcileCatalog(db: SupabaseClient, env: Env) {
+  const provider = marketProviders(env);
+  const stocks = await provider.catalog.fetchStocks();
+  if (stocks.length < 100) throw new Error('Catalog không đầy đủ');
+  const { error: catalogError } = await db.rpc('reconcile_stock_catalog', {
+    rows: stocks.map((s) => ({
+      ...s,
+      search_text: normalizeSearch(s.symbol + ' ' + s.name),
+    })),
+    complete: true,
+    observed_at: stocks[0]!.fetchedAt,
+  });
+  if (catalogError)
+    throw new Error(
+      'Danh mục không đủ bằng chứng đối soát; không vô hiệu hóa mã',
+    );
+  return stocks.length;
+}
+export async function refreshStockCatalog(env: Env) {
+  if (!env.SUPABASE_SERVICE_ROLE_KEY)
+    throw Error('Thiếu quyền đồng bộ danh mục');
+  const db = createClient(
+    env.SUPABASE_URL || deployment.supabaseUrl,
+    env.SUPABASE_SERVICE_ROLE_KEY,
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  );
+  return reconcileCatalog(db, env);
+}
+
+export async function refreshCatalogIfStale(
+  db: SupabaseClient,
+  env: Env,
+  stamp: number,
+) {
+  const { data, error } = await db
+    .from('catalog_sync_state')
+    .select('observed_at')
+    .eq('source', 'KBS')
+    .maybeSingle();
+  if (error) throw Error('Không đọc được thời điểm danh mục');
+  if (data && Date.parse(data.observed_at) >= stamp - 23 * 3600000)
+    return { state: 'skipped' as const };
+  const count = await reconcileCatalog(db, env);
+  return { state: 'ok' as const, count };
 }

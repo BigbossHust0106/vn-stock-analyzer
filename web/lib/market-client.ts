@@ -201,3 +201,67 @@ export async function stockDetail(
   detailCache.set(key, { at: Date.now(), data: result });
   return result;
 }
+
+export interface CatalogStock extends MarketStock {
+  financial_state:
+    'available' | 'missing' | 'unsupported' | 'empty' | 'invalid';
+  financial_fetched_at: string | null;
+}
+export interface CatalogPage {
+  data: CatalogStock[];
+  total: number;
+  page: number;
+  pageSize: number;
+  asOf: string;
+  counts: {
+    catalog: number;
+    withAnnual: number;
+    withoutSnapshot: number;
+    otherSnapshots: number;
+  };
+}
+export async function catalogStocks(
+  query: string,
+  exchange: string,
+  financials: string,
+  page: number,
+  signal: AbortSignal,
+): Promise<CatalogPage> {
+  const params = new URLSearchParams({
+    q: query,
+    financials,
+    page: String(page),
+  });
+  if (exchange) params.set('exchange', exchange);
+  const body = await marketJson('/v1/catalog?' + params, signal);
+  if (
+    !record(body) ||
+    !Array.isArray(body.data) ||
+    !body.data.every(
+      (r) =>
+        record(r) &&
+        stock(r) &&
+        ['available', 'missing', 'unsupported', 'empty', 'invalid'].includes(
+          String(r.financial_state),
+        ) &&
+        (r.financial_fetched_at === null ||
+          (typeof r.financial_fetched_at === 'string' &&
+            Number.isFinite(Date.parse(r.financial_fetched_at)))),
+    ) ||
+    !['total', 'page', 'pageSize'].every(
+      (k) => Number.isSafeInteger(body[k]) && Number(body[k]) >= 0,
+    ) ||
+    body.page !== page ||
+    body.pageSize !== 24 ||
+    !record(body.counts) ||
+    !['catalog', 'withAnnual', 'withoutSnapshot', 'otherSnapshots'].every(
+      (k) =>
+        Number.isSafeInteger((body.counts as Record<string, unknown>)[k]) &&
+        Number((body.counts as Record<string, unknown>)[k]) >= 0,
+    ) ||
+    typeof body.asOf !== 'string' ||
+    !Number.isFinite(Date.parse(body.asOf))
+  )
+    throw Error('Danh mục đầy đủ trả về không hợp lệ');
+  return body as unknown as CatalogPage;
+}

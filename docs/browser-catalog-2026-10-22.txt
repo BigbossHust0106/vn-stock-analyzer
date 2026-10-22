@@ -1,0 +1,1 @@
+CATALOG BROWSER PASS: real public Worker/DB; 24 available cards, page2 differs, all-market/HNX filter, FRT search, 390/1440px, no JS errors. Auth is a UI fixture; no real Auth/RLS verification claimed.
