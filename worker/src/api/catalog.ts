@@ -1,9 +1,64 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Env } from '../index';
 import deployment from '../../../config/public-deployment.json';
 import { normalizeSearch } from '../../../modules/market/search';
 import { scoreStock } from '../../../modules/scoring/engine';
 import { isFinancialData } from '../../../modules/providers/financial-types';
+type Counts = {
+  catalog: number;
+  withAnnual: number;
+  withoutSnapshot: number;
+  otherSnapshots: number;
+  asOf: string;
+};
+let countsTransport: typeof fetch;
+const countsCache = new Map<
+  string,
+  { until: number; value: Promise<Counts> }
+>();
+async function marketCounts(db: SupabaseClient, key: string): Promise<Counts> {
+  if (countsTransport !== fetch) {
+    countsTransport = fetch;
+    countsCache.clear();
+  }
+  const old = countsCache.get(key);
+  if (old && old.until > Date.now()) return old.value;
+  if (countsCache.size >= 32)
+    countsCache.delete(countsCache.keys().next().value!);
+  const value = (async () => {
+    const [total, stored, annual] = await Promise.all([
+      db
+        .from('stocks')
+        .select('id', { count: 'exact', head: true })
+        .eq('active', true),
+      db
+        .from('financial_snapshots')
+        .select('stock_id,stocks!inner(active)', { count: 'exact', head: true })
+        .eq('stocks.active', true),
+      db
+        .from('financial_snapshots')
+        .select('stock_id,stocks!inner(active)', { count: 'exact', head: true })
+        .eq('stocks.active', true)
+        .not('payload->annual', 'eq', '[]'),
+    ]);
+    if ([total, stored, annual].some((r) => r.error || r.count === null))
+      throw Error('Counts unavailable');
+    return {
+      catalog: total.count!,
+      withAnnual: annual.count!,
+      withoutSnapshot: total.count! - stored.count!,
+      otherSnapshots: stored.count! - annual.count!,
+      asOf: new Date().toISOString(),
+    };
+  })();
+  countsCache.set(key, { until: Date.now() + 300000, value });
+  try {
+    return await value;
+  } catch (e) {
+    countsCache.delete(key);
+    throw e;
+  }
+}
 export async function catalogResponse(
   request: Request,
   env: Env,
@@ -12,7 +67,7 @@ export async function catalogResponse(
   if (url.pathname !== '/v1/catalog') return null;
   const headers = {
     'Access-Control-Allow-Origin': '*',
-    'Cache-Control': 'public, max-age=30',
+    'Cache-Control': 'public, max-age=120',
     'X-Content-Type-Options': 'nosniff',
   };
   const reply = (body: unknown, status = 200) =>
@@ -67,25 +122,16 @@ export async function catalogResponse(
     if (filter === 'available')
       query = query.not('financial_snapshots.payload->annual', 'eq', '[]');
     if (filter === 'missing') query = query.is('financial_snapshots', null);
-    const [result, total, stored, annual] = await Promise.all([
+    const [result, counts] = await Promise.all([
       query,
-      db
-        .from('stocks')
-        .select('id', { count: 'exact', head: true })
-        .eq('active', true),
-      db
-        .from('financial_snapshots')
-        .select('stock_id,stocks!inner(active)', { count: 'exact', head: true })
-        .eq('stocks.active', true),
-      db
-        .from('financial_snapshots')
-        .select('stock_id,stocks!inner(active)', { count: 'exact', head: true })
-        .eq('stocks.active', true)
-        .not('payload->annual', 'eq', '[]'),
+      marketCounts(
+        db,
+        (env.SUPABASE_URL || deployment.supabaseUrl) +
+          '\n' +
+          env.SUPABASE_PUBLISHABLE_KEY,
+      ),
     ]);
-    if (
-      [result, total, stored, annual].some((r) => r.error || r.count === null)
-    )
+    if (result.error || result.count === null)
       throw Error('Catalog read failed');
     const stamp = new Date().toISOString();
     const rows = (result.data ?? []).map((value) => {
@@ -140,11 +186,12 @@ export async function catalogResponse(
       pageSize,
       asOf: stamp,
       counts: {
-        catalog: total.count,
-        withAnnual: annual.count,
-        withoutSnapshot: total.count! - stored.count!,
-        otherSnapshots: stored.count! - annual.count!,
+        catalog: counts.catalog,
+        withAnnual: counts.withAnnual,
+        withoutSnapshot: counts.withoutSnapshot,
+        otherSnapshots: counts.otherSnapshots,
       },
+      countsAsOf: counts.asOf,
       order: 'symbol_ascending',
       notice:
         'Độ phủ dữ liệu không phải chất lượng doanh nghiệp hay khuyến nghị mua. Số đếm toàn danh mục nguồn, bộ lọc áp dụng cho danh sách.',

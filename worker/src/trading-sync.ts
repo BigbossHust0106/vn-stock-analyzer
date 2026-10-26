@@ -73,7 +73,7 @@ export async function tradingSync(
     if (stocks.length < 1000) break;
   }
   if (!imported) throw new Error('Danh mục giao dịch rỗng; không ghi success');
-  if (closing) {
+  if (closing && env.PAUSE_BULK_SYNC !== 'true') {
     await syncMarket(env, timestamp);
     // Downloading after the close does not prove source finality or price basis.
     // Keep provider bars unverified; never promote fetchedAt to source evidence.

@@ -1,4 +1,4 @@
-import { persistFinancials } from '../financial-sync';
+import { financialMaxAgeMs, persistFinancials } from '../financial-sync';
 import { createClient } from '@supabase/supabase-js';
 import type { Env } from '../index';
 import deployment from '../../../config/public-deployment.json';
@@ -19,7 +19,7 @@ export async function financialResponse(
   if (!path.startsWith('/v1/financials/')) return null;
   const headers = {
     'Access-Control-Allow-Origin': '*',
-    'Cache-Control': 'public, max-age=60',
+    'Cache-Control': 'public, max-age=300',
     'X-Content-Type-Options': 'nosniff',
   };
   const reply = (data: unknown, status = 200) =>
@@ -59,7 +59,11 @@ export async function financialResponse(
       throw new Error('Invalid stored financials');
     let financials: FinancialData | null = stored?.payload ?? null;
     const notices: string[] = [];
-    if (!stored || Date.now() - Date.parse(stored.fetched_at) > 86400000) {
+    let shouldPersist = false;
+    if (
+      !stored ||
+      Date.now() - Date.parse(stored.fetched_at) > financialMaxAgeMs
+    ) {
       try {
         const candidate =
           await marketProviders(env).fundamentals.fetchFinancials(symbol);
@@ -67,7 +71,12 @@ export async function financialResponse(
           notices.push(
             'BCTC mới thiếu dữ liệu so với bản đã lưu; giữ snapshot tốt, không ghi đè.',
           );
-        else financials = candidate;
+        else {
+          financials = candidate;
+          shouldPersist =
+            candidate.annual.length > 0 &&
+            JSON.stringify(candidate) !== JSON.stringify(stored?.payload);
+        }
       } catch {
         notices.push(
           financials
@@ -90,7 +99,12 @@ export async function financialResponse(
       undefined,
       quote?.fetched_at ?? null,
     );
-    if (financials && env.SUPABASE_SERVICE_ROLE_KEY && context) {
+    if (
+      shouldPersist &&
+      financials &&
+      env.SUPABASE_SERVICE_ROLE_KEY &&
+      context
+    ) {
       const writer = createClient(
         env.SUPABASE_URL || deployment.supabaseUrl,
         env.SUPABASE_SERVICE_ROLE_KEY,

@@ -76,6 +76,16 @@ export function DataPriority() {
           {format(data.counts.otherSnapshots)} mã có snapshot nhưng chưa có kỳ
           năm chuẩn hóa. Số đếm toàn danh mục nguồn, không phải số kết quả bộ
           lọc.
+          {data.countsAsOf && (
+            <>
+              {' '}
+              Bộ đếm nhận lúc{' '}
+              {new Date(data.countsAsOf).toLocaleTimeString('vi-VN', {
+                timeZone: 'Asia/Ho_Chi_Minh',
+              })}
+              ; cache tối đa 5 phút.
+            </>
+          )}
         </p>
       )}
       <div className="catalog-filters">

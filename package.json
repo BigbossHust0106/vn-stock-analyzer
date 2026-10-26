@@ -59,7 +59,8 @@
     "verify:agent:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-agent.ts",
     "verify:export:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-stock-export.ts",
     "verify:catalog:live": "node --use-env-proxy --import tsx scripts/verify-catalog-live.ts",
-    "verify:catalog:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-catalog.ts"
+    "verify:catalog:browser": "PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright node --use-env-proxy --import tsx scripts/browser-catalog.ts",
+    "verify:io:live": "node --use-env-proxy --import tsx scripts/verify-io-live.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.3",

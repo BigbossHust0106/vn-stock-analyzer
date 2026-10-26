@@ -128,6 +128,7 @@ export async function migrations() {
       console.log(`MIGRATION PASS: ${file}`);
     }
     sqlFile(name, 'tests/database/schema.sql');
+    sqlFile(name, 'tests/database/io-budget.sql');
     sqlFile(name, 'tests/database/financials.sql');
     sqlFile(name, 'tests/database/review.sql');
     sqlFile(name, 'tests/database/closing.sql');

@@ -1,3 +1,5 @@
+import { changedHistory } from '../../modules/market/history-delta';
+import type { DailyBar } from '../../modules/providers/data-provider';
 import { rankingUniverse } from '../../modules/market/ranking-universe';
 import { syncMetadata } from './metadata-sync';
 import { syncFinancials } from './financial-sync';
@@ -56,8 +58,35 @@ export async function syncMarket(
       );
       if (!bars.length)
         throw new Error('Nguồn lịch sử không có dữ liệu cho mã đồng bộ');
+      const { data: old, error: oldError } = await db
+        .from('prices_history')
+        .select(
+          'session_date,source,open_vnd,high_vnd,low_vnd,close_vnd,volume_reported,is_final,fetched_at',
+        )
+        .eq('stock_id', stock.id)
+        .eq('source', bars[0]!.source)
+        .gte('session_date', yearsBefore(today, 3))
+        .order('session_date')
+        .limit(1200);
+      if (oldError) throw Error('Không đọc được history để đối chiếu');
+      const previous: DailyBar[] = (old ?? []).map((r) => ({
+        symbol,
+        sessionDate: r.session_date,
+        source: r.source,
+        openVnd: Number(r.open_vnd),
+        highVnd: Number(r.high_vnd),
+        lowVnd: Number(r.low_vnd),
+        closeVnd: Number(r.close_vnd),
+        volumeReported: Number(r.volume_reported),
+        isFinal: r.is_final,
+        fetchedAt: r.fetched_at,
+        priceBasis: 'unverified',
+        volumeUnit: 'shares',
+      }));
+      const delta = changedHistory(bars, previous);
+      if (!delta.length) continue;
       const { error: writeError } = await db.rpc('ingest_price_history', {
-        rows: bars.map((b) => ({
+        rows: delta.map((b) => ({
           stock_id: stock.id,
           session_date: b.sessionDate,
           source: b.source,

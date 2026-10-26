@@ -218,8 +218,10 @@ export async function collectNews(
       )
       .slice(0, 6);
     let analyzed = 0;
+    const attempted = new Set<string>();
     if (llmConfigured(env))
       for (const a of pending) {
+        attempted.add(a.id);
         a.analysis_attempts = (a.analysis_attempts ?? 0) + 1;
         a.last_attempt_at = asOf;
         try {
@@ -235,7 +237,7 @@ export async function collectNews(
         }
       }
     const changed = rows.filter(
-      (a) => a.fetched_at === asOf || pending.includes(a) || dirty.has(a.id),
+      (a) => a.fetched_at === asOf || attempted.has(a.id) || dirty.has(a.id),
     );
     for (let offset = 0; offset < changed.length; offset += 500) {
       const { error } = await db
@@ -253,16 +255,18 @@ export async function collectNews(
       group.push(a);
       issuerArticles.set(symbol, group);
     }
-    const scoreRows = stocks.map((s) => ({
-      stock_id: s.id,
-      score: null as number | null,
-      payload: newsSentiment(
-        issuerArticles.get(s.symbol) ?? [],
-        s.symbol,
-        asOf,
-      ),
-      updated_at: asOf,
-    }));
+    const scoreRows = stocks
+      .filter((s) => issuerArticles.has(s.symbol))
+      .map((s) => ({
+        stock_id: s.id,
+        score: null as number | null,
+        payload: newsSentiment(
+          issuerArticles.get(s.symbol) ?? [],
+          s.symbol,
+          asOf,
+        ),
+        updated_at: asOf,
+      }));
     for (const row of scoreRows) {
       if (failed) {
         row.payload.score = null;

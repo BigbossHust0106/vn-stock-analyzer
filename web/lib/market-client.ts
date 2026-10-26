@@ -208,6 +208,7 @@ export interface CatalogStock extends MarketStock {
   financial_fetched_at: string | null;
 }
 export interface CatalogPage {
+  countsAsOf?: string;
   data: CatalogStock[];
   total: number;
   page: number;
@@ -259,6 +260,9 @@ export async function catalogStocks(
         Number.isSafeInteger((body.counts as Record<string, unknown>)[k]) &&
         Number((body.counts as Record<string, unknown>)[k]) >= 0,
     ) ||
+    (body.countsAsOf !== undefined &&
+      (typeof body.countsAsOf !== 'string' ||
+        !Number.isFinite(Date.parse(body.countsAsOf)))) ||
     typeof body.asOf !== 'string' ||
     !Number.isFinite(Date.parse(body.asOf))
   )

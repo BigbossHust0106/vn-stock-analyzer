@@ -180,11 +180,11 @@ it('catalog failures do not fabricate counts or an empty complete list', async (
   expect(r?.status).toBe(502);
   expect(await r!.json()).not.toHaveProperty('counts');
 });
-it('registered all-day minute cron grows financial coverage on weekends without assuming a trading session', async () => {
+it('obsolete minute cron is gated before IO; configured maintenance uses five-minute ticks', async () => {
   const module = await import('../../worker/src/financial-sync');
   const refresh = vi
     .spyOn(module, 'refreshStaleFinancials')
-    .mockResolvedValue({ refreshed: ['GAS'], failed: [], pending: 1489 });
+    .mockResolvedValue({ refreshed: ['GAS'], failed: [], pending: null });
   const transport = vi.fn();
   vi.stubGlobal('fetch', transport);
   const pending: Promise<unknown>[] = [];
@@ -201,17 +201,17 @@ it('registered all-day minute cron grows financial coverage on weekends without 
     },
   );
   await Promise.all(pending);
-  expect(refresh).toHaveBeenCalledTimes(1);
+  expect(refresh).not.toHaveBeenCalled();
   expect(transport).not.toHaveBeenCalled();
   const config = parseConfigFileTextToJson(
     'wrangler.jsonc',
     readFileSync('wrangler.jsonc', 'utf8'),
   ).config;
-  expect(config.triggers.crons).toContain('* * * * *');
-  expect(config.triggers.crons).not.toContain('*/5 * * * *');
+  expect(config.triggers.crons).toContain('*/5 * * * *');
+  expect(config.triggers.crons).not.toContain('* * * * *');
   expect(config.triggers.crons).toHaveLength(5);
 });
-it('daily membership reconcile runs on a weekend independently of the price/session jobs', async () => {
+it('obsolete half-hour RSS trigger performs no database work before its new hourly slot', async () => {
   const module = await import('../../worker/src/market-sync');
   const reconcile = vi
     .spyOn(module, 'refreshStockCatalog')
@@ -221,8 +221,8 @@ it('daily membership reconcile runs on a weekend independently of the price/sess
   const pending: Promise<unknown>[] = [];
   worker.scheduled(
     {
-      cron: '* * * * *',
-      scheduledTime: Date.parse('2026-10-25T00:02:00Z'),
+      cron: '*/30 * * * *',
+      scheduledTime: Date.parse('2026-10-25T00:30:00Z'),
     } as ScheduledController,
     {},
     {
@@ -232,7 +232,7 @@ it('daily membership reconcile runs on a weekend independently of the price/sess
     },
   );
   await Promise.all(pending);
-  expect(reconcile).toHaveBeenCalledTimes(1);
+  expect(reconcile).not.toHaveBeenCalled();
   expect(transport).not.toHaveBeenCalled();
 });
 it('fresh catalog is not downloaded again; stale catalog is reconciled without a trading-session dependency', async () => {

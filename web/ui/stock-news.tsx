@@ -102,9 +102,9 @@ export function StockNews({ symbol }: { symbol: string }) {
         <button onClick={() => setRefresh((n) => n + 1)}>↻ Cập nhật tin</button>
       </div>
       <p>
-        RSS từ CafeF, Vietstock, VnEconomy và VnExpress Kinh doanh · Cron mỗi 30
-        phút. Phân tích dựa trên tiêu đề và mô tả RSS, không phải toàn văn; nhãn
-        LLM có thể sai.
+        RSS từ CafeF, Vietstock, VnEconomy và VnExpress Kinh doanh · Cập nhật
+        theo giờ. Phân tích dựa trên tiêu đề và mô tả RSS, không phải toàn văn;
+        nhãn LLM có thể sai.
       </p>
       {error && (
         <p role="alert">

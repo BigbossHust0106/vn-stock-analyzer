@@ -86,9 +86,11 @@ it('Đọc BCTC public đã lưu, báo điểm thật theo cùng snapshot, khôn
       throw new Error('Unexpected external provider');
     }),
   );
+  const waitUntil = vi.fn();
   const response = await worker.fetch(
     new Request('https://example.test/v1/financials/VNM'),
-    env,
+    { ...env, SUPABASE_SERVICE_ROLE_KEY: 'must-not-write-on-read' },
+    { waitUntil },
   );
   expect(response.status).toBe(200);
   const body = (await response.json()) as {
@@ -106,6 +108,7 @@ it('Đọc BCTC public đã lưu, báo điểm thật theo cùng snapshot, khôn
   expect(body.report.conclusion).toBe('Quan sát');
   expect(JSON.stringify(body)).not.toContain('local-test-public');
   expect(calls).toHaveLength(4);
+  expect(waitUntil).not.toHaveBeenCalled();
 });
 it('Không đọc được migration: trả lỗi rõ, không fabricate report', async () => {
   vi.stubGlobal(

@@ -209,3 +209,9 @@ Phí giả định 0,15% mỗi chiều, thuế bán 0,1%, chỉnh được khi t
 Không cần secret/binding mới. Migration `20261016033651_paper_investing.sql` tạo 4 bảng riêng tư, RLS chỉ đọc dữ liệu của chủ ví. Chỉ Worker xác thực người dùng mới gọi RPC tạo ví/giá/giao dịch bằng service key. API không nhận giá hoặc số dư từ trình duyệt; khóa hàng ví trong transaction và mã yêu cầu chống ghi trùng. Snapshot tiền/danh mục/lịch sử đọc nhất quán; lịch sử phân trang 20 dòng; API no-store và dùng rate limit đã có.
 
 Kiểm tra: `npm run verify` gồm đáp án tính tay, RLS A/B và giao dịch đồng thời trong PostgreSQL tạm. Kiểm tra UI + Auth + ví thử trên môi trường đã áp dụng migration: `npm run verify:paper:browser` (mặc định local; đặt `MARKET_APP_URL` để thử deployment). Script tạo rồi xóa hai tài khoản thử, chỉ tạo vốn/giao dịch ảo, không ghi giá giả vào bảng dữ liệu thị trường.
+
+### Giới hạn Disk IO
+
+Xem [ngân sách đọc/ghi và quy trình theo dõi](docs/disk-io-budget-2026-10-26.md).
+Các giới hạn truy vấn, ghi trùng, cache và nhịp cron có test trong `npm run verify`.
+Kiểm tra cache trên production riêng: `npm run verify:io:live`.

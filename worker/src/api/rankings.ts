@@ -18,7 +18,7 @@ export async function rankingsResponse(
   if (url.pathname !== '/v1/rankings') return null;
   const headers = {
     'Access-Control-Allow-Origin': '*',
-    'Cache-Control': 'no-store',
+    'Cache-Control': 'public, max-age=60',
     'X-Content-Type-Options': 'nosniff',
   };
   const horizon = url.searchParams.get('horizon') ?? 'day',

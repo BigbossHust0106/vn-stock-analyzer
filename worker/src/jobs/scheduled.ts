@@ -1,14 +1,12 @@
+import { ioPolicy, observationWindow } from '../../../modules/market/io-policy';
+import { emailConfigured } from '../alerts/email';
 import { sampleQuotes } from '../quote-sampling';
 import type { Env } from '../index';
 import { serviceDatabase } from './database';
 import { runJob, type JobOutcome, type Job } from './runner';
 import { syncNews } from '../news/sync';
 import { syncRankings } from '../ranking-sync';
-import {
-  syncMarket,
-  refreshStockCatalog,
-  refreshCatalogIfStale,
-} from '../market-sync';
+import { syncMarket, refreshCatalogIfStale } from '../market-sync';
 import { refreshStaleFinancials } from '../financial-sync';
 import { tradingSync } from '../trading-sync';
 import { evaluateWatchlistAlerts } from '../alerts/sync';
@@ -56,28 +54,51 @@ export async function runMaintenance(env: Env, stamp: number) {
     await evaluateWatchlistAlerts(db, Date.now());
     return { state: 'ok' };
   });
-  const email = await runJob(db, 'email', stamp, async () => {
-    const result = await deliverAlertEmails(db, env, Date.now());
-    return !result.configured
-      ? { state: 'skipped', code: 'EMAIL_UNCONFIGURED' }
-      : result.failed
-        ? { state: 'degraded', code: 'PARTIAL_SYNC' }
-        : { state: 'ok' };
-  });
-  const vps = await runJob(db, 'vps', stamp, () => probeVps(db, Date.now()));
-  const catalog = await refreshCatalogIfStale(db, env, stamp).catch(() => ({
-    state: 'degraded' as const,
-  }));
+  const email = emailConfigured(env)
+    ? await runJob(db, 'email', stamp, async () => {
+        const result = await deliverAlertEmails(db, env, Date.now());
+        return !result.configured
+          ? { state: 'skipped', code: 'EMAIL_UNCONFIGURED' }
+          : result.failed
+            ? { state: 'degraded', code: 'PARTIAL_SYNC' }
+            : { state: 'ok' };
+      })
+    : { state: 'skipped' as const, code: 'EMAIL_UNCONFIGURED' as const };
+  const vps =
+    new Date(stamp).getUTCMinutes() % 15 === 0
+      ? await runJob(db, 'vps', stamp, () => probeVps(db, Date.now()))
+      : { state: 'skipped' as const };
+  const catalog =
+    env.PAUSE_BULK_SYNC === 'true'
+      ? { state: 'skipped' as const }
+      : await refreshCatalogIfStale(db, env, stamp).catch(() => ({
+          state: 'degraded' as const,
+        }));
   // Chạy cuối: lỗi/giới hạn subrequest của bước BCTC không ảnh hưởng cảnh báo/VPS.
-  const financials = await refreshStaleFinancials(env, stamp)
-    .then((r) => ({
-      state: r.failed.length ? ('degraded' as const) : ('ok' as const),
-      ...r,
-    }))
-    .catch(() => {
-      console.warn('BCTC REFRESH SKIPPED: chưa đọc/ghi được trạng thái BCTC');
-      return { state: 'skipped' as const };
-    });
+  const financials =
+    env.PAUSE_BULK_SYNC === 'true'
+      ? { state: 'skipped' as const }
+      : await refreshStaleFinancials(env, stamp)
+          .then((r) => ({
+            state: r.failed.length ? ('degraded' as const) : ('ok' as const),
+            ...r,
+          }))
+          .catch(() => {
+            console.warn(
+              'BCTC REFRESH SKIPPED: chưa đọc/ghi được trạng thái BCTC',
+            );
+            return { state: 'skipped' as const };
+          });
+  if (
+    new Date(stamp).getUTCHours() === 0 &&
+    new Date(stamp).getUTCMinutes() === 0
+  ) {
+    const r = await db
+      .from('system_job_runs')
+      .delete()
+      .lt('scheduled_at', new Date(stamp - 30 * 86400000).toISOString());
+    if (r.error) throw Error('Không dọn được nhật ký');
+  }
   return { alerts, email, vps, catalog, financials };
 }
 export async function runScheduledJobs(
@@ -90,6 +111,7 @@ export async function runScheduledJobs(
     ![
       '* * * * *',
       '*/5 * * * *',
+      '0 * * * *',
       '*/30 * * * *',
       '*/5 2-8 * * 1-5',
       '* 2-8 * * 1-5',
@@ -99,22 +121,17 @@ export async function runScheduledJobs(
     ].includes(cron)
   )
     return;
+  // Also gate obsolete deployed triggers before any DB call while cron changes propagate.
+  const minute = new Date(stamp).getUTCMinutes();
   if (
-    cron === '* * * * *' &&
-    new Date(stamp).getUTCHours() === 0 &&
-    new Date(stamp).getUTCMinutes() === 2
-  ) {
-    // 07:02 Vietnam, including holidays: one catalog request, guarded reconcile.
-    await refreshStockCatalog(env);
+    env.PAUSE_BULK_SYNC === 'true' &&
+    ['*/30 * * * *', '0 * * * *', '0 9 * * 1-5'].includes(cron)
+  )
     return;
-  }
-  if (cron === '* * * * *' && new Date(stamp).getUTCMinutes() % 5 !== 0) {
-    // One bounded financial symbol per minute, including weekends/off-session.
-    // Keep alert/email/VPS maintenance every five minutes, not every minute.
-    const result = await refreshStaleFinancials(env, stamp);
-    console.log('FINANCIAL CATALOG PROGRESS:', JSON.stringify(result));
+  if (cron === '* * * * *' && minute % ioPolicy.maintenanceMinutes !== 0)
     return;
-  }
+  if (cron === '*/30 * * * *' && minute !== 0) return;
+  if (cron === '* 2-8 * * 1-5' && !observationWindow(stamp)) return;
   if (cron === '*/5 * * * *' || cron === '* * * * *') {
     const result = await runMaintenance(env, stamp);
     if (Object.values(result).some((r) => r.state === 'failed'))
@@ -131,15 +148,16 @@ export async function runScheduledJobs(
   if (cron === '* 2-8 * * 1-5') {
     const sampled = await logJob('prices', () => sampleQuotes(env, stamp));
     if (
+      env.PAUSE_BULK_SYNC !== 'true' &&
       (sampled.state === 'ok' || sampled.state === 'degraded') &&
-      new Date(stamp).getUTCMinutes() % 5 === 0
+      new Date(stamp).getUTCMinutes() % ioPolicy.rankingMinutes === 0
     )
       await logJob('rankings', async () => {
         await syncRankings(env, Date.now());
         return { state: 'ok' };
       });
-  } else if (cron === '*/30 * * * *') {
-    const result = await logJob('news', async () => {
+  } else if (cron === '0 * * * *' || cron === '*/30 * * * *') {
+    await logJob('news', async () => {
       const news = await syncNews(env, stamp);
       if (news.skipped) return { state: 'skipped' };
       return news.sourceFailures
@@ -148,11 +166,6 @@ export async function runScheduledJobs(
           ? { state: 'degraded', code: 'NEWS_LLM_UNCONFIGURED' }
           : { state: 'ok' };
     });
-    if (result.state === 'ok' || result.state === 'degraded')
-      await logJob('rankings', async () => {
-        await syncRankings(env, Date.now());
-        return { state: 'ok' };
-      });
   } else if (cron === '0 9 * * 1-5') {
     const result = await logJob('market', async () => {
       if (!(await syncMarket(env, stamp)))
@@ -190,11 +203,5 @@ export async function runScheduledJobs(
           ? { state: 'skipped', code: 'SESSION_CLOSED' }
           : { state: 'ok' };
     });
-  // Retain a bounded public operational history. Notification contents remain private.
-  const { error } = await db
-    .from('system_job_runs')
-    .delete()
-    .lt('scheduled_at', new Date(Date.now() - 30 * 86400000).toISOString());
-  if (error) throw Error('Không dọn được nhật ký tác vụ');
   if (failed) throw Error('Cron failed after bounded retries');
 }

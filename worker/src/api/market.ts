@@ -1,3 +1,4 @@
+import { changedHistory } from '../../../modules/market/history-delta';
 import { createClient } from '@supabase/supabase-js';
 import { stockSnapshot } from './stock-snapshot';
 import type { Env } from '../index';
@@ -142,8 +143,9 @@ export async function marketResponse(
       try {
         const fresh = await source.history.fetchHistory(symbol, from, today);
         if (fresh.length) {
+          const delta = changedHistory(fresh, bars);
           bars = fresh;
-          persistHistory(env, stock.id, bars, context);
+          if (delta.length) persistHistory(env, stock.id, delta, context);
         }
       } catch {
         notices.push(

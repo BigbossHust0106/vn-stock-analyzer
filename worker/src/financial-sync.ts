@@ -1,4 +1,5 @@
-import { financialCatalog } from './financial-catalog';
+import { financialTurn } from './financial-catalog';
+import { ioPolicy } from '../../modules/market/io-policy';
 import { syncFinancialBackup } from './financial-backup';
 import { rankingUniverse } from '../../modules/market/ranking-universe';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
@@ -121,11 +122,19 @@ export async function syncFinancials(env: Env): Promise<void> {
     try {
       const { data: stock, error } = await db
         .from('stocks')
-        .select('id')
+        .select('id,financial_snapshots(fetched_at)')
         .eq('symbol', symbol)
         .eq('active', true)
         .maybeSingle();
       if (error || !stock) throw new Error('Mã BCTC không thuộc catalog');
+      const existing = stock.financial_snapshots as unknown as {
+        fetched_at?: string;
+      } | null;
+      if (
+        existing?.fetched_at &&
+        Date.now() - Date.parse(existing.fetched_at) <= financialMaxAgeMs
+      )
+        continue;
       // Independent source archive: errors never erase the good normalized snapshot.
       await syncFinancialBackup(db, stock.id, symbol).catch(() =>
         console.warn(`BCTC BACKUP FAIL: ${symbol}; giữ bản cũ`),
@@ -140,12 +149,13 @@ export async function syncFinancials(env: Env): Promise<void> {
       );
     }
   }
+  if (!synced && !failed) return;
   await writeFundamentalsStatus(db, !failed, synced > 0);
   if (!synced) throw new Error('Không cập nhật được BCTC cho mã nào');
 }
 // > 24 giờ cache trong isolate của KbsProvider, để lượt làm mới luôn gọi nguồn thật
 // thay vì ghi lại bản cache cũ.
-export const financialMaxAgeMs = 25 * 3600000;
+export const financialMaxAgeMs = ioPolicy.financialMaxAgeMs;
 // Chọn mã cần làm mới: chưa có snapshot trước, sau đó snapshot cũ nhất. Xoay vòng
 // theo phút để một mã lỗi không cố định ở đầu hàng; không giới hạn theo rankingUniverse.
 export function staleFinancialSymbols(
@@ -165,56 +175,32 @@ export function staleFinancialSymbols(
   const turn = Math.floor(timestamp / 60000) % stale.length;
   return [...stale.slice(turn), ...stale.slice(0, turn)];
 }
-// Cron BCTC độc lập lịch phiên: BCTC không phụ thuộc ngày giao dịch. Mỗi phút chỉ
-// làm mới `limit` mã để nằm trong ngân sách subrequest/CPU của Workers Free.
-export async function refreshStaleFinancials(
-  env: Env,
-  timestamp: number,
-  limit = 1,
-): Promise<{ refreshed: string[]; failed: string[]; pending: number }> {
+// One symbol per five-minute turn. Ring position is stable even if a source fails;
+// fresh symbols do no provider requests/writes. Missing symbols remain discoverable.
+export async function refreshStaleFinancials(env: Env, timestamp: number) {
   const db = serviceClient(env);
-  const { stocks, fetched } = await financialCatalog(db);
-  const queue = staleFinancialSymbols(
-    stocks.map((s) => ({ id: String(s.id), symbol: String(s.symbol) })),
-    fetched,
-    timestamp,
-  );
-  const refreshed: string[] = [],
-    failed: string[] = [];
-  for (const stock of queue.slice(0, limit)) {
-    try {
-      const years = await syncFinancialSymbol(db, env, stock.id, stock.symbol);
-      refreshed.push(stock.symbol);
-      console.log(`BCTC REFRESH: ${stock.symbol}, ${years} kỳ năm`);
-    } catch {
-      failed.push(stock.symbol);
-      console.warn(`BCTC REFRESH FAIL: ${stock.symbol}; giữ snapshot cũ`);
-    }
-  }
-  // Khi BCTC chuẩn hóa đã mới, dùng lượt rảnh để làm mới kho dự phòng Vietcap.
-  if (!queue.length) {
-    const { data: backups, error: backupError } = await db
-      .from('financial_report_backups')
-      .select('stock_id,fetched_at')
-      .eq('source', 'VIETCAP_REPORTS');
-    if (!backupError && Array.isArray(backups)) {
-      const next = staleFinancialSymbols(
-        stocks.map((s) => ({ id: String(s.id), symbol: String(s.symbol) })),
-        new Map(backups.map((b) => [String(b.stock_id), String(b.fetched_at)])),
-        timestamp,
-        86400000,
-      )[0];
-      if (next)
-        await syncFinancialBackup(db, next.id, next.symbol).catch(() =>
-          console.warn(`BCTC BACKUP FAIL: ${next.symbol}; giữ bản cũ`),
-        );
-    }
-  }
-  if (refreshed.length || failed.length)
-    await writeFundamentalsStatus(db, !failed.length, refreshed.length > 0);
-  return {
-    refreshed,
-    failed,
-    pending: Math.max(0, queue.length - refreshed.length),
+  const stock = await financialTurn(db, timestamp);
+  const result: { refreshed: string[]; failed: string[]; pending: null } = {
+    refreshed: [],
+    failed: [],
+    pending: null,
   };
+  if (
+    !stock ||
+    (stock.fetchedAt &&
+      timestamp - Date.parse(stock.fetchedAt) <= financialMaxAgeMs)
+  )
+    return result;
+  try {
+    await syncFinancialSymbol(db, env, stock.id, stock.symbol);
+    result.refreshed.push(stock.symbol);
+  } catch {
+    result.failed.push(stock.symbol);
+  }
+  await writeFundamentalsStatus(
+    db,
+    !result.failed.length,
+    !!result.refreshed.length,
+  );
+  return result;
 }

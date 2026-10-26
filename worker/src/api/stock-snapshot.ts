@@ -1,3 +1,4 @@
+import { changedHistory } from '../../../modules/market/history-delta';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Env } from '../index';
 import type {
@@ -134,9 +135,10 @@ export async function stockSnapshot(
       yearsBefore(today, 3),
       today,
     );
-    if (writer && result.length) {
+    const delta = changedHistory(result, bars);
+    if (writer && delta.length) {
       const { error } = await writer.rpc('ingest_price_history', {
-        rows: result.map((b) => ({
+        rows: delta.map((b) => ({
           stock_id: stock.id,
           session_date: b.sessionDate,
           source: b.source,
@@ -273,7 +275,8 @@ export async function stockSnapshot(
     {
       headers: {
         'Access-Control-Allow-Origin': '*',
-        'Cache-Control': view === 'summary' ? 'no-store' : 'public, max-age=60',
+        'Cache-Control':
+          view === 'summary' ? 'public, max-age=5' : 'public, max-age=300',
         'X-Content-Type-Options': 'nosniff',
       },
     },

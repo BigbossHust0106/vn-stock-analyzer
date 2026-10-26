@@ -185,14 +185,18 @@ it('Chọn mã BCTC cần làm mới: chưa có snapshot trước, rồi cũ nh�
   // now/60000 = số phút kể từ epoch => lượt chia hết cho 3 => turn = 0.
   expect(Math.floor(now / 60000) % 3).toBe(0);
   expect(
-    staleFinancialSymbols(stocks, fetched, now).map((s) => s.symbol),
+    staleFinancialSymbols(stocks, fetched, now, 25 * 3600000).map(
+      (s) => s.symbol,
+    ),
   ).toEqual(['DDD', 'BBB', 'CCC']);
   // Lượt kế tiếp (+1 phút) => turn = 1 => BBB lên đầu, mã lỗi không chặn mã khác.
   expect(
-    staleFinancialSymbols(stocks, fetched, now + 60000).map((s) => s.symbol),
+    staleFinancialSymbols(stocks, fetched, now + 60000, 25 * 3600000).map(
+      (s) => s.symbol,
+    ),
   ).toEqual(['BBB', 'CCC', 'DDD']);
   expect(
-    staleFinancialSymbols(stocks.slice(0, 1), fetched, now).map(
+    staleFinancialSymbols(stocks.slice(0, 1), fetched, now, 25 * 3600000).map(
       (s) => s.symbol,
     ),
   ).toEqual([]);
@@ -204,6 +208,8 @@ it('Làm mới BCTC: nguồn lỗi giữ snapshot cũ, không ghi BCTC, trạng 
     vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       if (init?.body) writes.push({ url, body: JSON.parse(String(init.body)) });
+      if (url.includes('/catalog_sync_state'))
+        return Response.json({ row_count: 1 });
       if (url.includes('/rest/v1/stocks'))
         return Response.json([{ id: 'id-vnm', symbol: 'VNM' }]);
       if (url.includes('/rest/v1/financial_snapshots'))
@@ -223,7 +229,7 @@ it('Làm mới BCTC: nguồn lỗi giữ snapshot cũ, không ghi BCTC, trạng 
     },
     Date.parse('2026-10-16T00:00:00Z'),
   );
-  expect(result).toEqual({ refreshed: [], failed: ['VNM'], pending: 1 });
+  expect(result).toEqual({ refreshed: [], failed: ['VNM'], pending: null });
   expect(writes.some((w) => w.url.includes('persist_financial_score'))).toBe(
     false,
   );
@@ -234,15 +240,23 @@ it('Làm mới BCTC: nguồn lỗi giữ snapshot cũ, không ghi BCTC, trạng 
     (writes.find((w) => w.url.includes('system_status'))?.body as object) ?? {},
   ).not.toHaveProperty('last_success_at');
 });
-it('Làm mới BCTC: mọi snapshot còn mới thì chỉ thử kho dự phòng, lỗi không làm hỏng cron', async () => {
+it('BCTC còn mới: chỉ hai lượt đọc metadata, không gọi nguồn/kho dự phòng hoặc ghi DB', async () => {
   const urls: string[] = [];
   vi.stubGlobal(
     'fetch',
     vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
       urls.push(url);
+      if (url.includes('/catalog_sync_state'))
+        return Response.json({ row_count: 1 });
       if (url.includes('/rest/v1/stocks'))
-        return Response.json([{ id: 'id-vnm', symbol: 'VNM' }]);
+        return Response.json([
+          {
+            id: 'id-vnm',
+            symbol: 'VNM',
+            financial_snapshots: { fetched_at: '2026-10-15T23:00:00Z' },
+          },
+        ]);
       if (url.includes('/rest/v1/financial_snapshots'))
         return Response.json([
           { stock_id: 'id-vnm', fetched_at: '2026-10-15T23:00:00Z' },
@@ -262,8 +276,8 @@ it('Làm mới BCTC: mọi snapshot còn mới thì chỉ thử kho dự phòng,
     },
     Date.parse('2026-10-16T00:00:00Z'),
   );
-  expect(result).toEqual({ refreshed: [], failed: [], pending: 0 });
+  expect(result).toEqual({ refreshed: [], failed: [], pending: null });
   expect(urls.some((u) => u.includes('kbbuddywts.kbsec.com.vn'))).toBe(false);
-  expect(urls.some((u) => u.includes('iq.vietcap.com.vn'))).toBe(true);
+  expect(urls.some((u) => u.includes('iq.vietcap.com.vn'))).toBe(false);
   expect(urls.some((u) => u.includes('system_status'))).toBe(false);
 });

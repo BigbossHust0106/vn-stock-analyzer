@@ -70,7 +70,7 @@ it.each(['day', 'month', 'quarter'])(
     expect(data.map((row: { position: number }) => row.position)).toEqual([
       1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
     ]);
-    expect(r.headers.get('Cache-Control')).toBe('no-store');
+    expect(r.headers.get('Cache-Control')).toBe('public, max-age=60');
   },
 );
 it('client caps even a legacy 23-row response, deduplicates symbols, never merges excluded into Top10', async () => {
@@ -106,7 +106,7 @@ it('client caps even a legacy 23-row response, deduplicates symbols, never merge
   ]);
   expect(r.excluded).toHaveLength(23);
 });
-it('live rankings/quotes/summary never hit an old edge cache', async () => {
+it('rankings/summary use the new public cache namespace; live quote requests remain uncached', async () => {
   const open = vi.fn();
   vi.stubGlobal('caches', { open });
   const load = vi.fn(async () => Response.json({ data: [] }));
@@ -121,5 +121,8 @@ it('live rankings/quotes/summary never hit an old edge cache', async () => {
       load,
     );
   expect(load).toHaveBeenCalledTimes(3);
-  expect(open).not.toHaveBeenCalled();
+  expect(
+    open.mock.calls.every(([name]) => name === 'vn-stock-public-io-v1'),
+  ).toBe(true);
+  expect(open).toHaveBeenCalledTimes(2);
 });

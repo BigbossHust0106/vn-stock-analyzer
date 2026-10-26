@@ -253,10 +253,8 @@ it('Phần 7: cron cảnh báo riêng kiểm tra VPS, không ingest giá, email 
     false,
   );
   expect(
-    writes.filter((w) => w.url.includes('system_job_runs')).map((w) => w.body),
-  ).toContainEqual(
-    expect.objectContaining({ state: 'skipped', code: 'EMAIL_UNCONFIGURED' }),
-  );
+    writes.filter((w) => w.url.includes('claim_system_job')).map((w) => w.body),
+  ).not.toContainEqual(expect.objectContaining({ task: 'email' }));
   expect(writes.find((w) => w.url.includes('api_health'))?.body).toMatchObject({
     provider: 'VPS',
     state: 'ok',

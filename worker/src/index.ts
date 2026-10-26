@@ -29,6 +29,7 @@ export interface Env extends ProviderConfig, NewsConfig, AlertEmailConfig {
   API_RATE_LIMIT?: WorkerBindings['API_RATE_LIMIT'];
   ANALYSIS_RATE_LIMIT?: WorkerBindings['ANALYSIS_RATE_LIMIT'];
   SYNC_SYMBOLS?: string;
+  PAUSE_BULK_SYNC?: string;
   ASSETS?: Pick<WorkerBindings['ASSETS'], 'fetch'>;
   SUPABASE_URL?: string;
   SUPABASE_PUBLISHABLE_KEY?: string;
@@ -175,6 +176,11 @@ export default {
       );
     });
     const secured = new Response(response.body, response);
+    if (
+      secured.status >= 400 &&
+      !secured.headers.get('Cache-Control')?.includes('no-store')
+    )
+      secured.headers.set('Cache-Control', 'no-store');
     secured.headers.set('X-Content-Type-Options', 'nosniff');
     secured.headers.set('X-Frame-Options', 'DENY');
     secured.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -193,6 +199,7 @@ export default {
       ![
         '* * * * *',
         '*/5 * * * *',
+        '0 * * * *',
         '*/30 * * * *',
         '*/5 2-8 * * 1-5',
         '* 2-8 * * 1-5',
